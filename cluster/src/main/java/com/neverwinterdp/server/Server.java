@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.codahale.metrics.MetricRegistry;
 import com.neverwinterdp.server.cluster.Cluster;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
@@ -14,7 +15,7 @@ import com.neverwinterdp.server.cluster.hazelcast.HazelcastCluster;
 import com.neverwinterdp.server.config.ServerConfig;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-
+import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -32,7 +33,8 @@ public class Server {
   private ActivityLogs     activityLogs = new ActivityLogs();
   private ServerState      serverState  = null;
   private ServerRuntimeEnvironment runtimeEnvironment ; 
-
+  private MonitorRegistry monitorRegistry ;
+  
   /**
    * The configuration for the server such name, group, version, description,
    * listen port. It also may contain the service configurations
@@ -83,6 +85,7 @@ public class Server {
     return this.runtimeEnvironment ; 
   }
 
+  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
   /**
    * This lifecycle method be called after the configuration is set. The method
    * should: 1. Compute the configuration and add the services with the service
@@ -94,7 +97,9 @@ public class Server {
     long start = System.currentTimeMillis();
     cluster = new HazelcastCluster();
     cluster.onInit(this);
-    loggerFactory = new LoggerFactory("[" + cluster.getMember().toString() + "][NeverwinterDP] ") ;
+    String hostId = cluster.getMember().toString() ;
+    this.monitorRegistry = new MonitorRegistry(hostId, "server") ;
+    loggerFactory = new LoggerFactory("[" + hostId + "][NeverwinterDP] ") ;
     logger = loggerFactory.getLogger("Server");
     serviceContainer = new ServiceContainer();
     serviceContainer.onInit(this);

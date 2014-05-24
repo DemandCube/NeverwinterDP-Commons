@@ -144,4 +144,14 @@ public class ClusterServerUnitTest {
     Thread.sleep(1000); 
     Util.assertActivityLogs(client, "Server Start Event", ActivityLog.ClusterEvent, "ServerStateChange", "RUNNING", 1) ;
   }
+  
+  @Test
+  public void testMonitorRegistry() throws Exception {
+    Util.assertServerState(client, ServerState.RUNNING) ;
+    ClusterMember targetMember = instance[0].getCluster().getMember() ;
+    ServerCommandResult<String> monitorResult = 
+        client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
+    assertFalse(monitorResult.hasError()) ;
+    System.out.println(monitorResult.getResult());
+  }
 }

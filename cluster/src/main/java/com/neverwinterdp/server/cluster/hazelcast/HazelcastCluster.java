@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.codahale.metrics.Timer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
@@ -26,6 +27,7 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -110,8 +112,10 @@ public class HazelcastCluster implements Cluster, MessageListener<ClusterEvent> 
   }
 
   public void onMessage(Message<ClusterEvent> message) {
+    MonitorRegistry registry = server.getMonitorRegistry() ;
     long start = System.currentTimeMillis() ;
     ClusterEvent event = message.getMessageObject() ;
+    Timer.Context timeCtx = registry.timer("event", event.getType().toString()).time() ;
     server.getLogger().info("Start onMessage(...), event = " + event.getType());
     for(int i = 0; i < listeners.size(); i++) {
       ClusterListener<Server> listener = listeners.get(i) ;
@@ -120,6 +124,7 @@ public class HazelcastCluster implements Cluster, MessageListener<ClusterEvent> 
     long end = System.currentTimeMillis() ;
     String msg = "Received an event " +  event.getType() + " " + event.getSource() + " from " + event.getSourceMember().toString();
     String activityLogName = event.getType().toString() ;
+    timeCtx.stop() ;
     ActivityLog log = new ActivityLog(activityLogName, ActivityLog.Type.ClusterEvent, start, end, msg) ;
     server.getActivityLogs().add(log);
     server.getLogger().info(log.toString());

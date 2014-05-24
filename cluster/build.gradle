@@ -14,5 +14,8 @@ dependencies {
   compile group: 'com.hazelcast', name: 'hazelcast', version: '3.2.1'
   compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.2.1'
 
+  compile group: 'com.codahale.metrics', name: 'metrics-core', version: '3.0.2'
+  compile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
+
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 }
