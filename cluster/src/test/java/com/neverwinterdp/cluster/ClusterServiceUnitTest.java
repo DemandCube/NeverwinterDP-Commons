@@ -17,6 +17,8 @@ import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterListener;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
+import com.neverwinterdp.server.command.ServerCommandResult;
+import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
@@ -106,6 +108,28 @@ public class ClusterServiceUnitTest {
     assertEquals(2, listener.events.size()) ;
     
     client.removeListener(listener);
+  }
+  
+  @Test
+  public void testMethodCall() {
+    Util.assertServerState(client, ServerState.RUNNING) ;
+    ClusterMember member = instance[0].getCluster().getMember() ;
+    ServerRegistration serverRegistration = client.getServerRegistration(member);
+    ServiceRegistration helloService = serverRegistration.getServices().get(0) ; 
+    
+    ServiceCommand<String> helloCall = new ServiceCommands.MethodCall<String>("hello", "Tuan") ;
+    helloCall.setTargetService(helloService);
+    ServiceCommandResult<String> sel = client.execute(helloCall, member) ;
+    if(sel.hasError()) {
+      sel.getError().printStackTrace();
+    }
+    assertEquals("Hello Tuan", sel.getResult()) ;
+    
+    ClusterMember targetMember = instance[0].getCluster().getMember() ;
+    ServerCommandResult<String> monitorResult = 
+        client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
+    assertFalse(monitorResult.hasError()) ;
+    System.out.println(monitorResult.getResult());
   }
   
   static public class ServiceClusterListener<T> implements ClusterListener<T> {

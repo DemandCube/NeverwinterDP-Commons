@@ -7,11 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
+import com.codahale.metrics.Timer;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.config.ServiceConfig;
 import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
+import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.util.monitor.Monitorable;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -38,12 +41,17 @@ public class ServiceContainer {
   }
   
   private void start(Service service) {
-    logger.info("Start start service " + service.getServiceRegistration().getName());
+    MonitorRegistry registry = server.getMonitorRegistry() ;
+    String serviceId = service.getServiceRegistration().getServiceId(); 
+    Timer.Context timeCtx = registry.timer("service", serviceId, "start").time() ;
+    logger.info("Start start service " + serviceId);
     try {
       service.start() ;
       service.getServiceRegistration().setState(ServiceState.START);
     } catch(Exception ex) {
-      logger.error("Cannot launch the service " + service.getServiceRegistration().getName(), ex);
+      logger.error("Cannot launch the service " + serviceId, ex);
+    } finally {
+      timeCtx.stop() ;
     }
     logger.info("Finish start service " + service.getServiceRegistration().getName());
   }
@@ -53,10 +61,14 @@ public class ServiceContainer {
   }
   
   private void stop(Service service) {
-    logger.info("Start stop service " + service.getServiceRegistration().getServiceId()) ;
+    MonitorRegistry registry = server.getMonitorRegistry() ;
+    String serviceId = service.getServiceRegistration().getServiceId(); 
+    Timer.Context timeCtx = registry.timer("service", serviceId, "stop").time() ;
+    logger.info("Start stop service " + serviceId) ;
     service.stop() ; 
     service.getServiceRegistration().setState(ServiceState.STOP);
-    logger.info("Stop stop service " + service.getServiceRegistration().getServiceId()) ;
+    logger.info("Stop stop service " + serviceId) ;
+    timeCtx.stop() ;
   }
   
   public void start(ServiceRegistration registration) {
@@ -124,20 +136,15 @@ public class ServiceContainer {
     return services.values().toArray(new Service[services.size()]) ;
   }
   
-  /**
-   * This method is used to dynamically add a service
-   * @param service
-   */
-  public void register(Service service) {
-    
-  }
-  
   public void register(ServiceConfig config) throws Exception {
     logger.info("Start register(ServiceConfig configFile), serviceId = " + config.getServiceId());
     String className = config.getClassName() ;
     Class<Service> clazz = (Class<Service>) Class.forName(className) ;
     Service instance = clazz.newInstance();
     instance.setServiceConfig(config) ;
+    if(instance instanceof Monitorable) {
+      ((Monitorable)instance).init(server.getMonitorRegistry());
+    }
     instance.onInit(server);
     if(!services.containsKey(config.getServiceId())) {
       services.put(config.getServiceId(), instance) ;
