@@ -9,7 +9,7 @@ import com.neverwinterdp.server.command.ServiceCommandResult;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public interface Cluster {
+public interface ClusterService {
   final static public String CLUSTER_EVENT_TOPIC = "NeverwinterDP/ClusterEvent" ;
   final static public String CLUSTER_REGISTRATON = "NeverwinterDP/ClusterRegistration" ;
   

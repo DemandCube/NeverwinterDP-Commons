@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.codahale.metrics.Timer;
+import com.google.inject.Singleton;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
@@ -21,7 +22,7 @@ import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterListener;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.Cluster;
+import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.ClusterRegistraton;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
@@ -32,8 +33,9 @@ import com.neverwinterdp.util.monitor.MonitorRegistry;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class HazelcastCluster implements Cluster, MessageListener<ClusterEvent>  {
-  static Map<String, HazelcastCluster> instances = new HashMap<String, HazelcastCluster>() ;
+@Singleton
+public class HazelcastClusterService implements ClusterService, MessageListener<ClusterEvent>  {
+  static Map<String, HazelcastClusterService> instances = new HashMap<String, HazelcastClusterService>() ;
   
   private HazelcastInstance hzinstance ;
   private ClusterMember member ;
@@ -43,21 +45,21 @@ public class HazelcastCluster implements Cluster, MessageListener<ClusterEvent> 
   private ITopic<ClusterEvent> clusterEventTopic ;
   private String               clusterEventTopicListenerId ;
   
-  public void onInit(Server server) {
-    this.server = server ;
+  public HazelcastClusterService() {
     Config config = new XmlConfigBuilder().build();
-//    config.setProperty("hazelcast.logging.type", "log4j");
-//    config.setProperty("hazelcast.operation.call.timeout.millis", "5000");
-//    config.setProperty("hazelcast.shutdownhook.enabled", "false") ;
     hzinstance = Hazelcast.newHazelcastInstance(config);
     Member hzmember= hzinstance.getCluster().getLocalMember() ;
-    member = new ClusterMemberImpl(hzmember, server.getConfig()) ;
+    member = new ClusterMemberImpl(hzmember) ;
     synchronized(instances) {
       instances.put(hzinstance.getName(), this) ;
     }
     clusterEventTopic = hzinstance.getTopic(CLUSTER_EVENT_TOPIC);
     clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
     
+  }
+  
+  public void onInit(Server server) {
+    this.server = server ;
     IMap<String, ServerRegistration> registrationMap = hzinstance.getMap(CLUSTER_REGISTRATON) ;
     clusterRegistration = new ClusterRegistrationImpl(registrationMap) ;
   }
@@ -131,7 +133,7 @@ public class HazelcastCluster implements Cluster, MessageListener<ClusterEvent> 
     server.getLogger().info("Finish onMessage(...), event = " + event.getType());
   }
   
-  static public HazelcastCluster getClusterRPC(HazelcastInstance hzinstance) {
+  static public HazelcastClusterService getClusterRPC(HazelcastInstance hzinstance) {
     return instances.get(hzinstance.getName()) ;
   }
 }

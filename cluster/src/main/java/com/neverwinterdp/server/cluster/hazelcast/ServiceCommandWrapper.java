@@ -27,7 +27,7 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
   }
   
   final public T call() throws Exception {
-    HazelcastCluster rpc = HazelcastCluster.getClusterRPC(hzInstance) ;
+    HazelcastClusterService rpc = HazelcastClusterService.getClusterRPC(hzInstance) ;
     Server server = rpc.getServer() ;
     MonitorRegistry registry = server.getMonitorRegistry() ;
     Timer.Context ctx =  

@@ -16,10 +16,10 @@ abstract public class ClusterRegistraton {
   abstract public void remove(ClusterMember member) ;
   abstract public int  getNumberOfServers() ;
   
-  public Map<ClusterMember, ServiceRegistration> findByServiceName(String name) {
+  public Map<ClusterMember, ServiceRegistration> findByServiceId(String id) {
     Map<ClusterMember, ServiceRegistration> map = new HashMap<ClusterMember, ServiceRegistration>() ;
     for(ServerRegistration sel : getServerRegistration()) {
-      ServiceRegistration registration = sel.findByServiceName(name) ;
+      ServiceRegistration registration = sel.findByServiceId(id) ;
       if(registration != null) {
         map.put(sel.getClusterMember(), registration) ;
       }

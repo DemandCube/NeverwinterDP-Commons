@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -19,10 +20,8 @@ import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.command.ActivityLogsCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.server.config.Configuration;
+import com.neverwinterdp.server.service.HelloServiceContainerModule;
 import com.neverwinterdp.server.service.ServiceRegistration;
-import com.neverwinterdp.util.IOUtil;
-import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -38,19 +37,18 @@ public class ClusterServerUnitTest {
 
   @BeforeClass
   static public void setup() throws Exception {
-    String jsonConfig = 
-        IOUtil.getFileContentAsString("src/main/resources/server-default-config.json", "UTF-8") ;
-    Configuration conf = JSONSerializer.INSTANCE.fromString(jsonConfig, Configuration.class) ;
-      
+    Properties properties = new Properties() ;
+    properties.put("server.group", "NeverwinterDP") ;
+    properties.put("server.cluster-framework", "hazelcast") ;
+    properties.put("server.roles", "master") ;
+    properties.put("server.service-container-module", HelloServiceContainerModule.class.getName()) ;
+    
+    
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {
-      instance[i] = new Server() ;  
-      instance[i].setConfig(conf.getServer());
-      instance[i].onInit();
-      instance[i].getServiceContainer().register(conf.getServices());
-      instance[i].start();
+      instance[i] = Server.create(properties) ;  
     }
-    ClusterMember member = instance[1].getCluster().getMember() ;
+    ClusterMember member = instance[1].getClusterService().getMember() ;
     String connectUrl = member.getIpAddress() + ":" + member.getPort() ;
     client = new HazelcastClusterClient(connectUrl) ;
   }
@@ -67,7 +65,7 @@ public class ClusterServerUnitTest {
   public void assertServerEnvironment() throws Exception {
     assertEquals(instance.length, client.getClusterRegistration().getNumberOfServers()) ;
     Map<ClusterMember, ServiceRegistration> helloServiceMap = 
-      client.getClusterRegistration().findByServiceName("HelloService") ;
+      client.getClusterRegistration().findByServiceId("HelloService") ;
     assertEquals(instance.length, helloServiceMap.size()) ;
   }
   
@@ -126,7 +124,7 @@ public class ClusterServerUnitTest {
     Util.assertServerState(client, ServerState.RUNNING) ;
     client.execute(new ActivityLogsCommand.Clear()) ;
 
-    ClusterMember targetMember = instance[0].getCluster().getMember() ;
+    ClusterMember targetMember = instance[0].getClusterService().getMember() ;
     ServerCommandResult<ServerState> shutdownResult = 
         client.execute(new ServerCommands.Shutdown().setLogEnable(true), targetMember) ;
     assertFalse(shutdownResult.hasError()) ;
@@ -148,7 +146,7 @@ public class ClusterServerUnitTest {
   @Test
   public void testMonitorRegistry() throws Exception {
     Util.assertServerState(client, ServerState.RUNNING) ;
-    ClusterMember targetMember = instance[0].getCluster().getMember() ;
+    ClusterMember targetMember = instance[0].getClusterService().getMember() ;
     ServerCommandResult<String> monitorResult = 
         client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;

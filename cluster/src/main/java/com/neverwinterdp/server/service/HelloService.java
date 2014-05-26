@@ -1,18 +1,51 @@
 package com.neverwinterdp.server.service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+
 import com.codahale.metrics.Counter;
-import com.neverwinterdp.server.Server;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.MonitorRegistry;
 import com.neverwinterdp.util.monitor.Monitorable;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
+@Singleton
 public class HelloService extends AbstractService implements Monitorable  {
-  private Counter helloCounter ;
+  private Logger logger ;
+  @Inject(optional = true) @Named("server.group")
+  private String   serverGroup;
   
-  public void onInit(Server server) {
-    super.onInit(server);
+  @Inject private MonitorRegistry monitorRegistry ;
+  private Counter helloCounter ;
+
+  public String getServerGroup() { return this.serverGroup ; }
+  
+  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
+  
+  @Inject
+  public void setLoggerFactory(LoggerFactory lfactory) {
+    logger = lfactory.getLogger("HelloService") ;
+  }
+  
+  @Inject
+  public void init(MonitorRegistry mRegistry) {
+    reset(mRegistry) ;
+  }
+
+  public void reset(MonitorRegistry mRegistry) {
+    helloCounter = mRegistry.counter("service", "HelloService", "hello") ;
+  }
+
+  @PreDestroy
+  public void onDestroy() {
+    logger.info("onDestroy()");
   }
   
   public void start() {
@@ -30,13 +63,5 @@ public class HelloService extends AbstractService implements Monitorable  {
   public String hello(String message) {
     helloCounter.inc();
     return "Hello " + message;
-  }
-  
-  public void init(MonitorRegistry mRegistry) {
-    reset(mRegistry) ;
-  }
-
-  public void reset(MonitorRegistry mRegistry) {
-    helloCounter = mRegistry.counter("service", "HelloService", "hello") ;
   }
 }

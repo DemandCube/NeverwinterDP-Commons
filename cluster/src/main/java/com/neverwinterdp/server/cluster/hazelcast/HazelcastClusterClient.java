@@ -15,7 +15,7 @@ import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterListener;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.Cluster;
+import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.ClusterRegistraton;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
@@ -40,10 +40,10 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
     config.getGroupConfig().setPassword("neverwinterdp");
     hzclient = HazelcastClient.newHazelcastClient(config);
     
-    IMap<String, ServerRegistration> registrationMap = hzclient.getMap(Cluster.CLUSTER_REGISTRATON) ;
+    IMap<String, ServerRegistration> registrationMap = hzclient.getMap(ClusterService.CLUSTER_REGISTRATON) ;
     clusterRegistration = new ClusterRegistrationImpl(registrationMap) ;
     
-    clusterEventTopic = hzclient.getTopic(Cluster.CLUSTER_EVENT_TOPIC);
+    clusterEventTopic = hzclient.getTopic(ClusterService.CLUSTER_EVENT_TOPIC);
     clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
   }
   
