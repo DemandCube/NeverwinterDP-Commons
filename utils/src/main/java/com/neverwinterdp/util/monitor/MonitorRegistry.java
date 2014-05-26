@@ -10,6 +10,8 @@ public class MonitorRegistry {
   private String uriPrefix ;
   private MetricRegistry registry = new MetricRegistry();
   
+  public MonitorRegistry() {} 
+  
   public MonitorRegistry(String host, String application) {
     this.host = host ;
     this.application = application ;
