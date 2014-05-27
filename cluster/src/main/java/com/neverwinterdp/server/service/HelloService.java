@@ -1,6 +1,5 @@
 package com.neverwinterdp.server.service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;

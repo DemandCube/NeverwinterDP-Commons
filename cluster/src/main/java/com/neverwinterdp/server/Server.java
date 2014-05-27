@@ -34,6 +34,10 @@ public class Server {
 
   @Inject
   private ServerConfig     config;
+  
+  @Inject
+  private RuntimeEnvironment runtimeEnvironment ; 
+  
   @Inject
   private ClusterService   cluster;
   
@@ -42,7 +46,6 @@ public class Server {
   
   private ActivityLogs     activityLogs = new ActivityLogs();
   private ServerState      serverState  = null;
-  private ServerRuntimeEnvironment runtimeEnvironment ; 
   
   @Inject
   private MonitorRegistry monitorRegistry ;
@@ -87,7 +90,7 @@ public class Server {
     return this.loggerFactory ;
   }
 
-  public ServerRuntimeEnvironment getRuntimeEnvironment() {
+  public RuntimeEnvironment getRuntimeEnvironment() {
     return this.runtimeEnvironment ; 
   }
 
@@ -109,8 +112,6 @@ public class Server {
     cluster.onInit(this);
     long end = System.currentTimeMillis();
     activityLogs.add(new ActivityLog("Init", ActivityLog.Type.Auto, start, end, null));
-    runtimeEnvironment = new ServerRuntimeEnvironment(null) ;
-    
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
        Server.this.exit(0);
@@ -196,7 +197,12 @@ public class Server {
   }
   
   static public Server create(Properties properties) {
-    Injector container = Guice.createInjector(new ServerModule());
+    Injector container = null ;
+    if(properties == null) {
+      container = Guice.createInjector(new ServerModule());
+    } else {
+      container = Guice.createInjector(new ServerModule(properties));
+    }
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();

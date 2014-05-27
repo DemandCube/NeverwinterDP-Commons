@@ -27,7 +27,7 @@ public class MonitorRegistryUnitTest {
     ctx.stop() ;
     String json = mapper.writeValueAsString(registry) ;
     System.out.println(json) ;
-    StringReader reader = new StringReader(json) ;
-    registry = mapper.readValue(reader, MonitorRegistry.class) ;
+    //StringReader reader = new StringReader(json) ;
+    //registry = mapper.readValue(reader, MonitorRegistry.class) ;
   }
 }

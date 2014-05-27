@@ -23,7 +23,7 @@ import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
-import com.neverwinterdp.server.service.HelloServiceContainerModule;
+import com.neverwinterdp.server.service.HelloServiceModule;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 /**
@@ -45,7 +45,7 @@ public class ClusterServiceUnitTest {
     properties.put("server.group", "NeverwinterDP") ;
     properties.put("server.cluster-framework", "hazelcast") ;
     properties.put("server.roles", "master") ;
-    properties.put("server.service-container-module", HelloServiceContainerModule.class.getName()) ;
+    properties.put("server.service-module", HelloServiceModule.class.getName()) ;
     
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {

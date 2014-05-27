@@ -1,7 +1,6 @@
 package com.neverwinterdp.server;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterService;
-import com.neverwinterdp.server.service.HelloServiceContainerModule;
+import com.neverwinterdp.server.service.HelloServiceModule;
 import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
@@ -42,18 +41,16 @@ public class ServiceContainer {
   @Inject
   private ClusterService  clusterService;
 
-  @Inject(optional = true)
-  @Named("server.service-container-module")
-  private String          serviceModuleContainer = HelloServiceContainerModule.class.getName();
-
   private Injector        container;
   private Logger          logger;
 
   @Inject
-  public ServiceContainer(Injector parentContainer,
-      LoggerFactory lfactory) throws Exception {
+  public ServiceContainer(Injector parentContainer, 
+                          LoggerFactory lfactory,
+                          @Named("server.service-module") String serviceModule) throws Exception {
     logger = lfactory.getLogger("ServiceContainer");
-    Class<Module> clazz = (Class<Module>) Class.forName(serviceModuleContainer);
+    Class<Module> clazz = (Class<Module>) Class.forName(serviceModule);
+    logger.info("Use the service module " + serviceModule);
     container = parentContainer.createChildInjector(clazz.newInstance());
   }
 
@@ -105,7 +102,7 @@ public class ServiceContainer {
   public <T> T getInstance(Class<T> type) {
     return container.getInstance(type);
   }
-
+  
   public void start() {
     List<Binding<Service>> bindings = container.findBindingsByType(TypeLiteral.get(Service.class));
     for (Binding<Service> sel : bindings) {
@@ -201,9 +198,9 @@ public class ServiceContainer {
    * @param serviceId
    * @return
    */
-  public Service getService(String serviceId) {
-    Service service =
-        container.getInstance(Key.get(Service.class, Names.named(serviceId)));
+  public <T extends Service > T getService(String serviceId) {
+    T service =
+        (T) container.getInstance(Key.get(Service.class, Names.named(serviceId)));
     return service;
   }
 

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+
 import com.codahale.metrics.Timer;
 import com.google.inject.Singleton;
 import com.hazelcast.config.Config;
@@ -28,6 +30,7 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
@@ -37,10 +40,12 @@ import com.neverwinterdp.util.monitor.MonitorRegistry;
 public class HazelcastClusterService implements ClusterService, MessageListener<ClusterEvent>  {
   static Map<String, HazelcastClusterService> instances = new HashMap<String, HazelcastClusterService>() ;
   
+  private Logger logger ;
   private HazelcastInstance hzinstance ;
   private ClusterMember member ;
   private ClusterRegistraton clusterRegistration ;
   private Server server ;
+  private MonitorRegistry registry ;
   private List<ClusterListener<Server>> listeners = new ArrayList<ClusterListener<Server>>() ;
   private ITopic<ClusterEvent> clusterEventTopic ;
   private String               clusterEventTopicListenerId ;
@@ -53,13 +58,21 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
     synchronized(instances) {
       instances.put(hzinstance.getName(), this) ;
     }
-    clusterEventTopic = hzinstance.getTopic(CLUSTER_EVENT_TOPIC);
-    clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
-    
   }
+  
+  public void setMonitorRegistry(MonitorRegistry registry) {
+    this.registry = registry ;
+  }
+ 
+  public void setLoggerFactory(LoggerFactory factory) {
+    logger = factory.getLogger(getClass().getName()) ;
+  }
+ 
   
   public void onInit(Server server) {
     this.server = server ;
+    clusterEventTopic = hzinstance.getTopic(CLUSTER_EVENT_TOPIC);
+    clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
     IMap<String, ServerRegistration> registrationMap = hzinstance.getMap(CLUSTER_REGISTRATON) ;
     clusterRegistration = new ClusterRegistrationImpl(registrationMap) ;
   }
@@ -107,18 +120,17 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   }
   
   public void broadcast(ClusterEvent event) {
-    server.getLogger().info("Start broadcast(event), event = " + event.getType());
+    logger.info("Start broadcast(event), event = " + event.getType());
     event.setSourceMember(member);
     clusterEventTopic.publish(event);
-    server.getLogger().info("Finish broadcast(event), event = " + event.getType());
+    logger.info("Finish broadcast(event), event = " + event.getType());
   }
 
   public void onMessage(Message<ClusterEvent> message) {
-    MonitorRegistry registry = server.getMonitorRegistry() ;
     long start = System.currentTimeMillis() ;
     ClusterEvent event = message.getMessageObject() ;
     Timer.Context timeCtx = registry.timer("event", event.getType().toString()).time() ;
-    server.getLogger().info("Start onMessage(...), event = " + event.getType());
+    logger.info("Start onMessage(...), event = " + event.getType());
     for(int i = 0; i < listeners.size(); i++) {
       ClusterListener<Server> listener = listeners.get(i) ;
       listener.onEvent(server, event) ;
@@ -129,8 +141,8 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
     timeCtx.stop() ;
     ActivityLog log = new ActivityLog(activityLogName, ActivityLog.Type.ClusterEvent, start, end, msg) ;
     server.getActivityLogs().add(log);
-    server.getLogger().info(log.toString());
-    server.getLogger().info("Finish onMessage(...), event = " + event.getType());
+    logger.info(log.toString());
+    logger.info("Finish onMessage(...), event = " + event.getType());
   }
   
   static public HazelcastClusterService getClusterRPC(HazelcastInstance hzinstance) {

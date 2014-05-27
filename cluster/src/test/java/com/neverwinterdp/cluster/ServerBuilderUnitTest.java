@@ -11,7 +11,7 @@ import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerConfig;
 import com.neverwinterdp.server.ServiceContainer;
 import com.neverwinterdp.server.service.HelloService;
-import com.neverwinterdp.server.service.HelloServiceContainerModule;
+import com.neverwinterdp.server.service.HelloServiceModule;
 
 public class ServerBuilderUnitTest {
   @Test
@@ -20,7 +20,7 @@ public class ServerBuilderUnitTest {
     properties.put("server.group", "NeverwinterDP") ;
     properties.put("server.cluster-framework", "hazelcast") ;
     properties.put("server.roles", "master") ;
-    properties.put("server.service-container-module", HelloServiceContainerModule.class.getName()) ;
+    properties.put("server.service-module", HelloServiceModule.class.getName()) ;
     
     Server server = Server.create(properties);
     ServerConfig config = server.getConfig() ;
@@ -36,5 +36,9 @@ public class ServerBuilderUnitTest {
     assertEquals("NeverwinterDP", helloService.getServerGroup()) ;
     assertEquals("HelloService", helloService.getServiceId()) ;
     assertNotNull(helloService.getMonitorRegistry()) ;
+    
+    HelloService helloServiceInstance = serviceContainer.getService("HelloServiceInstance") ;
+    assertEquals("HelloServiceInstance", helloServiceInstance.getServiceId()) ;
+    assertNotNull(helloServiceInstance.getMonitorRegistry()) ;
   }
 }
