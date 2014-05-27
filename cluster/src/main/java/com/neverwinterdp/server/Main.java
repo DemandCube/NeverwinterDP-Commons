@@ -2,16 +2,14 @@ package com.neverwinterdp.server;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.neverwinterdp.server.config.Configuration;
 import com.neverwinterdp.util.IOUtil;
-import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
 public class Main {
   static public class Options {
-    @Parameter(names = "-config", description = "The configuration file in json format")
+    @Parameter(names = "-config", description = "The configuration file in the properties format")
     String configFile;
   }
 
@@ -24,14 +22,8 @@ public class Main {
     }
     Options options = new Options();
     new JCommander(options, args);
-    String jsonConfig = IOUtil.getResourceAsString(options.configFile, "UTF-8") ;
-    Configuration conf = JSONSerializer.INSTANCE.fromString(jsonConfig, Configuration.class) ;
+    String propsConfig = IOUtil.getResourceAsString(options.configFile, "UTF-8") ;
     
-    Server server = new Server() ;
-    server.setConfig(conf.getServer());
-    server.onInit();
-    server.getServiceContainer().register(conf.getServices());
-    server.start();
     Thread.currentThread().join();
   }
 }

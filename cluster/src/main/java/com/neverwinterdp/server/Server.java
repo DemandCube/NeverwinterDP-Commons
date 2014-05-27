@@ -1,20 +1,23 @@
 package com.neverwinterdp.server;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.server.cluster.Cluster;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.hazelcast.HazelcastCluster;
-import com.neverwinterdp.server.config.ServerConfig;
+import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-
+import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -22,17 +25,31 @@ import com.neverwinterdp.util.LoggerFactory;
  * The server can be understood as a single container or a machine that
  * contains an unlimited number of the services.
  */
+@Singleton
 public class Server {
   private Logger           logger;
+  
+  @Inject
   private LoggerFactory    loggerFactory ;
 
+  @Inject
   private ServerConfig     config;
-  private Cluster          cluster;
+  
+  @Inject
+  private RuntimeEnvironment runtimeEnvironment ; 
+  
+  @Inject
+  private ClusterService   cluster;
+  
+  @Inject
   private ServiceContainer serviceContainer;
+  
   private ActivityLogs     activityLogs = new ActivityLogs();
   private ServerState      serverState  = null;
-  private ServerRuntimeEnvironment runtimeEnvironment ; 
-
+  
+  @Inject
+  private MonitorRegistry monitorRegistry ;
+  
   /**
    * The configuration for the server such name, group, version, description,
    * listen port. It also may contain the service configurations
@@ -41,11 +58,7 @@ public class Server {
     return config;
   }
 
-  public void setConfig(ServerConfig config) {
-    this.config = config;
-  }
-
-  public Cluster getCluster() {
+  public ClusterService getClusterService() {
     return cluster;
   }
 
@@ -61,9 +74,7 @@ public class Server {
     return this.activityLogs;
   }
 
-  public ServiceContainer getServiceContainer() {
-    return serviceContainer;
-  }
+  public ServiceContainer getServiceContainer() { return serviceContainer ; }
 
   public ServerRegistration getServerRegistration() {
     List<ServiceRegistration> list = serviceContainer.getServiceRegistrations();
@@ -79,10 +90,12 @@ public class Server {
     return this.loggerFactory ;
   }
 
-  public ServerRuntimeEnvironment getRuntimeEnvironment() {
+  public RuntimeEnvironment getRuntimeEnvironment() {
     return this.runtimeEnvironment ; 
   }
 
+  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
+  
   /**
    * This lifecycle method be called after the configuration is set. The method
    * should: 1. Compute the configuration and add the services with the service
@@ -92,18 +105,13 @@ public class Server {
    */
   public void onInit() {
     long start = System.currentTimeMillis();
-    cluster = new HazelcastCluster();
-    cluster.onInit(this);
-    loggerFactory = new LoggerFactory("[" + cluster.getMember().toString() + "][NeverwinterDP] ") ;
-    logger = loggerFactory.getLogger("Server");
-    serviceContainer = new ServiceContainer();
-    serviceContainer.onInit(this);
-    logger.info("Start onInit()");
     setServerState(ServerState.INIT);
+    logger = loggerFactory.getLogger("Server");
+    logger.info("Start onInit()");
+    serviceContainer.onInit();
+    cluster.onInit(this);
     long end = System.currentTimeMillis();
     activityLogs.add(new ActivityLog("Init", ActivityLog.Type.Auto, start, end, null));
-    runtimeEnvironment = new ServerRuntimeEnvironment(null) ;
-    
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
        Server.this.exit(0);
@@ -122,7 +130,8 @@ public class Server {
       return ;
     }
     logger.info("Start onDestroy()");
-    serviceContainer.onDestroy(this);
+    serviceContainer.onDestroy();
+    serviceContainer = null;
     cluster.onDestroy(this);
     setServerState(ServerState.EXIT) ;
     logger.info("Finish onDestroy()");
@@ -185,5 +194,18 @@ public class Server {
       };
       worker.schedule(shutdownTask, wait, TimeUnit.MILLISECONDS);
     }
+  }
+  
+  static public Server create(Properties properties) {
+    Injector container = null ;
+    if(properties == null) {
+      container = Guice.createInjector(new ServerModule());
+    } else {
+      container = Guice.createInjector(new ServerModule(properties));
+    }
+    Server server = container.getInstance(Server.class) ;
+    server.onInit() ;
+    server.start();
+    return server ;
   }
 }

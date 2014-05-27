@@ -3,12 +3,14 @@ package com.neverwinterdp.server.cluster.hazelcast;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 
+import com.codahale.metrics.Timer;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceAware;
 import com.neverwinterdp.server.ActivityLog;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.service.Service;
+import com.neverwinterdp.util.monitor.MonitorRegistry;
 
 /**
  * @author Tuan Nguyen
@@ -25,10 +27,19 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
   }
   
   final public T call() throws Exception {
+    HazelcastClusterService rpc = HazelcastClusterService.getClusterRPC(hzInstance) ;
+    Server server = rpc.getServer() ;
+    MonitorRegistry registry = server.getMonitorRegistry() ;
+    Timer.Context ctx =  
+      registry.timer("services", "command", command.getActivityLogName()).time();
+    T result = doExecute(server) ;
+    ctx.stop();
+    return result ;
+  }
+  
+  final public T doExecute(Server server) throws Exception {
     long start = 0, end = 0 ;
     if(command.isLogEnable()) start = System.currentTimeMillis() ;
-    HazelcastCluster rpc = HazelcastCluster.getClusterRPC(hzInstance) ;
-    Server server = rpc.getServer() ;
     server.getLogger().info("Start execute command " + command.getActivityLogName());
     Service service = server.getServiceContainer().getService(command.getTargetService()) ;
     T result = command.execute(server, service) ;

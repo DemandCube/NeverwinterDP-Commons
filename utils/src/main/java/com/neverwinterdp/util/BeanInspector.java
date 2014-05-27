@@ -3,8 +3,9 @@ package com.neverwinterdp.util;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ public class BeanInspector<T> {
   static WeakHashMap<String, BeanInspector> inspectors = new WeakHashMap<String, BeanInspector>() ;
   
   private Map<String, PropertyDescriptor> pdescriptors = new HashMap<String, PropertyDescriptor>() ;
+  private Map<String, MethodDescriptor>   mdescriptors = new HashMap<String, MethodDescriptor>() ;
   private Class<T> type ;
   
   public BeanInspector(Class<T> type) {
@@ -23,6 +25,12 @@ public class BeanInspector<T> {
       BeanInfo info = Introspector.getBeanInfo(type);
       for(PropertyDescriptor sel : info.getPropertyDescriptors()) {
         pdescriptors.put(sel.getName(), sel) ;
+      }
+      
+      for(MethodDescriptor sel : info.getMethodDescriptors()) {
+        String name = sel.getMethod().getName() ;
+        Class<?>[] pTypes = sel.getMethod().getParameterTypes() ;
+        mdescriptors.put(name + ":" + pTypes.length, sel) ;
       }
     } catch (IntrospectionException e) {
       throw new RuntimeException(e) ;
@@ -75,6 +83,13 @@ public class BeanInspector<T> {
     }
   }
 
+  public Object call(T target, String methodName, Object[] args) throws Exception {
+    String methodId = methodName + ":" + args.length ;
+    MethodDescriptor descriptor = mdescriptors.get(methodId) ;
+    Method method = descriptor.getMethod() ;
+    return method.invoke(target, args) ;
+  }
+  
   public T newInstance() throws InstantiationException, IllegalAccessException { 
     return type.newInstance() ;
   }

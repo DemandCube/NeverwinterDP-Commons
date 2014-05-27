@@ -2,36 +2,21 @@ package com.neverwinterdp.server.service;
 
 import java.io.Serializable;
 
-import com.neverwinterdp.server.config.ServiceConfig;
 /**
  * @author Tuan Nguyen
- * @email  tuan08@gmail.com
+ * @email tuan08@gmail.com
  */
 public class ServiceRegistration implements Serializable {
-  private String       serviceId;
+  private String       serviceId ;
   private String       name;
   private float        version;
   private String       description;
-  private ServiceState state = ServiceState.INIT ;
+  private ServiceState state = ServiceState.INIT;
 
   public ServiceRegistration() {
-    
-  }
-  
-  public void init(ServiceConfig config) {
-    this.serviceId = config.getServiceId() ;
-    this.name = config.getName() ;
-    this.version = config.getVersion() ;
-    this.description = config.getDescription() ;
-    state = ServiceState.INIT ;
-  }
-  
-  
-  
-  public String getServiceId() {
-    return serviceId;
   }
 
+  public String getServiceId() { return serviceId; }
   public void setServiceId(String serviceId) {
     this.serviceId = serviceId;
   }

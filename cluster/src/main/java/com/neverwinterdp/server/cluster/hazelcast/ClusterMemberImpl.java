@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.hazelcast.core.Member;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.config.ServerConfig;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -24,7 +23,7 @@ class ClusterMemberImpl implements ClusterMember, Serializable {
   public ClusterMemberImpl() {
   }
 
-  ClusterMemberImpl(Member member, ServerConfig config) {
+  ClusterMemberImpl(Member member) {
     this.version = 0f ;
     this.uuid = member.getUuid() ;
     this.hostname = member.getSocketAddress().getHostName() ;

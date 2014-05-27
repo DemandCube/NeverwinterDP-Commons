@@ -33,10 +33,10 @@ public class ServerRegistration implements Serializable {
     return services;
   }
   
-  public ServiceRegistration findByServiceName(String name) {
+  public ServiceRegistration findByServiceId(String id) {
     for(int i = 0; i < services.size(); i++) {
       ServiceRegistration registration = services.get(i) ;
-      if(name.equals(registration.getName())) return registration ;
+      if(id.equals(registration.getServiceId())) return registration ;
     }
     return null ;
   }

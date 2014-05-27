@@ -9,6 +9,8 @@ import com.neverwinterdp.server.ActivityLog.Type;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
+ * 
+ * TODO: remove this class and the relation, replace by the MonitorRegistry
  */
 public class ActivityLogs implements Serializable {
   private List<ActivityLog> activityLogs = new ArrayList<ActivityLog>() ;
