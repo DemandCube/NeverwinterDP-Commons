@@ -1,4 +1,4 @@
-package com.neverwinterdp.cluster.hazelcast;
+package com.neverwinterdp.hazelcast;
 
 import static org.junit.Assert.assertEquals;
 

@@ -8,9 +8,6 @@ package com.neverwinterdp.server.service;
  *        zookeeper , kafka, Vertx...
  */
 public interface Service {
-  public String getServiceId();
-  public void setServiceId(String id);
-
   /**
    * The service descriptor contain the information of the service such name ,
    * version , the state of the service so another service or remote service can

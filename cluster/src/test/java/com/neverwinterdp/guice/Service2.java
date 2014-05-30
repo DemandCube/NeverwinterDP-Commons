@@ -1,4 +1,4 @@
-package com.neverwinterdp.cluster.guice;
+package com.neverwinterdp.guice;
 
 import com.google.inject.Inject;
 

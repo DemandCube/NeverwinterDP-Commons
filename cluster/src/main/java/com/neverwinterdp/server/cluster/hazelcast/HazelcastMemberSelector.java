@@ -24,7 +24,7 @@ public class HazelcastMemberSelector {
   public Member select(ClusterMember cmember) {
     return memberMap.get(cmember.getUuid()) ;
   }
-  
+
   public Member[] select(ClusterMember[] cmember) {
     Member[] member = new Member[cmember.length] ;
     for(int i = 0; i < member.length; i++) {

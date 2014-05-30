@@ -16,6 +16,8 @@ public interface ClusterClient {
   public void removeListener(ClusterListener<ClusterClient> listener) ;
   
   public void broadcast(ClusterEvent event) ; 
+
+  public ClusterMember getClusterMember(String connect) ;
   
   public ServerRegistration getServerRegistration(ClusterMember member) ; 
   

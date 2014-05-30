@@ -7,15 +7,6 @@ package com.neverwinterdp.server.service;
 abstract public class AbstractService implements Service {
   private ServiceRegistration registration = new ServiceRegistration();
 
-  public String getServiceId() {
-    return registration.getServiceId();
-  }
-
-  public void setServiceId(String id) {
-    registration.setServiceId(id);
-    ;
-  }
-
   public ServiceRegistration getServiceRegistration() {
     return this.registration;
   }

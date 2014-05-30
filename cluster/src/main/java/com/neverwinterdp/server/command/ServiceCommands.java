@@ -19,7 +19,7 @@ public class ServiceCommands {
   static public class Start extends ServiceCommand<ServiceRegistration> {
     public ServiceRegistration execute(Server server, Service service) throws Exception {
       ServiceRegistration registration = service.getServiceRegistration() ;
-      server.getServiceContainer().start(registration);
+      server.getModuleContainer().start(registration);
       return service.getServiceRegistration() ;
     }
   }
@@ -27,7 +27,7 @@ public class ServiceCommands {
   static public class Stop extends ServiceCommand<ServiceRegistration> {
     public ServiceRegistration execute(Server server, Service service) throws Exception {
       ServiceRegistration registration = service.getServiceRegistration() ;
-      server.getServiceContainer().stop(registration);
+      server.getModuleContainer().stop(registration);
       return service.getServiceRegistration() ;
     }
   }

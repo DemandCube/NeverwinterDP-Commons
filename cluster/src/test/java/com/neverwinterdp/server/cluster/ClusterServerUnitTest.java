@@ -1,4 +1,4 @@
-package com.neverwinterdp.cluster;
+package com.neverwinterdp.server.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,7 +20,7 @@ import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.command.ActivityLogsCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.server.service.HelloServiceModule;
+import com.neverwinterdp.server.service.HelloModule;
 import com.neverwinterdp.server.service.ServiceRegistration;
 /**
  * @author Tuan Nguyen
@@ -41,16 +41,15 @@ public class ClusterServerUnitTest {
     properties.put("server.group", "NeverwinterDP") ;
     properties.put("server.cluster-framework", "hazelcast") ;
     properties.put("server.roles", "master") ;
-    properties.put("server.service-module", HelloServiceModule.class.getName()) ;
-    
+    properties.put("server.available-modules", HelloModule.class.getName()) ;
+    properties.put("server.install-modules", HelloModule.class.getName()) ;
+    properties.put("server.install-modules-autostart", "true") ;
     
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {
       instance[i] = Server.create(properties) ;  
     }
-    ClusterMember member = instance[1].getClusterService().getMember() ;
-    String connectUrl = member.getIpAddress() + ":" + member.getPort() ;
-    client = new HazelcastClusterClient(connectUrl) ;
+    client = new HazelcastClusterClient() ;
   }
 
   @AfterClass

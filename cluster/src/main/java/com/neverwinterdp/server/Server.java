@@ -42,7 +42,7 @@ public class Server {
   private ClusterService   cluster;
   
   @Inject
-  private ServiceContainer serviceContainer;
+  private ModuleContainer  moduleContainer;
   
   private ActivityLogs     activityLogs = new ActivityLogs();
   private ServerState      serverState  = null;
@@ -74,10 +74,10 @@ public class Server {
     return this.activityLogs;
   }
 
-  public ServiceContainer getServiceContainer() { return serviceContainer ; }
+  public ModuleContainer getModuleContainer() { return moduleContainer ; }
 
   public ServerRegistration getServerRegistration() {
-    List<ServiceRegistration> list = serviceContainer.getServiceRegistrations();
+    List<ServiceRegistration> list = moduleContainer.getServiceRegistrations();
     ClusterMember member = cluster.getMember();
     return new ServerRegistration(member, serverState, list);
   }
@@ -108,7 +108,7 @@ public class Server {
     setServerState(ServerState.INIT);
     logger = loggerFactory.getLogger("Server");
     logger.info("Start onInit()");
-    serviceContainer.onInit();
+    moduleContainer.onInit();
     cluster.onInit(this);
     long end = System.currentTimeMillis();
     activityLogs.add(new ActivityLog("Init", ActivityLog.Type.Auto, start, end, null));
@@ -130,8 +130,8 @@ public class Server {
       return ;
     }
     logger.info("Start onDestroy()");
-    serviceContainer.onDestroy();
-    serviceContainer = null;
+    moduleContainer.onDestroy();
+    moduleContainer = null;
     cluster.onDestroy(this);
     setServerState(ServerState.EXIT) ;
     logger.info("Finish onDestroy()");
@@ -152,7 +152,7 @@ public class Server {
       return ;
     }
     logger.info("Start start()");
-    serviceContainer.start();
+    moduleContainer.start();
     setServerState(ServerState.RUNNING);
     cluster.getClusterRegistration().update(getServerRegistration());
     ClusterEvent clusterEvent = new ClusterEvent(ClusterEvent.ServerStateChange, getServerState());
@@ -171,7 +171,7 @@ public class Server {
     }
     logger.info("Start shutdown()");
     cluster.getClusterRegistration().remove(cluster.getMember());
-    serviceContainer.stop();
+    moduleContainer.stop();
     setServerState(ServerState.SHUTDOWN);
     ClusterEvent clusterEvent = new ClusterEvent(ClusterEvent.ServerStateChange, getServerState());
     cluster.broadcast(clusterEvent);

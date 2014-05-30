@@ -1,7 +1,9 @@
 package com.neverwinterdp.server;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.service.ServiceRegistration;
@@ -11,6 +13,7 @@ import com.neverwinterdp.server.service.ServiceRegistration;
  */
 public class ServerRegistration implements Serializable {
   private ClusterMember             clusterMember;
+  private Set<String> roles = new HashSet<String>() ;
   private ServerState               serverState;
   private List<ServiceRegistration> services;
 
@@ -24,6 +27,8 @@ public class ServerRegistration implements Serializable {
   }
 
   public ClusterMember getClusterMember() { return this.clusterMember ; }
+  
+  public Set<String> getRoles() { return roles ; }
   
   public ServerState getServerState() {
     return this.serverState;

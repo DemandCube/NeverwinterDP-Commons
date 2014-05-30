@@ -100,6 +100,7 @@ class Util {
     try {
       T ret = future.get(command.getTimeout(), TimeUnit.MILLISECONDS) ;
       result.setResult(ret);
+      result.setFromMember(member);
       return result ;
     } catch (InterruptedException | ExecutionException | TimeoutException error) {
       result.setError(error) ;
@@ -128,6 +129,7 @@ class Util {
       try {
         T ret = future.get(waitTime, TimeUnit.MILLISECONDS) ;
         results[i].setResult(ret);
+        results[i].setFromMember(member[i]);;
       } catch (InterruptedException | ExecutionException | TimeoutException error) {
         results[i].setError(error) ;
       }
@@ -152,6 +154,7 @@ class Util {
       try {
         T ret = future.get(waitTime, TimeUnit.MILLISECONDS) ;
         results[idx].setResult(ret);
+        results[idx].setFromMember(new ClusterMemberImpl(entry.getKey()));;
       } catch (InterruptedException | ExecutionException | TimeoutException error) {
         results[idx].setError(error) ;
       }

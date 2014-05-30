@@ -1,4 +1,4 @@
-package com.neverwinterdp.cluster;
+package com.neverwinterdp.server.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -1,7 +1,7 @@
 package com.neverwinterdp.server.service;
 
 
-public class HelloServiceModule extends ServiceModule {
+public class HelloModule extends ServiceModule {
   @Override
   protected void configure() {  
     bind("HelloService", HelloService.class); 

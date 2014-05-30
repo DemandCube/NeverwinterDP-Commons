@@ -7,6 +7,7 @@ import java.io.Serializable;
  * @email tuan08@gmail.com
  */
 public class ServiceRegistration implements Serializable {
+  private String       module ;
   private String       serviceId ;
   private String       name;
   private float        version;
@@ -16,6 +17,9 @@ public class ServiceRegistration implements Serializable {
   public ServiceRegistration() {
   }
 
+  public String getModule() { return this.module ; }
+  public void   setModule(String module) { this.module = module ;}
+  
   public String getServiceId() { return serviceId; }
   public void setServiceId(String serviceId) {
     this.serviceId = serviceId;
