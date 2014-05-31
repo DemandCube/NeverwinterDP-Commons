@@ -1,6 +1,8 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import com.neverwinterdp.util.text.TabularPrinter;
 
@@ -55,8 +57,17 @@ public class Console {
     consoleOutput.append('\n') ;
   }
   
+  
   public void println() {
     consoleOutput.append('\n') ;
+  }
+  
+  public void println(Throwable t) {
+    if(t == null) return ;
+    StringWriter swriter = new StringWriter() ;
+    t.printStackTrace(new PrintWriter(swriter));
+    consoleOutput.append(swriter.getBuffer().toString());
+    consoleOutput.append("\n") ;
   }
   
   public void println(String text, int width) {

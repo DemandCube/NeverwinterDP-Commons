@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class ShellContext {
   
   public ExecuteContext getLastExecuteContext() { return this.lastExecuteContext ; }
   
-  public void connect(String[] members) {
+  public void connect(String ... members) {
     if(client != null) client.shutdown();
     client = new HazelcastClusterClient(members) ;
   }
@@ -40,5 +40,9 @@ public class ShellContext {
   
   public void onFinishCommand(CommandGroup group, Command command) {
     currentExecuteContext.setConsoleOutput(console.getTextOutput()) ;
+  }
+  
+  public void close() {
+    if(client != null) client.shutdown();
   }
 } 

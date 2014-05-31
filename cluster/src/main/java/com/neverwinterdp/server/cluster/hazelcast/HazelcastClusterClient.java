@@ -61,21 +61,8 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
   }
   
   public ClusterMember getClusterMember(String connect) {
-    int    port = 5700 ;
-    String host = connect ;
-    if(connect.indexOf(':') > 0) {
-      String[] parts = StringUtil.toStringArray(connect, ":") ;
-      host = parts[0] ;
-      port = Integer.parseInt(parts[1]) ;
-    }
-    Set<Member> members = hzclient.getCluster().getMembers() ;
-    for(Member sel : members) {
-      ClusterMember cmember = new ClusterMemberImpl(sel) ;
-      if(host.equals(cmember.getHost()) || host.equals(cmember.getIpAddress())) {
-        if(port == cmember.getPort()) return cmember ;
-      }
-    }
-    return null ;
+    HazelcastMemberSelector selector = new HazelcastMemberSelector(hzclient) ;
+    return selector.selectClusterMemOber(connect) ;
   }
   
   public void addListener(ClusterListener<ClusterClient> listener) {

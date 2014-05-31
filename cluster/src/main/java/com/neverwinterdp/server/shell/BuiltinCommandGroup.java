@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class BuiltinCommandGroup extends CommandGroup {
@@ -16,12 +17,27 @@ public class BuiltinCommandGroup extends CommandGroup {
     add("exit", Exit.class) ;
     add("set", Set.class) ;
     add("echo", Echo.class) ;
+    add("sleep", Sleep.class) ;
+    add("connect", Connect.class) ;
   }
 
   @Parameters(commandDescription = "Exit the shell")
   static public class Exit extends Command {
     public void execute(ShellContext context) {
       System.exit(0);
+    }
+  }
+  
+  @Parameters(commandDescription = "Sleep for an amount of milli seconds")
+  static public class Sleep extends Command {
+    @Parameter(description = "An amount of time in milli second")
+    List<Long> times = new ArrayList<Long>()  ;
+
+    public void execute(ShellContext context) throws Exception {
+      if(times.size() > 0) {
+        long time = times.get(0) ;
+        if(time > 0) Thread.sleep(time) ;
+      }
     }
   }
   
@@ -152,6 +168,17 @@ public class BuiltinCommandGroup extends CommandGroup {
         ctx.console().println("  ", info, " - OK") ;
       }
       return matchLine ;
+    }
+  }
+  
+  @Parameters(commandDescription = "Connect to a cluster")
+  static public class Connect extends Command {
+    @ParametersDelegate
+    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    
+    public void execute(ShellContext ctx) {
+      ctx.connect(memberSelector.member) ;
+      ctx.console().println("Connect Successfully to " + memberSelector.member);
     }
   }
 }

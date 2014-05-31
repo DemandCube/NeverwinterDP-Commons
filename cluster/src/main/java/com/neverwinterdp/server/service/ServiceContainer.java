@@ -1,4 +1,4 @@
-package com.neverwinterdp.server;
+package com.neverwinterdp.server.service;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -19,13 +19,11 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.neverwinterdp.server.ModuleStatus.RunningStatus;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterService;
-import com.neverwinterdp.server.service.Service;
-import com.neverwinterdp.server.service.ServiceModule;
-import com.neverwinterdp.server.service.ServiceRegistration;
-import com.neverwinterdp.server.service.ServiceState;
+import com.neverwinterdp.server.module.ModuleRegistration;
+import com.neverwinterdp.server.module.ServiceModule;
+import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.MonitorRegistry;
 
@@ -41,17 +39,17 @@ public class ServiceContainer {
 
   private Injector        container;
   private Logger          logger;
-  private ModuleStatus    moduleStatus ;
+  private ModuleRegistration    moduleStatus ;
   private ServiceModule   module ;
 
   public ServiceModule getModule() { return this.module ; }
   
-  public ModuleStatus getModuleStatus() { return this.moduleStatus ; }
+  public ModuleRegistration getModuleStatus() { return this.moduleStatus ; }
   
-  public void init(ModuleStatus mstatus, ServiceModule module, LoggerFactory lfactory) {
+  public void init(ModuleRegistration mstatus, ServiceModule module, LoggerFactory lfactory) {
     this.moduleStatus = mstatus ;
     this.module = module ;
-    logger = lfactory.getLogger(module.getName()) ;
+    logger = lfactory.getLogger(module.getClass().getSimpleName()) ;
   }
 
   public void install(Injector parentContainer) {
@@ -62,7 +60,7 @@ public class ServiceContainer {
     for (Binding<Service> sel : serviceBindings) {
       Service instance = container.getInstance(sel.getKey());
       Named named = (Named) sel.getKey().getAnnotation();
-      instance.getServiceRegistration().setModule(module.getName());
+      instance.getServiceRegistration().setModule(moduleStatus.getModuleName());
       instance.getServiceRegistration().setServiceId(named.value());
     }
     
@@ -206,7 +204,7 @@ public class ServiceContainer {
     return getService(registration.getServiceId());
   }
 
-  void collect(List<ServiceRegistration> holder) {
+  public void collect(List<ServiceRegistration> holder) {
     List<Binding<Service>> bindings = container.findBindingsByType(TypeLiteral.get(Service.class));
     for (int i = 0; i < bindings.size(); i++) {
       Binding<Service> sel = bindings.get(i);

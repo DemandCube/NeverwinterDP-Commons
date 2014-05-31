@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,13 +7,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.neverwinterdp.util.text.StringUtil;
+
 public class Shell {
   private ShellContext context = new ShellContext() ;
   private CommandGroup builtin = new BuiltinCommandGroup();
   private Map<String, CommandGroup> commandGroups = new HashMap<String, CommandGroup>() ;
   
   public Shell() {
-    commandGroups.put("cluster", new ClusterCommandGroup()) ;
+    CommandGroup[] groups = CommandGroup.loadByAnnotation("com.neverwinterdp.server.shell") ;
+    for(CommandGroup sel : groups) {
+      commandGroups.put(sel.getName(), sel) ;
+    }
   }
   
   public ShellContext getShellContext() { return this.context ; }
@@ -45,6 +50,16 @@ public class Shell {
     }
   }
   
+  public void executeScript(String script) {
+    String[] line = parseScript(script) ;
+    for(String selLine : line) {
+      execute(selLine) ;
+    }
+  }
+  
+  public void close() {
+    
+  }
   
   private String processVariables(String line) {
     for(Map.Entry<String, Object> entry : context.getVariables().entrySet()) {
@@ -58,11 +73,36 @@ public class Shell {
   private String[] parseArgs(String line) {
     List<String> holder = new ArrayList<String>();
     Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
-    while (m.find())
-      holder.add(m.group(1).trim()); // Add .replace("\"", "") to remove surrounding quotes.
+    while (m.find()) {
+      String arg = m.group(1).trim() ;
+      if(arg.length() == 0) continue ;
+      //Add .replace("\"", "") to remove surrounding quotes.
+      if(arg.startsWith("\"") && arg.endsWith("\"")) {
+        arg = arg.substring(1, arg.length() - 1) ;
+      }
+      holder.add(arg); 
+    }
     return holder.toArray(new String[holder.size()]) ;
   }
 
+  public String[] parseScript(String script) {
+    List<String> holder = new ArrayList<String>() ;
+    String[] line = StringUtil.splitAsArray(script, '\n');
+    StringBuilder b = new StringBuilder() ;
+    for(String selLine : line) {
+      if(selLine.startsWith("#")) continue ;
+      boolean endLine = !selLine.endsWith("\\") ;
+      if(!endLine) {
+        b.append(selLine.substring(0, selLine.length() - 1)).append('\n') ;
+      } else {
+        b.append(selLine) ;
+        holder.add(b.toString()) ;
+        b = new StringBuilder() ;
+      }
+    }
+    return holder.toArray(new String[holder.size()]) ;
+  }
+  
   static public void main(String[] args) {
     
   }

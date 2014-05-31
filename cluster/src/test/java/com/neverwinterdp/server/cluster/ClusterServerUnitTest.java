@@ -14,13 +14,11 @@ import com.neverwinterdp.server.ActivityLog;
 import com.neverwinterdp.server.ActivityLogs;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.command.ActivityLogsCommand;
+import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.server.service.HelloModule;
 import com.neverwinterdp.server.service.ServiceRegistration;
 /**
  * @author Tuan Nguyen
@@ -29,7 +27,7 @@ import com.neverwinterdp.server.service.ServiceRegistration;
 public class ClusterServerUnitTest {
   static {
     System.setProperty("app.dir", "build/cluster") ;
-    System.setProperty("log4j.configuration", "file:src/main/resources/log4j.properties") ;
+    System.setProperty("log4j.configuration", "file:src/test/resources/log4j.properties") ;
   }
   
   static protected Server[]      instance ;
@@ -37,17 +35,12 @@ public class ClusterServerUnitTest {
 
   @BeforeClass
   static public void setup() throws Exception {
-    Properties properties = new Properties() ;
-    properties.put("server.group", "NeverwinterDP") ;
-    properties.put("server.cluster-framework", "hazelcast") ;
-    properties.put("server.roles", "master") ;
-    properties.put("server.available-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules-autostart", "true") ;
-    
+    String[] args = {
+      "-Pserver.group=NeverwinterDP", "-Pserver.name=test", "-Pserver.roles=master"
+    };
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {
-      instance[i] = Server.create(properties) ;  
+      instance[i] = Server.create(args) ;  
     }
     client = new HazelcastClusterClient() ;
   }
@@ -66,6 +59,23 @@ public class ClusterServerUnitTest {
     Map<ClusterMember, ServiceRegistration> helloServiceMap = 
       client.getClusterRegistration().findByServiceId("HelloService") ;
     assertEquals(instance.length, helloServiceMap.size()) ;
+  }
+  
+  @Test
+  public void testPing() throws Exception {
+    assertEquals(instance.length, client.getClusterRegistration().getNumberOfServers()) ;
+    Util.assertServerState(client, ServerState.RUNNING) ;
+    ServerCommand<ServerState> ping = new ServerCommands.Ping() ;
+    ClusterMember member = instance[0].getClusterService().getMember() ;
+    Thread.sleep(1000);
+    System.out.println("----------------------------------------------") ;
+    ServerCommandResult<ServerState> singleMemberPing = client.execute(ping, member) ;
+    assertFalse(singleMemberPing.hasError()) ;
+    assertEquals(ServerState.RUNNING, singleMemberPing.getResult()) ;
+    
+    Thread.sleep(1000);
+    System.out.println("----------------------------------------------") ;
+    client.execute(ping, new ClusterMember[] { member }) ;
   }
   
   @Test

@@ -1,32 +1,41 @@
 package com.neverwinterdp.server;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
+@Singleton
 public class RuntimeEnvironment {
   static int serverIdTracker ;
   
+  private String serverName ;
   private String appDir;
   private String configDir;
   private String logDir;
   private String tmpDir;
   private String workingDir;
   private String dataDir;
-  private int    serverId ;
 
-  public RuntimeEnvironment(String appDir) {
+  @Inject
+  public RuntimeEnvironment(ServerConfig config) {
+    serverName = config.getServerName();
+    if(serverName == null) {
+      synchronized(RuntimeEnvironment.class) {
+        serverName  = "server" + ++serverIdTracker ;
+      }
+    }
     appDir = getSystemProperty("app.dir", "./") ;
     configDir = getSystemProperty("app.config.dir", appDir + "/config") ;
-    logDir = getSystemProperty("app.log.dir", appDir + "/logs") ;
-    tmpDir = getSystemProperty("app.tmp.dir", appDir + "/tmp") ;
-    workingDir = getSystemProperty("app.working.dir", appDir + "/working") ;
-    dataDir = getSystemProperty("app.data.dir", appDir + "/data") ;
-    synchronized(RuntimeEnvironment.class) {
-      serverId = ++serverIdTracker ;
-    }
+    logDir = getSystemProperty("app.log.dir", appDir + "/logs/" + serverName) ;
+    tmpDir = getSystemProperty("app.tmp.dir", appDir + "/tmp/" + serverName) ;
+    workingDir = getSystemProperty("app.working.dir", appDir + "/working/" + serverName) ;
+    dataDir = getSystemProperty("app.data.dir", appDir + "/data/" + serverName) ;
   }
   
-  public int getServerId() { return this.serverId ; }
+  public String getServerName() { return this.serverName ; }
   
   public String getAppDir() {
     return appDir;

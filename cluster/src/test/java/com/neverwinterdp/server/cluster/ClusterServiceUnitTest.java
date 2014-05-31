@@ -1,6 +1,8 @@
 package com.neverwinterdp.server.cluster;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,17 +15,12 @@ import org.junit.Test;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.ClusterEvent;
-import com.neverwinterdp.server.cluster.ClusterListener;
-import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
-import com.neverwinterdp.server.service.HelloModule;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 /**
@@ -33,7 +30,7 @@ import com.neverwinterdp.server.service.ServiceState;
 public class ClusterServiceUnitTest {
   static {
     System.setProperty("app.dir", "build/cluster") ;
-    System.setProperty("log4j.configuration", "file:src/main/resources/log4j.properties") ;
+    System.setProperty("log4j.configuration", "file:src/test/resources/log4j.properties") ;
   }
   
   static protected Server[]      instance ;
@@ -41,17 +38,12 @@ public class ClusterServiceUnitTest {
   
   @BeforeClass
   static public void setup() throws Exception {
-    Properties properties = new Properties() ;
-    properties.put("server.group", "NeverwinterDP") ;
-    properties.put("server.cluster-framework", "hazelcast") ;
-    properties.put("server.roles", "master") ;
-    properties.put("server.available-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules-autostart", "true") ;
-    
+    String[] args = {
+      "-Pserver.group=NeverwinterDP", "-Pserver.name=test", "-Pserver.roles=master"
+    };
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {
-      instance[i] = Server.create(properties) ;  
+      instance[i] = Server.create(args) ;  
     }
     client = new HazelcastClusterClient() ;
   }

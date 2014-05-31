@@ -1,38 +1,41 @@
 package com.neverwinterdp.server.command;
 
 import java.util.List;
+import java.util.Map;
 
-import com.neverwinterdp.server.ModuleStatus;
 import com.neverwinterdp.server.Server;
+import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class ServerModuleCommands {
-  static public class GetAvailableModule extends ServerCommand<ModuleStatus[]> {
-    public ModuleStatus[] execute(Server server) throws Exception {
+  static public class GetAvailableModule extends ServerCommand<ModuleRegistration[]> {
+    public ModuleRegistration[] execute(Server server) throws Exception {
       return server.getModuleContainer().getAvailableModules() ;
     }
   }
   
-  static public class GetInstallModule extends ServerCommand<ModuleStatus[]> {
-    public ModuleStatus[] execute(Server server) throws Exception {
+  static public class GetInstallModule extends ServerCommand<ModuleRegistration[]> {
+    public ModuleRegistration[] execute(Server server) throws Exception {
       return server.getModuleContainer().getInstalledModules() ;
     }
   }
   
-  static public class InstallModule extends ServerCommand<ModuleStatus[]> {
+  static public class InstallModule extends ServerCommand<ModuleRegistration[]> {
     private List<String> modules ;
     private boolean autostart =false ;
+    private Map<String, String> properties ;
     
     public InstallModule() {} 
     
-    public InstallModule(List<String> modules, boolean autostart) {
+    public InstallModule(List<String> modules, boolean autostart, Map<String, String> properties) {
       this.modules = modules ;
       this.autostart = autostart ;
+      this.properties = properties ;
     }
     
-    public ModuleStatus[] execute(Server server) throws Exception {
+    public ModuleRegistration[] execute(Server server) throws Exception {
       String[] moduleNames = StringUtil.toArray(modules) ;
-      ModuleStatus[] status = server.getModuleContainer().install(moduleNames) ;
+      ModuleRegistration[] status = server.getModuleContainer().install(properties, moduleNames) ;
       if(autostart) {
         status = server.getModuleContainer().start(moduleNames) ;
       }
@@ -40,7 +43,7 @@ public class ServerModuleCommands {
     }
   }
   
-  static public class UninstallModule extends ServerCommand<ModuleStatus[]> {
+  static public class UninstallModule extends ServerCommand<ModuleRegistration[]> {
     private List<String> modules ;
     
     public UninstallModule() {} 
@@ -49,7 +52,7 @@ public class ServerModuleCommands {
       this.modules = modules ;
     }
     
-    public ModuleStatus[] execute(Server server) throws Exception {
+    public ModuleRegistration[] execute(Server server) throws Exception {
       String[] moduleNames = StringUtil.toArray(modules) ;
       return server.getModuleContainer().uninstall(moduleNames) ;
     }

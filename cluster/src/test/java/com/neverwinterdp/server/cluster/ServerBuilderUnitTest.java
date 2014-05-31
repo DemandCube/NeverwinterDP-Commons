@@ -2,47 +2,54 @@ package com.neverwinterdp.server.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import java.util.Properties;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerConfig;
-import com.neverwinterdp.server.ModuleContainer;
+import com.neverwinterdp.server.ServerRegistration;
+import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
+import com.neverwinterdp.server.module.HelloModule;
+import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.HelloService;
-import com.neverwinterdp.server.service.HelloModule;
 
 public class ServerBuilderUnitTest {
   @Test
-  public void testBuilder() {
-    Properties properties = new Properties() ;
-    properties.put("server.group", "NeverwinterDP") ;
-    properties.put("server.cluster-framework", "hazelcast") ;
-    properties.put("server.roles", "master") ;
-    properties.put("server.available-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules", HelloModule.class.getName()) ;
-    properties.put("server.install-modules-autostart", "true") ;
-    
-    Server server = Server.create(properties);
+  public void testBuilder() throws Exception {
+    String[] args = {
+      "-Pserver.group=NeverwinterDP", "-Pserver.name=test", "-Pserver.roles=master"
+    };
+    Server server = Server.create(args);
+    Thread.sleep(1000);
+    System.out.println("----------------------------------------");
     ServerConfig config = server.getConfig() ;
     assertNotNull(config) ;
-    assertEquals("hazelcast", config.getClusterFramework()) ;
+    assertEquals("test", config.getServerName()) ;
     
     assertNotNull(server.getMonitorRegistry()) ;
     assertNotNull(server.getLoggerFactory()) ;
     
     ModuleContainer moduleContainer = server.getModuleContainer() ;
     HelloService helloService = 
-      moduleContainer.getInstance("HelloServiceModule", HelloService.class) ;
+      moduleContainer.getService("HelloModule", "HelloService") ;
     assertNotNull(helloService) ;
     assertEquals("NeverwinterDP", helloService.getServerGroup()) ;
     assertEquals("HelloService", helloService.getServiceRegistration().getServiceId()) ;
+    assertEquals("hello property", helloService.getHelloProperty()) ;
+    assertEquals("hello map property", helloService.getHelloProperties().get("hello")) ;
     assertNotNull(helloService.getMonitorRegistry()) ;
     
     HelloService helloServiceInstance = 
-      moduleContainer.getService("HelloServiceModule", "HelloServiceInstance") ;
+      moduleContainer.getService(HelloModule.class.getSimpleName(), "HelloServiceInstance") ;
     assertEquals("HelloServiceInstance", helloServiceInstance.getServiceRegistration().getServiceId()) ;
     assertNotNull(helloServiceInstance.getMonitorRegistry()) ;
+    ServerRegistration sReg = server.getServerRegistration() ;
+    assertTrue(sReg.getRoles().contains("master")) ;
+    
+    
+    ClusterClient client = new HazelcastClusterClient() ;
+    ClusterRegistraton cReg = client.getClusterRegistration() ;
+    assertEquals(1, cReg.findClusterMemberByRole("master").length) ;
   }
 }

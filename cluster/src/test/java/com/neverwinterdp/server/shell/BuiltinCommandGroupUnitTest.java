@@ -1,8 +1,10 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import com.neverwinterdp.server.shell.Shell;
 
 public class BuiltinCommandGroupUnitTest {
   @Test

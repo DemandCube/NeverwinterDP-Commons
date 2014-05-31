@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.cluster.shell;
+package com.neverwinterdp.server.shell;
 
 import java.io.PrintStream;
 

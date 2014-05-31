@@ -20,10 +20,14 @@ public class ServerRegistration implements Serializable {
   public ServerRegistration() {
   }
 
-  public ServerRegistration(ClusterMember member, ServerState state, List<ServiceRegistration> services) {
+  public ServerRegistration(ServerConfig config, ClusterMember member, 
+                            ServerState state, List<ServiceRegistration> services) {
     this.clusterMember = member ;
     this.serverState = state;
     this.services = services;
+    for(String sel : config.getRoles()) {
+      this.roles.add(sel) ;
+    }
   }
 
   public ClusterMember getClusterMember() { return this.clusterMember ; }

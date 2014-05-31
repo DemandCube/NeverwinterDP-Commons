@@ -1,6 +1,8 @@
 package com.neverwinterdp.server;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.JCommander;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -15,6 +19,7 @@ import com.google.inject.Singleton;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
+import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.MonitorRegistry;
@@ -79,7 +84,7 @@ public class Server {
   public ServerRegistration getServerRegistration() {
     List<ServiceRegistration> list = moduleContainer.getServiceRegistrations();
     ClusterMember member = cluster.getMember();
-    return new ServerRegistration(member, serverState, list);
+    return new ServerRegistration(config, member, serverState, list);
   }
 
   public Logger getLogger() {
@@ -170,8 +175,8 @@ public class Server {
       return ;
     }
     logger.info("Start shutdown()");
-    cluster.getClusterRegistration().remove(cluster.getMember());
     moduleContainer.stop();
+    cluster.getClusterRegistration().remove(cluster.getMember());
     setServerState(ServerState.SHUTDOWN);
     ClusterEvent clusterEvent = new ClusterEvent(ClusterEvent.ServerStateChange, getServerState());
     cluster.broadcast(clusterEvent);
@@ -196,13 +201,15 @@ public class Server {
     }
   }
   
-  static public Server create(Properties properties) {
-    Injector container = null ;
-    if(properties == null) {
-      container = Guice.createInjector(new ServerModule());
-    } else {
-      container = Guice.createInjector(new ServerModule(properties));
-    }
+  static public class Options {
+    @DynamicParameter(names = "-P", description = "Module properties")
+    Map<String, String> properties = new HashMap<String, String>();
+  }
+  
+  static public Server create(String ... args) {
+    Options options = new Options() ;
+    new JCommander(options, args) ;
+    Injector container = Guice.createInjector(new ServerModule(options.properties));
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
