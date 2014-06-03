@@ -26,8 +26,8 @@ public class ShellUnitTest {
         "#this is a comment line" + "\n" +
         "module install \\" + "\n" +
         "  --autostart \\"  + "\n" +
-        "  --Mproperty=value -Mproperty1=value1 \\"  + "\n" +
-        "  --Mcustom:property=value -Mcustom:property1=value1 \\"  + "\n" +
+        "  -Pproperty=value -Pproperty1=value1 \\"  + "\n" +
+        "  -Pcustom:property=value -Pcustom:property1=value1 \\"  + "\n" +
         "  HelloModule"  + "\n" +
         ":echo \"this is a test\"" ;
     String[] lines = shell.parseScript(script) ;
@@ -83,7 +83,7 @@ public class ShellUnitTest {
         "server registration" + "\n" +
         "module install " +
         "  --member $firstMember --autostart " +
-        "  -Mhello:install=from-install " +
+        "  -Phello:install=from-install " +
         "  HelloModuleDisable" + "\n" +
         "module list --installed" +"\n" +
         ":sleep 2000" +"\n" + 
@@ -111,7 +111,7 @@ public class ShellUnitTest {
   
   void close(Server[] instance) throws Exception {
     for(int i = 0; i < instance.length; i++) {
-      instance[i].exit(0) ;
+      instance[i].destroy() ;
     }
   }
 }

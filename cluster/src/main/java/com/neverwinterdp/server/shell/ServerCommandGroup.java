@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.cluster.ClusterClient;
@@ -20,32 +21,26 @@ public class ServerCommandGroup extends CommandGroup {
   public ServerCommandGroup() {
     super("cluster") ;
     add("ping", Ping.class);
+    add("shutdown", Shutdown.class);
+    add("exit", Exit.class);
     add("registration", Registration.class);
   }
   
   static public class Ping extends Command {
-    @Parameter(names = {"-m","--member"}, description = "member in the host:port format")
-    String member = null ;
+    @ParametersDelegate
+    MemberSelectorOption memberSelector = new MemberSelectorOption();
     
     public void execute(ShellContext ctx) {
       ClusterClient client = ctx.getClusterClient() ;
       ServerCommand<ServerState> ping = new ServerCommands.Ping() ;
+      ClusterMember[] members = memberSelector.getMembers(ctx) ;
       ServerCommandResult<ServerState>[] results = null ;
-      if(member == null) {
+      if(members == null) {
         results = client.execute(ping) ; 
       } else {
-        ClusterMember cmember = client.getClusterMember(member) ;
-        results = new ServerCommandResult[] { client.execute(ping, cmember) };
+        results = client.execute(ping, members) ;
       }
-      TabularPrinter tprinter = ctx.console().tabularPrinter(30, 10, 10) ;
-      tprinter.header("Host IP", "Port", "State");
-      for(int i = 0; i < results.length; i++) {
-        ServerCommandResult<ServerState> sel = results[i] ;
-        String host = sel.getFromMember().getIpAddress() ;
-        int    port = sel.getFromMember().getPort() ;
-        ServerState state = sel.getResult() ;
-        tprinter.row(host, port, state);
-      }
+      printServerStateResults(ctx, results) ;
     }
   }
   
@@ -85,74 +80,54 @@ public class ServerCommandGroup extends CommandGroup {
     }
   }
   
-//  @Parameters(commandDescription = "execute various module option such list, install, uninstall")
-//  static public class Module extends Command {
-//    @Parameter(names = {"--member"}, description = "Select the member by host:port")
-//    String member ;
-//    
-//    @Parameter(names = {"--member-role"}, description = "Select the member by role")
-//    String memberRole ;
-//    
-//    @Parameter(names = {"--available"}, description = "List the available modules")
-//    boolean available ;
-//    
-//    @Parameter(names = {"--installed"}, description = "List the installed modules")
-//    boolean installed ;
-//    
-//    @Parameter(names = {"--install"}, description = "List of module to install")
-//    List<String> installModules = new ArrayList<String>() ;
-//    
-//    @Parameter(names = {"--install-autostart"}, description = "Autostart after install")
-//    boolean installAutostart = false ;
-//    
-//    @Parameter(names = {"--uninstall"}, description = "List of module to uninstall")
-//    List<String> uninstallModules = new ArrayList<String>() ;
-//    
-//    
-//    public void execute(ShellContext ctx) {
-//      if(installModules.size() > 0) {
-//        ServerCommand<ModuleRegistration[]> installCommand = 
-//            new ServerModuleCommands.InstallModule(installModules, installAutostart) ;
-//        list(ctx, installCommand, "Install") ;
-//      }
-//      if(uninstallModules.size() > 0) {
-//        ServerCommand<ModuleRegistration[]> uninstallCommand = 
-//            new ServerModuleCommands.UninstallModule(uninstallModules) ;
-//        list(ctx, uninstallCommand, "Uninstall") ;
-//      }
-//      
-//      if(available) {
-//        list(ctx, new ServerModuleCommands.GetAvailableModule(), "List available") ;
-//      }
-//      if(installed) {
-//        list(ctx, new ServerModuleCommands.GetInstallModule(), "List installed") ;
-//      }
-//    }
-//    
-//    private void list(ShellContext ctx, ServerCommand<ModuleRegistration[]> command, String title) {
-//      ClusterClient client = ctx.getClusterClient() ;
-//      ServerCommandResult<ModuleRegistration[]>[] results = null ;
-//      if(command != null) {
-//        results = client.execute(command) ; 
-//      } else {
-//        ClusterMember cmember = client.getClusterMember(member) ;
-//        results = new ServerCommandResult[] { client.execute(command, cmember) };
-//      }
-//      
-//      for(int i = 0; i < results.length; i++) {
-//        ServerCommandResult<ModuleRegistration[]> sel = results[i] ;
-//        TabularPrinter printer = ctx.console().tabularPrinter(30, 10, 10) ;
-//        ctx.console().header(title + " on member " + sel.getFromMember());
-//        printer.setIndent("  ") ;
-//        printer.header("Module", "Install", "Status");
-//        ModuleRegistration[] mstatus = sel.getResult() ;
-//        for(ModuleRegistration selStatus : mstatus) {
-//          String moduleName = selStatus.getModuleName() ;
-//          InstallStatus installStatus = selStatus.getInstallStatus() ;
-//          RunningStatus runningStatus = selStatus.getRunningStatus() ;
-//          printer.row(moduleName, installStatus, runningStatus);
-//        }
-//      }
-//    }
-//  }
+  static public class Shutdown extends Command {
+    @ParametersDelegate
+    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    
+    public void execute(ShellContext ctx) {
+      ClusterClient client = ctx.getClusterClient() ;
+      ServerCommand<ServerState> shutdown = new ServerCommands.Shutdown() ;
+      ServerCommandResult<ServerState>[] results = null ;
+      ClusterMember[] members = memberSelector.getMembers(ctx) ;
+      if(members == null) {
+        results = client.execute(shutdown) ; 
+      } else {
+        results = client.execute(shutdown, members) ;
+      }
+      printServerStateResults(ctx, results) ;
+    }
+  }
+
+  static public class Exit extends Command {
+    @Parameter(names = {"-t","--wait-time"}, description = "Wait time before shutdown")
+    long waitTime = 3000 ;
+    
+    @ParametersDelegate
+    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    
+    public void execute(ShellContext ctx) {
+      ClusterClient client = ctx.getClusterClient() ;
+      ServerCommand<ServerState> shutdown = new ServerCommands.Exit(waitTime) ;
+      ServerCommandResult<ServerState>[] results = null ;
+      ClusterMember[] members = memberSelector.getMembers(ctx) ;
+      if(members == null) {
+        results = client.execute(shutdown) ; 
+      } else {
+        results = client.execute(shutdown, members) ;
+      }
+      printServerStateResults(ctx, results) ;
+    }
+  }
+  
+  static void printServerStateResults(ShellContext ctx, ServerCommandResult<ServerState>[] results) {
+    TabularPrinter tprinter = ctx.console().tabularPrinter(30, 10, 10) ;
+    tprinter.header("Host IP", "Port", "State");
+    for(int i = 0; i < results.length; i++) {
+      ServerCommandResult<ServerState> sel = results[i] ;
+      String host = sel.getFromMember().getIpAddress() ;
+      int    port = sel.getFromMember().getPort() ;
+      ServerState state = sel.getResult() ;
+      tprinter.row(host, port, state);
+    }
+  }
 }

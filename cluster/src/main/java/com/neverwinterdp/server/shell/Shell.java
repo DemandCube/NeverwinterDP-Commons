@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class Shell {
@@ -102,8 +105,40 @@ public class Shell {
     }
     return holder.toArray(new String[holder.size()]) ;
   }
-  
-  static public void main(String[] args) {
+
+  static public class Options {
+    @Parameter(names = {"--connect"}, description = "Connect in the host:port format")
+    String connect = "" ;
     
+    @Parameter(names = {"-f", "--script-file"}, description = "Run the script file")
+    String script ;
+    
+    @Parameter(
+      names = {"-c", "--command"}, variableArity = true, 
+      description = "Run the script command"
+    )
+    List<String> tokens = new ArrayList<String>() ;
+  }
+  
+  static public void main(String[] args) throws Exception {
+    Options options = new Options() ;
+    new JCommander(options, args) ;
+    Shell shell = new Shell() ;
+    if(options.connect != null) {
+      shell.getShellContext().connect(options.connect);
+    } else {
+      shell.getShellContext().connect((String[])null);
+    }
+    
+    if(options.tokens.size() > 0) {
+      String command = StringUtil.join(options.tokens, " ") ;
+      shell.execute(command);
+    } 
+   
+    if(options.script != null) {
+      String script = IOUtil.getFileContentAsString(options.script) ;
+      shell.executeScript(script);
+    }
+    shell.getShellContext().close();
   }
 }

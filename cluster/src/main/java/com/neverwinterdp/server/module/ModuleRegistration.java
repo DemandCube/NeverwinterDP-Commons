@@ -16,7 +16,7 @@ public class ModuleRegistration implements Serializable {
   private boolean autostart = false ;
   private boolean autoInstall = false ;
   private InstallStatus installStatus =  InstallStatus.AVAILABLE ;
-  private RunningStatus runningStatus = RunningStatus.INSTALLED ;
+  private RunningStatus runningStatus = RunningStatus.UNINSTALLED ;
 
   public String getModuleName() {
     return moduleName;

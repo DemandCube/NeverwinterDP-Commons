@@ -54,12 +54,10 @@ abstract public class ServiceModule extends AbstractModule {
       String mapName = entry.getKey() ;
       if(mapName.equals("")) {
         Names.bindProperties(binder(), entry.getValue()) ;
-        System.out.println("BIND DEFAULT " + entry.getValue());
       } else {
         String name = mapName + "Properties" ;
         Map<String, String> map = entry.getValue() ;
         bind(new TypeLiteral<Map<String,String>>(){}).annotatedWith(Names.named(name)).toInstance(map) ;
-        System.out.println("BIND  " + name + " : " + entry.getValue());
       }
     }
   }

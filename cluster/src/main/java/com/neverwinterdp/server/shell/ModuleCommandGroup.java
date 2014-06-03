@@ -54,7 +54,7 @@ public class ModuleCommandGroup extends CommandGroup {
     @Parameter(names = {"--autostart"}, description = "Autostart after install")
     boolean autostart = false ;
     
-    @DynamicParameter(names = "-M", description = "Module properties")
+    @DynamicParameter(names = "-P", description = "Module properties")
     Map<String, String> properties = new HashMap<String, String>();
 
     @Parameter(description = "List of module to install")

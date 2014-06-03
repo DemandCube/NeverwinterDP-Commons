@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class BuiltinCommandGroup extends CommandGroup {
@@ -173,12 +172,12 @@ public class BuiltinCommandGroup extends CommandGroup {
   
   @Parameters(commandDescription = "Connect to a cluster")
   static public class Connect extends Command {
-    @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    @Parameter(names = {"--member"}, description = "Select the member by host:port")
+    String member ;
     
     public void execute(ShellContext ctx) {
-      ctx.connect(memberSelector.member) ;
-      ctx.console().println("Connect Successfully to " + memberSelector.member);
+      ctx.connect(member) ;
+      ctx.console().println("Connect Successfully to " + member);
     }
   }
 }

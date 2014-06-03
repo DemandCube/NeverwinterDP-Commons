@@ -35,8 +35,16 @@ public class ServerCommands {
   }
   
   static public class Exit extends ServerCommand<ServerState> {
+    private long waitTime = 3000 ;
+    
+    public Exit() {}
+    
+    public Exit(long time) {
+      this.waitTime = time ;
+    }
+    
     public ServerState execute(Server server) throws Exception {
-      server.exit(3000) ; 
+      server.exit(waitTime) ; 
       return server.getServerState() ;
     }
   }

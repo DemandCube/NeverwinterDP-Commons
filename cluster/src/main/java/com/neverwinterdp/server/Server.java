@@ -3,7 +3,6 @@ package com.neverwinterdp.server;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -183,6 +182,11 @@ public class Server {
     logger.info("Finish shutdown()");
   }
   
+  public void destroy() {
+    shutdown();
+    onDestroy() ;
+  }
+  
   public void exit(long wait) {
     if(wait <= 0) {
       //exit immediately
@@ -195,6 +199,7 @@ public class Server {
         public void run() {
           shutdown();
           onDestroy() ;
+          System.exit(0);
         }
       };
       worker.schedule(shutdownTask, wait, TimeUnit.MILLISECONDS);
@@ -209,10 +214,20 @@ public class Server {
   static public Server create(String ... args) {
     Options options = new Options() ;
     new JCommander(options, args) ;
+    String serverName = options.properties.get("server.name") ;
+    if(serverName != null) {
+      System.setProperty("server.name", serverName);
+    }
     Injector container = Guice.createInjector(new ServerModule(options.properties));
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
     return server ;
+  }
+  
+  static public void main(String[] args) throws InterruptedException {
+    Server server = create(args) ;
+    Thread.currentThread().setDaemon(true);
+    Thread.currentThread().join() ;
   }
 }
