@@ -41,7 +41,7 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
     long start = 0, end = 0 ;
     if(command.isLogEnable()) start = System.currentTimeMillis() ;
     server.getLogger().info("Start execute command " + command.getActivityLogName());
-    Service service = server.getServiceContainer().getService(command.getTargetService()) ;
+    Service service = server.getModuleContainer().getService(command.getTargetService()) ;
     T result = command.execute(server, service) ;
     if(command.isLogEnable()) {
       end = System.currentTimeMillis() ;

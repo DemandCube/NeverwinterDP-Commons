@@ -1,6 +1,8 @@
 package com.neverwinterdp.server.cluster;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.neverwinterdp.server.ServerRegistration;
@@ -25,5 +27,15 @@ abstract public class ClusterRegistraton {
       }
     }
     return map ;
+  }
+  
+  public ClusterMember[] findClusterMemberByRole(String role) {
+    List<ClusterMember> holder = new ArrayList<ClusterMember>() ;
+    for(ServerRegistration sel : getServerRegistration()) {
+      if(sel.getRoles().contains(role)) {
+        holder.add(sel.getClusterMember()) ;
+      }
+    }
+    return holder.toArray(new ClusterMember[holder.size()]);
   }
 }

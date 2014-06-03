@@ -91,6 +91,10 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   public ClusterRegistraton getClusterRegistration() { return clusterRegistration ; }
   
+  public void updateClusterRegistration() {
+    clusterRegistration.update(server.getServerRegistration());
+  }
+  
   public void addClusterListener(ClusterListener<Server> listener) {
     listeners.add(listener) ;
   }

@@ -17,6 +17,8 @@ dependencies {
 
   compile group: 'com.google.inject', name: 'guice', version: '3.0'
 
+  compile group: 'org.reflections', name: 'reflections', version: '0.9.9-RC1'
+
   compile group: 'com.codahale.metrics', name: 'metrics-core', version: '3.0.2'
   compile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
 

@@ -3,6 +3,7 @@ package com.neverwinterdp.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.neverwinterdp.util.text.StringUtil;
 
 /**
  * @author Tuan Nguyen
@@ -13,6 +14,10 @@ public class ServerConfig {
   @Inject(optional = true) @Named("server.group")
   private String   group;
   
+  @Inject(optional = true) @Named("server.name")
+  private String   serverName;
+  
+  
   @Inject(optional = true) @Named("server.host")
   private String   host = "127.0.0.1";
 
@@ -22,7 +27,7 @@ public class ServerConfig {
   @Inject(optional = true) @Named("server.version")
   private float    version = 1.0f;
   
-  private String[] roles = {"worker"};
+  private String[] roles = {};
   
   @Inject(optional = true) @Named("server.cluster-framework")
   private String   clusterFramework ;
@@ -35,6 +40,14 @@ public class ServerConfig {
     this.group = clusterName;
   }
 
+  public String getServerName() {
+    return serverName;
+  }
+
+  public void setServerName(String serverName) {
+    this.serverName = serverName;
+  }
+  
   public String getHost() { return host;}
   public void setHost(String host) {
     this.host = host;
@@ -53,8 +66,8 @@ public class ServerConfig {
   public String[] getRoles() { return roles; }
   
   @Inject(optional = true) 
-  public void setRoles(@Named("server.cluster-framework") String roles) {
-    this.roles = roles.split(",");
+  public void setRoles(@Named("server.roles") String roles) {
+    this.roles = StringUtil.toStringArray(roles);
   }
 
   public String getClusterFramework() {

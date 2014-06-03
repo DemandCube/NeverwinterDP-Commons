@@ -74,6 +74,7 @@ public class JSONSerializer {
   }
 
   public <T> String toString(T idoc) {
+    if(idoc == null) return "" ;
     try  {
       Writer writer = new StringWriter() ;
       ObjectWriter owriter  = mapper.writerWithDefaultPrettyPrinter() ;

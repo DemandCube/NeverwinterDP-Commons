@@ -1,13 +1,16 @@
 package com.neverwinterdp.server;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.JCommander;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -15,6 +18,7 @@ import com.google.inject.Singleton;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
+import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.MonitorRegistry;
@@ -42,7 +46,7 @@ public class Server {
   private ClusterService   cluster;
   
   @Inject
-  private ServiceContainer serviceContainer;
+  private ModuleContainer  moduleContainer;
   
   private ActivityLogs     activityLogs = new ActivityLogs();
   private ServerState      serverState  = null;
@@ -74,12 +78,12 @@ public class Server {
     return this.activityLogs;
   }
 
-  public ServiceContainer getServiceContainer() { return serviceContainer ; }
+  public ModuleContainer getModuleContainer() { return moduleContainer ; }
 
   public ServerRegistration getServerRegistration() {
-    List<ServiceRegistration> list = serviceContainer.getServiceRegistrations();
+    List<ServiceRegistration> list = moduleContainer.getServiceRegistrations();
     ClusterMember member = cluster.getMember();
-    return new ServerRegistration(member, serverState, list);
+    return new ServerRegistration(config, member, serverState, list);
   }
 
   public Logger getLogger() {
@@ -108,7 +112,7 @@ public class Server {
     setServerState(ServerState.INIT);
     logger = loggerFactory.getLogger("Server");
     logger.info("Start onInit()");
-    serviceContainer.onInit();
+    moduleContainer.onInit();
     cluster.onInit(this);
     long end = System.currentTimeMillis();
     activityLogs.add(new ActivityLog("Init", ActivityLog.Type.Auto, start, end, null));
@@ -130,8 +134,8 @@ public class Server {
       return ;
     }
     logger.info("Start onDestroy()");
-    serviceContainer.onDestroy();
-    serviceContainer = null;
+    moduleContainer.onDestroy();
+    moduleContainer = null;
     cluster.onDestroy(this);
     setServerState(ServerState.EXIT) ;
     logger.info("Finish onDestroy()");
@@ -152,7 +156,7 @@ public class Server {
       return ;
     }
     logger.info("Start start()");
-    serviceContainer.start();
+    moduleContainer.start();
     setServerState(ServerState.RUNNING);
     cluster.getClusterRegistration().update(getServerRegistration());
     ClusterEvent clusterEvent = new ClusterEvent(ClusterEvent.ServerStateChange, getServerState());
@@ -170,12 +174,17 @@ public class Server {
       return ;
     }
     logger.info("Start shutdown()");
+    moduleContainer.stop();
     cluster.getClusterRegistration().remove(cluster.getMember());
-    serviceContainer.stop();
     setServerState(ServerState.SHUTDOWN);
     ClusterEvent clusterEvent = new ClusterEvent(ClusterEvent.ServerStateChange, getServerState());
     cluster.broadcast(clusterEvent);
     logger.info("Finish shutdown()");
+  }
+  
+  public void destroy() {
+    shutdown();
+    onDestroy() ;
   }
   
   public void exit(long wait) {
@@ -190,22 +199,35 @@ public class Server {
         public void run() {
           shutdown();
           onDestroy() ;
+          System.exit(0);
         }
       };
       worker.schedule(shutdownTask, wait, TimeUnit.MILLISECONDS);
     }
   }
   
-  static public Server create(Properties properties) {
-    Injector container = null ;
-    if(properties == null) {
-      container = Guice.createInjector(new ServerModule());
-    } else {
-      container = Guice.createInjector(new ServerModule(properties));
+  static public class Options {
+    @DynamicParameter(names = "-P", description = "Module properties")
+    Map<String, String> properties = new HashMap<String, String>();
+  }
+  
+  static public Server create(String ... args) {
+    Options options = new Options() ;
+    new JCommander(options, args) ;
+    String serverName = options.properties.get("server.name") ;
+    if(serverName != null) {
+      System.setProperty("server.name", serverName);
     }
+    Injector container = Guice.createInjector(new ServerModule(options.properties));
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
     return server ;
+  }
+  
+  static public void main(String[] args) throws InterruptedException {
+    Server server = create(args) ;
+    Thread.currentThread().setDaemon(true);
+    Thread.currentThread().join() ;
   }
 }

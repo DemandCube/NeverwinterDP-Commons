@@ -18,6 +18,6 @@ public class LoggerFactory {
   }
   
   public Logger getLogger(Class<?> type) {
-    return org.slf4j.LoggerFactory.getLogger(prefix + type.getName()) ;
+    return org.slf4j.LoggerFactory.getLogger(prefix + type.getSimpleName()) ;
   }
 }

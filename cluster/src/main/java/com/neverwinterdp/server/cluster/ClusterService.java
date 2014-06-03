@@ -24,6 +24,7 @@ public interface ClusterService {
   public ClusterMember getMember() ;
   
   public ClusterRegistraton getClusterRegistration() ;
+  public void updateClusterRegistration() ;
   
   public void addClusterListener(ClusterListener<Server> listener) ;
   
