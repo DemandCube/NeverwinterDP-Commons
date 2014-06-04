@@ -1,6 +1,6 @@
 package com.neverwinterdp.util.monitor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringReader;
 import java.util.concurrent.TimeUnit;
@@ -8,12 +8,13 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.json.MetricsModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.neverwinterdp.util.monitor.snapshot.CounterSnapshot;
-import com.neverwinterdp.util.monitor.snapshot.MonitorRegistrySnapshot;
+import com.neverwinterdp.util.monitor.snapshot.MetricRegistrySnapshot;
 import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 
 public class MonitorRegistryUnitTest {  
@@ -23,7 +24,7 @@ public class MonitorRegistryUnitTest {
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
     
-    MonitorRegistry registry = new MonitorRegistry("localhost", "test") ;
+    MetricRegistry registry = new MetricRegistry() ;
     Timer timer1 = registry.timer("timer1") ;
     Timer.Context ctx = timer1.time();
     Counter counter1 = registry.counter("counter1") ;
@@ -35,7 +36,7 @@ public class MonitorRegistryUnitTest {
     System.out.println(json) ;
     
     StringReader reader = new StringReader(json) ;
-    MonitorRegistrySnapshot regSnapshot = mapper.readValue(reader, MonitorRegistrySnapshot.class) ;
+    MetricRegistrySnapshot regSnapshot = mapper.readValue(reader, MetricRegistrySnapshot.class) ;
     
     CounterSnapshot counter1Snapshot = regSnapshot.counter("counter1") ;
     assertEquals(counter1.getCount(), counter1Snapshot.getCount()) ;
