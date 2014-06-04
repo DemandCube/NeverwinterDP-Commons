@@ -4,10 +4,13 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
+/**
+ * @author Tuan Nguyen
+ * @email  tuan08@gmail.com
+ */
 public class MonitorRegistry {
   private String host ;
   private String application  ;
-  private String uriPrefix ;
   private MetricRegistry registry = new MetricRegistry();
   
   public MonitorRegistry() {} 
@@ -15,7 +18,6 @@ public class MonitorRegistry {
   public MonitorRegistry(String host, String application) {
     this.host = host ;
     this.application = application ;
-    uriPrefix = "monitor:" + application + "://" + host  ;
   }
   
   public String getHost() { return this.host ; }
@@ -34,9 +36,9 @@ public class MonitorRegistry {
   
   private String name(String ... name) {
     StringBuilder b = new StringBuilder() ;
-    b.append(uriPrefix) ;
     for(int i = 0; i < name.length; i++) {
-      b.append("/").append(name[i]) ;
+      if(i > 0) b.append("/") ;
+      b.append(name[i]) ;
     }
     return b.toString() ;
   }
