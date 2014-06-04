@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -19,7 +18,9 @@ import com.neverwinterdp.server.command.ActivityLogsCommand;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
+import com.neverwinterdp.server.monitor.MonitorRegistrySnapshot;
 import com.neverwinterdp.server.service.ServiceRegistration;
+import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -57,7 +58,7 @@ public class ClusterServerUnitTest {
   public void assertServerEnvironment() throws Exception {
     assertEquals(instance.length, client.getClusterRegistration().getNumberOfServers()) ;
     Map<ClusterMember, ServiceRegistration> helloServiceMap = 
-      client.getClusterRegistration().findByServiceId("HelloService") ;
+      client.getClusterRegistration().findByServiceId("HelloModule", "HelloService") ;
     assertEquals(instance.length, helloServiceMap.size()) ;
   }
   
@@ -156,9 +157,9 @@ public class ClusterServerUnitTest {
   public void testMonitorRegistry() throws Exception {
     Util.assertServerState(client, ServerState.RUNNING) ;
     ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<String> monitorResult = 
+    ServerCommandResult<MonitorRegistrySnapshot> monitorResult = 
         client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;
-    System.out.println(monitorResult.getResult());
+    System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
   }
 }

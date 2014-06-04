@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
+import com.neverwinterdp.server.monitor.MonitorRegistrySnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -55,7 +56,7 @@ public class ServerCommands {
     }
   }
   
-  static public class GetMonitorRegistry extends ServerCommand<String> {
+  static public class GetMonitorRegistry extends ServerCommand<MonitorRegistrySnapshot> {
     static ObjectMapper mapper ;
     static {
       mapper = new ObjectMapper() ; 
@@ -63,10 +64,12 @@ public class ServerCommands {
       mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
     }
     
-    public String execute(Server server) throws Exception {
+    public MonitorRegistrySnapshot execute(Server server) throws Exception {
       MonitorRegistry registry = server.getMonitorRegistry() ;
       String json = mapper.writeValueAsString(registry) ;
-      return json ;
+      MonitorRegistrySnapshot snapshot = 
+          mapper.readValue(json, MonitorRegistrySnapshot.class) ;
+      return snapshot ;
     }
   }
 }

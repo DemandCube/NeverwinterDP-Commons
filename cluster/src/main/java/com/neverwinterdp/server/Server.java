@@ -19,9 +19,9 @@ import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com

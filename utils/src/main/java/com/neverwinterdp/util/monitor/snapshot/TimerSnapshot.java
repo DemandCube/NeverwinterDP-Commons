@@ -2,15 +2,17 @@ package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
 
+import com.codahale.metrics.Timer;
+
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
 public class TimerSnapshot implements Serializable {
   long   count;
-  double max;
+  long   max;
   double mean;
-  double min;
+  long   min;
   double p50;
   double p75;
   double p95;
@@ -25,17 +27,27 @@ public class TimerSnapshot implements Serializable {
   String duration_units;
   String rate_units;
 
+  public TimerSnapshot() {} 
+  
+  public TimerSnapshot(Timer timer) {
+    count = timer.getCount() ;
+    max   = timer.getSnapshot().getMax() ;
+    mean  = timer.getSnapshot().getMean() ;
+    min   = timer.getSnapshot().getMin() ;
+    //TODO: copy the other fields
+  }
+  
   public long getCount() { return count; }
   public void setCount(long count) { this.count = count; }
 
-  public double getMax() { return max; }
-  public void setMax(double max) { this.max = max; }
+  public long getMax() { return max; }
+  public void setMax(long max) { this.max = max; }
 
   public double getMean() { return mean; }
   public void setMean(double mean) { this.mean = mean; }
 
-  public double getMin() { return min; }
-  public void setMin(double min) { this.min = min; }
+  public long getMin() { return min; }
+  public void setMin(long min) { this.min = min; }
 
   public double getP50() { return p50;}
   public void setP50(double p50) { this.p50 = p50; }

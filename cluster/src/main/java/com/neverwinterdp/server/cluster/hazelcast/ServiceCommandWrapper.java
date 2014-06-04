@@ -9,8 +9,8 @@ import com.hazelcast.core.HazelcastInstanceAware;
 import com.neverwinterdp.server.ActivityLog;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.command.ServiceCommand;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.server.service.Service;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
 
 /**
  * @author Tuan Nguyen
@@ -41,7 +41,9 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
     long start = 0, end = 0 ;
     if(command.isLogEnable()) start = System.currentTimeMillis() ;
     server.getLogger().info("Start execute command " + command.getActivityLogName());
-    Service service = server.getModuleContainer().getService(command.getTargetService()) ;
+    String module = command.getTargetModule() ;
+    String serviceId = command.getTargetServiceId() ;
+    Service service = server.getModuleContainer().getService(module, serviceId) ;
     T result = command.execute(server, service) ;
     if(command.isLogEnable()) {
       end = System.currentTimeMillis() ;

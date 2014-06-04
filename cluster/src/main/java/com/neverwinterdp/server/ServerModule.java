@@ -2,15 +2,14 @@ package com.neverwinterdp.server;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
 
 public class ServerModule extends AbstractModule {
   private Map<String, String> properties ;

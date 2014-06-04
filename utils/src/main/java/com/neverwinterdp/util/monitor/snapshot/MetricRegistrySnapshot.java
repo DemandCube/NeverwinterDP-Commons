@@ -1,7 +1,13 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 /**
  * @author Tuan Nguyen
@@ -15,6 +21,20 @@ public class MetricRegistrySnapshot implements Serializable {
   private Map<String, Object>          meters;
   private Map<String, TimerSnapshot>   timers;
 
+  public MetricRegistrySnapshot() {
+    
+  }
+  
+  public MetricRegistrySnapshot(String prefix, MetricRegistry registry) {
+    for(Map.Entry<String, Metric> entry : registry.getMetrics().entrySet()) {
+      String key = entry.getKey() ;
+      if(prefix != null && !key.startsWith(prefix)) continue ;
+      Metric metric = entry.getValue() ;
+      if(metric instanceof Counter) add(key, (Counter) metric) ;
+      if(metric instanceof Timer) add(key, (Timer) metric) ;
+      //TODO: copy the other metric and create unit test
+    }
+  }
   public String getVersion() { return version; }
   public void setVersion(String version) { this.version = version; }
 
@@ -46,9 +66,19 @@ public class MetricRegistrySnapshot implements Serializable {
   public TimerSnapshot timer(String name) {
     return timers.get(name) ;
   }
-  
+
   //TODO: to implement
   public void merge(MetricRegistrySnapshot other) {
     
+  }
+  
+  public void add(String key, Counter counter) {
+    if(counters == null) counters = new HashMap<String, CounterSnapshot>() ;
+    counters.put(key, new CounterSnapshot(counter)) ;
+  }
+  
+  public void add(String key, Timer timer) {
+    if(timers == null) timers = new HashMap<String, TimerSnapshot>() ;
+    timers.put(key, new TimerSnapshot(timer)) ;
   }
 }

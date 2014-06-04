@@ -1,6 +1,10 @@
-package com.neverwinterdp.util.monitor.snapshot;
+package com.neverwinterdp.server.monitor;
 
 import java.io.Serializable;
+
+import com.neverwinterdp.util.monitor.snapshot.CounterSnapshot;
+import com.neverwinterdp.util.monitor.snapshot.MetricRegistrySnapshot;
+import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 
 
 /**

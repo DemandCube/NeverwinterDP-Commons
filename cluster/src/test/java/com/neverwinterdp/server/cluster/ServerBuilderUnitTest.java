@@ -38,12 +38,12 @@ public class ServerBuilderUnitTest {
     assertEquals("HelloService", helloService.getServiceRegistration().getServiceId()) ;
     assertEquals("hello property", helloService.getHelloProperty()) ;
     assertEquals("hello map property", helloService.getHelloProperties().get("hello")) ;
-    assertNotNull(helloService.getMonitorRegistry()) ;
+    assertNotNull(helloService.getComponentMonitorRegistry()) ;
     
     HelloService helloServiceInstance = 
       moduleContainer.getService(HelloModule.class.getSimpleName(), "HelloServiceInstance") ;
     assertEquals("HelloServiceInstance", helloServiceInstance.getServiceRegistration().getServiceId()) ;
-    assertNotNull(helloServiceInstance.getMonitorRegistry()) ;
+    assertNotNull(helloServiceInstance.getComponentMonitorRegistry()) ;
     ServerRegistration sReg = server.getServerRegistration() ;
     assertTrue(sReg.getRoles().contains("master")) ;
     

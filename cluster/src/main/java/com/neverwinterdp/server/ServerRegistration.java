@@ -42,10 +42,11 @@ public class ServerRegistration implements Serializable {
     return services;
   }
   
-  public ServiceRegistration findByServiceId(String id) {
+  public ServiceRegistration findByServiceId(String module, String id) {
     for(int i = 0; i < services.size(); i++) {
       ServiceRegistration registration = services.get(i) ;
-      if(id.equals(registration.getServiceId())) return registration ;
+      if(module.equals(registration.getModule()) && 
+        id.equals(registration.getServiceId())) return registration ;
     }
     return null ;
   }

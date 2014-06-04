@@ -30,8 +30,8 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com

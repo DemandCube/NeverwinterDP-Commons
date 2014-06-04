@@ -21,8 +21,11 @@ import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
+import com.neverwinterdp.server.monitor.ComponentMonitorSnapshot;
+import com.neverwinterdp.server.monitor.MonitorRegistrySnapshot;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
+import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -118,12 +121,22 @@ public class ClusterServiceUnitTest {
       sel.getError().printStackTrace();
     }
     assertEquals("Hello Tuan", sel.getResult()) ;
+
+    ServiceCommand<ComponentMonitorSnapshot> monitorCall = new ServiceCommands.GetServiceMonitor() ;
+    monitorCall.setTargetService(helloService);
+    ServiceCommandResult<ComponentMonitorSnapshot> monitorCallResult = client.execute(monitorCall, member) ;
+    assertFalse(monitorCallResult.hasError()) ;
+    System.out.println("----Service Monitor Registry----");
+    System.out.println(JSONSerializer.INSTANCE.toString(monitorCallResult.getResult()));
+    System.out.println("--------------------------------");
     
     ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<String> monitorResult = 
+    ServerCommandResult<MonitorRegistrySnapshot> monitorResult = 
         client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;
-    System.out.println(monitorResult.getResult());
+    System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
+  
+    
   }
   
   static public class ServiceClusterListener<T> implements ClusterListener<T> {

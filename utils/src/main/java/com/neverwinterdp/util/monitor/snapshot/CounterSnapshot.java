@@ -2,6 +2,8 @@ package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
 
+import com.codahale.metrics.Counter;
+
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -9,6 +11,13 @@ import java.io.Serializable;
 public class CounterSnapshot implements Serializable {
   private long count;
 
+  public CounterSnapshot() {
+  }
+
+  CounterSnapshot(Counter counter) {
+    this.count = counter.getCount() ;
+  }
+  
   public long getCount() {
     return count;
   }

@@ -9,9 +9,10 @@ import org.slf4j.Logger;
 import com.codahale.metrics.Counter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.neverwinterdp.server.monitor.ComponentMonitorRegistry;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
+import com.neverwinterdp.server.monitor.Monitorable;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
-import com.neverwinterdp.util.monitor.Monitorable;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -29,12 +30,14 @@ public class HelloService extends AbstractService implements Monitorable  {
   @Inject(optional = true) @Named("server.group")
   private String   serverGroup;
   
-  @Inject private MonitorRegistry monitorRegistry ;
+  private ComponentMonitorRegistry monitorRegistry ;
   private Counter helloCounter ;
 
   public String getServerGroup() { return this.serverGroup ; }
   
-  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
+  public ComponentMonitorRegistry getComponentMonitorRegistry() { 
+    return this.monitorRegistry ; 
+  }
   
   public String getHelloProperty() { return helloProperty ; }
   
@@ -49,11 +52,8 @@ public class HelloService extends AbstractService implements Monitorable  {
   
   @Inject
   public void init(MonitorRegistry mRegistry) {
-    reset(mRegistry) ;
-  }
-
-  public void reset(MonitorRegistry mRegistry) {
-    helloCounter = mRegistry.counter("service", "HelloService", "hello") ;
+    this.monitorRegistry = mRegistry.createComponentMonitorRegistry(this) ;
+    helloCounter = monitorRegistry.counter("hello-counter") ;
   }
 
   @PreDestroy
@@ -69,7 +69,6 @@ public class HelloService extends AbstractService implements Monitorable  {
 
   public void stop() {
     logger.info("Start stop()");
-    System.out.println("==> helloProperties " + helloProperties) ;
     logger.info("Stopping the HelloService......................");
     logger.info("Finish stop()");
   }

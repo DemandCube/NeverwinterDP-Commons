@@ -10,7 +10,7 @@ import com.hazelcast.core.HazelcastInstanceAware;
 import com.neverwinterdp.server.ActivityLog;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.command.ServerCommand;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 
 /**
  * @author Tuan Nguyen

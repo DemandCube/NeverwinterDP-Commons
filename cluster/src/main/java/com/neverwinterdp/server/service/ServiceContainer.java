@@ -24,8 +24,8 @@ import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ServiceModule;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
+import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
 
 /**
  * @author Tuan Nguyen

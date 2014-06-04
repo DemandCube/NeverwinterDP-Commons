@@ -1,4 +1,7 @@
 package com.neverwinterdp.server.command;
+
+import com.neverwinterdp.server.cluster.ClusterMember;
+
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -6,6 +9,7 @@ package com.neverwinterdp.server.command;
 public class ServiceCommandResult <T> {
   private T result ;
   private Exception error ;
+  private ClusterMember member ;
   
   public T getResult() {
     return result;
@@ -23,5 +27,13 @@ public class ServiceCommandResult <T> {
   
   public void setError(Exception error) {
     this.error = error;
+  }
+
+  public ClusterMember getFromMember() {
+    return member;
+  }
+
+  public void setFromMember(ClusterMember member) {
+    this.member = member;
   }
 }
