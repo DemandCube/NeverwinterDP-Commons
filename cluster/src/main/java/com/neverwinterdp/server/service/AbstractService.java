@@ -6,8 +6,6 @@ package com.neverwinterdp.server.service;
  */
 abstract public class AbstractService implements Service {
   private ServiceRegistration registration = new ServiceRegistration();
-
-  public ServiceRegistration getServiceRegistration() {
-    return this.registration;
-  }
+  
+  public ServiceRegistration getServiceRegistration() { return this.registration; }
 }

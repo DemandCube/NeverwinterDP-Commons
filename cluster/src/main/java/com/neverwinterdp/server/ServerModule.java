@@ -8,8 +8,8 @@ import com.google.inject.name.Names;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
-import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 public class ServerModule extends AbstractModule {
   private Map<String, String> properties ;
@@ -32,9 +32,9 @@ public class ServerModule extends AbstractModule {
     String hostId = clusterService.getMember().toString() ;
     bind(ClusterService.class).toInstance(clusterService);
     
-    MonitorRegistry monitorRegistry = new MonitorRegistry(hostId, "server") ;
-    clusterService.setMonitorRegistry(monitorRegistry);
-    bind(MonitorRegistry.class).toInstance(monitorRegistry);
+    ApplicationMonitor appMonitor = new ApplicationMonitor(hostId, "server") ;
+    clusterService.setApplicationMonitor(appMonitor);
+    bind(ApplicationMonitor.class).toInstance(appMonitor);
     
     LoggerFactory loggerFactory = new LoggerFactory("[" + hostId + "][NeverwinterDP] ") ;
     clusterService.setLoggerFactory(loggerFactory);

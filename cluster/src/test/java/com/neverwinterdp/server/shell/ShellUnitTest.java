@@ -91,6 +91,7 @@ public class ShellUnitTest {
         "module uninstall HelloModuleDisable" + "\n" +
         "module list --available" + "\n" +
         "server registration" + "\n" +
+        "server metric --type timer --filter * " + "\n" +
         ":echo \"===================END TEST=====================\"" + "\n" +
         "" ;
     shell.executeScript(SCRIPT);

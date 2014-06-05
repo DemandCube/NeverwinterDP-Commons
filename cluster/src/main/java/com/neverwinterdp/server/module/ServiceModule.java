@@ -18,7 +18,7 @@ abstract public class ServiceModule extends AbstractModule {
   public void init(Map<String, String> overridedProperties, RuntimeEnvironment env) {
     this.overridedProperties = overridedProperties ;
     properties.put("module.data.drop", "false") ;
-    properties.put("module.data.dir",  "false") ;
+    properties.put("module.data.dir", env.getDataDir()) ;
   }
   
   final protected void configure() {

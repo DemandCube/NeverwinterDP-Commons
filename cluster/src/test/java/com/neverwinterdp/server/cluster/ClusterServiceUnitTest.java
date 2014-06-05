@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -21,11 +20,11 @@ import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
-import com.neverwinterdp.server.monitor.ComponentMonitorSnapshot;
-import com.neverwinterdp.server.monitor.MonitorRegistrySnapshot;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
+import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -131,8 +130,8 @@ public class ClusterServiceUnitTest {
     System.out.println("--------------------------------");
     
     ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<MonitorRegistrySnapshot> monitorResult = 
-        client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
+    ServerCommandResult<ApplicationMonitorSnapshot> monitorResult = 
+        client.execute(new ServerCommands.GetMonitorSnapshot(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;
     System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
   

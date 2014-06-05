@@ -1,12 +1,12 @@
 package com.neverwinterdp.server.command;
 
 import com.neverwinterdp.server.Server;
-import com.neverwinterdp.server.monitor.ComponentMonitorSnapshot;
-import com.neverwinterdp.server.monitor.Monitorable;
 import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.BeanInspector;
+import com.neverwinterdp.util.monitor.ComponentMonitorable;
+import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -36,8 +36,8 @@ public class ServiceCommands {
   
   static public class GetServiceMonitor extends ServiceCommand<ComponentMonitorSnapshot> {
     public ComponentMonitorSnapshot execute(Server server, Service service) throws Exception {
-      if(service instanceof Monitorable) {
-        return ((Monitorable)service).getComponentMonitorRegistry().getComponentMonitorSnapshot() ;
+      if(service instanceof ComponentMonitorable) {
+        return ((ComponentMonitorable)service).getComponentMonitor().getComponentMonitorSnapshot() ;
       }
       return null ;
     }

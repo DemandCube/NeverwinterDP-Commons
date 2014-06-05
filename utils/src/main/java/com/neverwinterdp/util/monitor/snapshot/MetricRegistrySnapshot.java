@@ -1,8 +1,11 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Metric;
@@ -80,5 +83,42 @@ public class MetricRegistrySnapshot implements Serializable {
   public void add(String key, Timer timer) {
     if(timers == null) timers = new HashMap<String, TimerSnapshot>() ;
     timers.put(key, new TimerSnapshot(timer)) ;
+  }
+  
+  public CounterSnapshot findCounter(String exp) {
+    return find(counters, exp) ;
+  }
+  
+  public Map<String, CounterSnapshot> findCounters(String exp) {
+    return findAll(counters, exp) ;
+  }
+  
+  public TimerSnapshot findTimer(String exp) {
+    return find(timers, exp) ;
+  }
+  
+  public Map<String, TimerSnapshot> findTimers(String exp) {
+    return findAll(timers, exp) ;
+  }
+  
+  private <T> T find(Map<String, T> map, String exp) {
+    exp.replace("*", ".*") ;
+    Pattern pattern = Pattern.compile(exp) ;
+    for(Map.Entry<String, T> entry : map.entrySet()) {
+      String key = entry.getKey() ;
+      if(pattern.matcher(key).matches()) return entry.getValue() ;
+    }
+    return null ;
+  }
+  
+  private <T> Map<String, T> findAll(Map<String, T> map, String exp) {
+    exp = exp.replace("*", ".*") ;
+    Map<String, T> holder = new HashMap<String, T>() ;
+    Pattern pattern = Pattern.compile(exp) ;
+    for(Map.Entry<String, T> entry : map.entrySet()) {
+      String key = entry.getKey() ;
+      if(pattern.matcher(key).matches()) holder.put(key, entry.getValue()) ;
+    }
+    return holder ;
   }
 }

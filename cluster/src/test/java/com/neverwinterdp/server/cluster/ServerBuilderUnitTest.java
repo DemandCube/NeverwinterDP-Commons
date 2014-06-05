@@ -27,7 +27,7 @@ public class ServerBuilderUnitTest {
     assertNotNull(config) ;
     assertEquals("test", config.getServerName()) ;
     
-    assertNotNull(server.getMonitorRegistry()) ;
+    assertNotNull(server.getApplicationMonitor()) ;
     assertNotNull(server.getLoggerFactory()) ;
     
     ModuleContainer moduleContainer = server.getModuleContainer() ;
@@ -38,12 +38,12 @@ public class ServerBuilderUnitTest {
     assertEquals("HelloService", helloService.getServiceRegistration().getServiceId()) ;
     assertEquals("hello property", helloService.getHelloProperty()) ;
     assertEquals("hello map property", helloService.getHelloProperties().get("hello")) ;
-    assertNotNull(helloService.getComponentMonitorRegistry()) ;
+    assertNotNull(helloService.getComponentMonitor()) ;
     
     HelloService helloServiceInstance = 
       moduleContainer.getService(HelloModule.class.getSimpleName(), "HelloServiceInstance") ;
     assertEquals("HelloServiceInstance", helloServiceInstance.getServiceRegistration().getServiceId()) ;
-    assertNotNull(helloServiceInstance.getComponentMonitorRegistry()) ;
+    assertNotNull(helloServiceInstance.getComponentMonitor()) ;
     ServerRegistration sReg = server.getServerRegistration() ;
     assertTrue(sReg.getRoles().contains("master")) ;
     

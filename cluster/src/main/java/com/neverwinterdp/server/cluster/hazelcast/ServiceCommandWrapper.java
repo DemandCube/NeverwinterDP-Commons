@@ -9,8 +9,8 @@ import com.hazelcast.core.HazelcastInstanceAware;
 import com.neverwinterdp.server.ActivityLog;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.command.ServiceCommand;
-import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.server.service.Service;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 /**
  * @author Tuan Nguyen
@@ -29,7 +29,7 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
   final public T call() throws Exception {
     HazelcastClusterService rpc = HazelcastClusterService.getClusterRPC(hzInstance) ;
     Server server = rpc.getServer() ;
-    MonitorRegistry registry = server.getMonitorRegistry() ;
+    ApplicationMonitor registry = server.getApplicationMonitor() ;
     Timer.Context ctx =  
       registry.timer("services", "command", command.getActivityLogName()).time();
     T result = doExecute(server) ;

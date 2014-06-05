@@ -19,9 +19,9 @@ import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
-import com.neverwinterdp.server.monitor.MonitorRegistry;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -52,7 +52,7 @@ public class Server {
   private ServerState      serverState  = null;
   
   @Inject
-  private MonitorRegistry monitorRegistry ;
+  private ApplicationMonitor appMonitor ;
   
   /**
    * The configuration for the server such name, group, version, description,
@@ -98,7 +98,7 @@ public class Server {
     return this.runtimeEnvironment ; 
   }
 
-  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
+  public ApplicationMonitor getApplicationMonitor() { return this.appMonitor ; }
   
   /**
    * This lifecycle method be called after the configuration is set. The method

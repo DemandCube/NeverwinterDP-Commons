@@ -18,9 +18,9 @@ import com.neverwinterdp.server.command.ActivityLogsCommand;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.server.monitor.MonitorRegistrySnapshot;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -157,8 +157,8 @@ public class ClusterServerUnitTest {
   public void testMonitorRegistry() throws Exception {
     Util.assertServerState(client, ServerState.RUNNING) ;
     ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<MonitorRegistrySnapshot> monitorResult = 
-        client.execute(new ServerCommands.GetMonitorRegistry(), targetMember) ;
+    ServerCommandResult<ApplicationMonitorSnapshot> monitorResult = 
+        client.execute(new ServerCommands.GetMonitorSnapshot(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;
     System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
   }

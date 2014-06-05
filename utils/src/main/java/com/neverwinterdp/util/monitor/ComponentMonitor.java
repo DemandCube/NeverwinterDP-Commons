@@ -2,6 +2,7 @@ package com.neverwinterdp.util.monitor;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
+import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
 import com.neverwinterdp.util.monitor.snapshot.MetricRegistrySnapshot;
 
 public class ComponentMonitor {
