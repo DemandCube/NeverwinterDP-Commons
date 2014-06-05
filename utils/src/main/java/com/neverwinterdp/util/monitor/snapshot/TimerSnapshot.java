@@ -1,7 +1,9 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
+import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
 /**
@@ -31,10 +33,23 @@ public class TimerSnapshot implements Serializable {
   
   public TimerSnapshot(Timer timer) {
     count = timer.getCount() ;
-    max   = timer.getSnapshot().getMax() ;
-    mean  = timer.getSnapshot().getMean() ;
-    min   = timer.getSnapshot().getMin() ;
-    //TODO: copy the other fields
+    Snapshot snapshot = timer.getSnapshot() ;
+    max   = snapshot.getMax() ;
+    mean  = snapshot.getMean() ;
+    min   = snapshot.getMin() ;
+    p50   = snapshot.getMedian() ;
+    p75   = snapshot.get75thPercentile();
+    p95   = snapshot.get95thPercentile();
+    p98   = snapshot.get98thPercentile();
+    p99   = snapshot.get99thPercentile();
+    p999  = snapshot.get999thPercentile();
+    stddev = snapshot.getStdDev() ;
+    m15_rate = timer.getFifteenMinuteRate();
+    m1_rate = timer.getOneMinuteRate() ;
+    m5_rate = timer.getFiveMinuteRate() ;
+    mean_rate = timer.getMeanRate() ;
+    duration_units = TimeUnit.NANOSECONDS.name() ;
+    rate_units= "";
   }
   
   public long getCount() { return count; }
