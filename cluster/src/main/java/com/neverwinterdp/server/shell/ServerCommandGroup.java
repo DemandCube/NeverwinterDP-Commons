@@ -8,11 +8,8 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.command.ServerCommand;
+import com.neverwinterdp.server.client.MemberSelector;
 import com.neverwinterdp.server.command.ServerCommandResult;
-import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
@@ -33,19 +30,10 @@ public class ServerCommandGroup extends CommandGroup {
   
   static public class Ping extends Command {
     @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      ClusterClient client = ctx.getClusterClient() ;
-      ServerCommand<ServerState> ping = new ServerCommands.Ping() ;
-      ClusterMember[] members = memberSelector.getMembers(ctx) ;
-      ServerCommandResult<ServerState>[] results = null ;
-      if(members == null) {
-        results = client.execute(ping) ; 
-      } else {
-        results = client.execute(ping, members) ;
-      }
-      printServerStateResults(ctx, results) ;
+      printServerStateResults(ctx, ctx.getCluster().server.ping(memberSelector)) ;
     }
   }
   
@@ -55,8 +43,7 @@ public class ServerCommandGroup extends CommandGroup {
     String filter;
     
     public void execute(ShellContext ctx) {
-      ServerRegistration[] registration = 
-          ctx.getClusterClient().getClusterRegistration().getServerRegistration() ;
+      ServerRegistration[] registration = ctx.getCluster().getClusterRegistration().getServerRegistration() ;
       Console console = ctx.console() ;
       String indent = "  " ;
       for(ServerRegistration server : registration) {
@@ -87,19 +74,10 @@ public class ServerCommandGroup extends CommandGroup {
   
   static public class Shutdown extends Command {
     @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      ClusterClient client = ctx.getClusterClient() ;
-      ServerCommand<ServerState> shutdown = new ServerCommands.Shutdown() ;
-      ServerCommandResult<ServerState>[] results = null ;
-      ClusterMember[] members = memberSelector.getMembers(ctx) ;
-      if(members == null) {
-        results = client.execute(shutdown) ; 
-      } else {
-        results = client.execute(shutdown, members) ;
-      }
-      printServerStateResults(ctx, results) ;
+      printServerStateResults(ctx, ctx.getCluster().server.shutdown(memberSelector)) ;
     }
   }
 
@@ -108,25 +86,16 @@ public class ServerCommandGroup extends CommandGroup {
     long waitTime = 3000 ;
     
     @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      ClusterClient client = ctx.getClusterClient() ;
-      ServerCommand<ServerState> shutdown = new ServerCommands.Exit(waitTime) ;
-      ServerCommandResult<ServerState>[] results = null ;
-      ClusterMember[] members = memberSelector.getMembers(ctx) ;
-      if(members == null) {
-        results = client.execute(shutdown) ; 
-      } else {
-        results = client.execute(shutdown, members) ;
-      }
-      printServerStateResults(ctx, results) ;
+      printServerStateResults(ctx, ctx.getCluster().server.exit(memberSelector)) ;
     }
   }
   
   static public class Metric extends Command {
     @ParametersDelegate
-    MemberSelectorOption memberSelector = new MemberSelectorOption();
+    MemberSelector memberSelector = new MemberSelector();
     
     @Parameter(names = {"-t","--type"}, description = "Metric type: counter, timer, meter, histogram")
     String type = "timer" ;
@@ -136,15 +105,8 @@ public class ServerCommandGroup extends CommandGroup {
     
     
     public void execute(ShellContext ctx) {
-      ClusterClient client = ctx.getClusterClient() ;
-      ServerCommand<ApplicationMonitorSnapshot> getCommand = new ServerCommands.GetMonitorSnapshot() ;
-      ServerCommandResult<ApplicationMonitorSnapshot>[] results = null ;
-      ClusterMember[] members = memberSelector.getMembers(ctx) ;
-      if(members == null) {
-        results = client.execute(getCommand) ; 
-      } else {
-        results = client.execute(getCommand, members) ;
-      }
+      ServerCommandResult<ApplicationMonitorSnapshot>[] results = 
+          ctx.getCluster().server.metric(memberSelector) ;
       if("timer".equals(type)) {
         MetricFormater formater = new MetricFormater("  ") ;
         for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {

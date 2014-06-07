@@ -2,7 +2,6 @@ package com.neverwinterdp.server.shell;
 
 import java.io.PrintStream;
 
-
 public class ConsoleAppendable implements Appendable {
   private StringBuilder textOutput ;
   private PrintStream   out ;

@@ -36,4 +36,8 @@ public class ServerCommandResult <T> {
   public void setFromMember(ClusterMember fromMember) {
     this.fromMember = fromMember;
   }
+  
+  public String toJSON() {
+    return "this is a tets" ;
+  }
 }

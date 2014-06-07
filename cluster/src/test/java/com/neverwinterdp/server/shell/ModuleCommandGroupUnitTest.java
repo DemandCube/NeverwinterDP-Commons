@@ -19,7 +19,7 @@ public class ModuleCommandGroupUnitTest {
         "--autostart",
         "-Pproperty1=property1", "-Pproperty2=property2", 
         "-Psub:property1=property1",
-        "HelloModule"
+        "--module", "HelloModule"
     } ;
     new JCommander(install, args) ;
     assertTrue(install.autostart) ;

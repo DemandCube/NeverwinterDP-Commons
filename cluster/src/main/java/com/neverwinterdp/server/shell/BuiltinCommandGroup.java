@@ -1,11 +1,13 @@
 package com.neverwinterdp.server.shell;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.neverwinterdp.server.shell.js.ScriptRunner;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class BuiltinCommandGroup extends CommandGroup {
@@ -17,6 +19,7 @@ public class BuiltinCommandGroup extends CommandGroup {
     add("set", Set.class) ;
     add("echo", Echo.class) ;
     add("sleep", Sleep.class) ;
+    add("jsrun", JSRun.class) ;
     add("connect", Connect.class) ;
   }
 
@@ -79,6 +82,23 @@ public class BuiltinCommandGroup extends CommandGroup {
         }
       }
       ctx.console().println(array);
+    }
+  }
+  
+  @Parameters(commandDescription = "Run a javascript file")
+  static public class JSRun extends Command {
+    @Parameter(description = "list of the js file")
+    List<String> files = new ArrayList<String>()  ;
+
+    public void execute(ShellContext context) throws Exception {
+      HashMap<String, Object> ctx = new HashMap<String, Object>() ;
+      ctx.put("client", context.getCluster()) ;
+      ScriptRunner runner = new ScriptRunner(".", ctx) ;
+      runner.require("classpath:js/assert.js");
+      runner.require("classpath:js/cluster.js");
+      for(String selFile :files) {
+        runner.require(selFile);
+      }
     }
   }
   

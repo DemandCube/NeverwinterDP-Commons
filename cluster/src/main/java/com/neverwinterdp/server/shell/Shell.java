@@ -60,6 +60,9 @@ public class Shell {
     }
   }
   
+  public void executeJSScript(String script) {
+  }
+  
   public void close() {
     context.close();
   }
