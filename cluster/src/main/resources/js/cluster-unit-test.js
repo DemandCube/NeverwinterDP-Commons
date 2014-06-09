@@ -2,10 +2,12 @@ function testCluster() {
   var members = cluster.members() ;
   Assert.assertTrue(members.length > 0)
   console.printJSON(cluster.members()) ;
-
   var clusterRegistration = cluster.clusterRegistration() ;
   Assert.assertNotNull(clusterRegistration)
-  console.printJSON(clusterRegistration) ;
+  //console.printJSON(clusterRegistration) ;
+  var printer = new ClusterRegistrationPrinter(console, clusterRegistration);
+  printer.printServerRegistration() ;
+  printer.printServiceRegistration() ;
 }
 
 function testServer() {
@@ -16,7 +18,7 @@ function testServer() {
     params: { "member-role": "master" },
 
     onResponse: function(resp) {
-      console.printJSON(resp) ;
+      new ResponsePrinter(console, resp).print();
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
       Assert.assertEquals("RUNNING", resp.results[0].result) ;
     }
@@ -26,7 +28,21 @@ function testServer() {
     params: { "member-role": "master" },
 
     onResponse: function(resp) {
-      console.printJSON(resp) ;
+      //console.printJSON(resp) ;
+      var result = resp.results[0] ;
+      var printer = new MetricPrinter(console, result.fromMember, result.result);
+      printer.printCounter();
+      printer.printTimer();
+      Assert.assertTrue(resp.success && !resp.isEmpty()) ;
+    }
+  }) ;
+
+  cluster.server.clearMetric({
+    params: { "member-role": "master", "expression": "*Hello*" },
+
+    onResponse: function(resp) {
+      console.h1("Remove *Hello* metric monitor") ;
+      new ResponsePrinter(console, resp).print() ;
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;
@@ -61,7 +77,11 @@ function testModule() {
 
     onResponse: function(resp) {
       console.println("List the available modules") ;
-      console.printJSON(resp) ;
+      for(var i = 0; i < resp.results.length; i++) {
+        var result = resp.results[i];
+        var printer = new ModuleRegistrationPrinter(console, result.fromMember, result.result);
+        printer.printModuleRegistration() ;
+      }
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;

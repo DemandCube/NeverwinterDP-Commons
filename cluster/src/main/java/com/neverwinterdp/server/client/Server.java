@@ -16,18 +16,24 @@ public class Server {
   }
   
   public String call(String json) {
-    CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-    String commandName = params.getString("_commandName") ;
-    ServerCommandResult<?>[] results = null ;
-    if("ping".equals(commandName)) results = ping(params) ;
-    else if("metric".equals(commandName)) results = metric(params) ;
-    else if("start".equals(commandName)) results = start(params) ;
-    else if("shutdown".equals(commandName)) results = shutdown(params) ;
-    else if("exit".equals(commandName)) results = exit(params) ;
-    if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
-    return "{ 'success': false, 'message': 'unknown command'}" ;
+    try {
+      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
+      String commandName = params.getString("_commandName") ;
+      ServerCommandResult<?>[] results = null ;
+      if("ping".equals(commandName)) results = ping(params) ;
+      else if("metric".equals(commandName)) results = metric(params) ;
+      else if("clearMetric".equals(commandName)) results = clearMetric(params) ;
+      else if("start".equals(commandName)) results = start(params) ;
+      else if("shutdown".equals(commandName)) results = shutdown(params) ;
+      else if("exit".equals(commandName)) results = exit(params) ;
+      if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
+      return "{ 'success': false, 'message': 'unknown command'}" ;
+    } catch(Throwable t) {
+      t.printStackTrace();
+      throw t ;
+    }
   }
-  
+
   public ServerCommandResult<ServerState>[] ping(CommandParams params) {
     MemberSelector memberSelector = new MemberSelector(params) ;
     return ping(memberSelector) ;
@@ -46,6 +52,17 @@ public class Server {
   
   public ServerCommandResult<ApplicationMonitorSnapshot>[] metric(MemberSelector memberSelector) {
     ServerCommand<ApplicationMonitorSnapshot> cmd = new ServerCommands.GetMonitorSnapshot() ;
+    return memberSelector.execute(clusterClient, cmd) ;
+  }
+  
+  public ServerCommandResult<Integer>[] clearMetric(CommandParams params) {
+    MemberSelector memberSelector = new MemberSelector(params) ;
+    String expression = params.getString("expression") ;
+    return clearMetric(memberSelector, expression) ;
+  }
+  
+  public ServerCommandResult<Integer>[] clearMetric(MemberSelector memberSelector, String nameExp) {
+    ServerCommand<Integer> cmd = new ServerCommands.ClearMonitor(nameExp) ;
     return memberSelector.execute(clusterClient, cmd) ;
   }
   

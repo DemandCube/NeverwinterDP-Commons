@@ -1,6 +1,5 @@
 package com.neverwinterdp.server.client;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +18,19 @@ public class Module {
   }
   
   public String call(String json) {
-    CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-    String commandName = params.getString("_commandName") ;
-    ServerCommandResult<?>[] results = null ;
-    if("list".equals(commandName)) results = list(params) ;
-    else if("install".equals(commandName)) results = install(params) ;
-    else if("uninstall".equals(commandName)) results = uninstall(params) ;
-    if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
-    return "{ 'success': false, 'message': 'unknown command'}" ;
+    try {
+      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
+      String commandName = params.getString("_commandName") ;
+      ServerCommandResult<?>[] results = null ;
+      if("list".equals(commandName)) results = list(params) ;
+      else if("install".equals(commandName)) results = install(params) ;
+      else if("uninstall".equals(commandName)) results = uninstall(params) ;
+      if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
+      return "{ 'success': false, 'message': 'unknown command'}" ;
+    } catch(Throwable t) {
+      t.printStackTrace(); 
+      throw t ;
+    }
   }
   
   public ServerCommandResult<ModuleRegistration[]>[] list(CommandParams params) {
@@ -47,7 +51,7 @@ public class Module {
   
   public ServerCommandResult<ModuleRegistration[]>[] install(CommandParams params) {
     MemberSelector memberSelector = new MemberSelector(params) ;
-    boolean autostart = params.getBoolean("autostart") ;
+    boolean autostart = params.getBoolean("autostart", false) ;
     List<String> modules = params.getStringList("module") ;
     Map<String, String> properties = params.getProperties() ;
     return install(memberSelector, modules, autostart, properties) ;

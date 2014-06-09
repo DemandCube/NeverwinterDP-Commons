@@ -10,11 +10,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.client.MemberSelector;
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
-import com.neverwinterdp.server.command.ServerModuleCommands;
 import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ModuleRegistration.InstallStatus;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
@@ -70,9 +66,6 @@ public class ModuleCommandGroup extends CommandGroup {
         description = "List of module to uninstall"
     )
     List<String> modules = new ArrayList<String>() ;
-    
-    @Parameter(names = {"--timeout"}, description = "timeout")
-    long timeout = 5000 ;
     
     @ParametersDelegate
     MemberSelector memberSelector = new MemberSelector();

@@ -57,19 +57,25 @@ public class ServerCommands {
   }
   
   static public class GetMonitorSnapshot extends ServerCommand<ApplicationMonitorSnapshot> {
-    static ObjectMapper mapper ;
-    static {
-      mapper = new ObjectMapper() ; 
-      mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
+    public ApplicationMonitorSnapshot execute(Server server) throws Exception {
+      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
+      return appMonitor.snapshot() ;
+    }
+  }
+  
+  static public class ClearMonitor extends ServerCommand<Integer> {
+    private String nameExp ;
+    
+    public ClearMonitor() {
     }
     
-    public ApplicationMonitorSnapshot execute(Server server) throws Exception {
-      ApplicationMonitor registry = server.getApplicationMonitor() ;
-      String json = mapper.writeValueAsString(registry) ;
-      ApplicationMonitorSnapshot snapshot = 
-          mapper.readValue(json, ApplicationMonitorSnapshot.class) ;
-      return snapshot ;
+    public ClearMonitor(String nameExp) {
+      this.nameExp = nameExp ;
+    }
+    
+    public Integer execute(Server server) throws Exception {
+      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
+      return appMonitor.remove(nameExp) ;
     }
   }
 }

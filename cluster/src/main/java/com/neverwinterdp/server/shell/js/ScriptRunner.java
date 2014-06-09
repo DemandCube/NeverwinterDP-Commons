@@ -41,6 +41,7 @@ public class ScriptRunner {
         script = IOUtil.getFileContentAsString(baseDir + "/" + scriptFile, "UTF-8") ;
       }
       loadedFiles.add(scriptFile) ;
+      engine.put(ScriptEngine.FILENAME, scriptFile);
       engine.eval(script);
     } catch(Exception ex) {
       ex.printStackTrace() ;

@@ -14,4 +14,12 @@ public class ScriptRunnerUnitTest {
     runner.eval("print('ctx hello = ' +  hello + '\\n')") ;
     runner.eval("print('ctx hello = ' +  JSON.stringify({name: 'Tuan'}))") ;
   }
+  
+  @Test
+  public void testConsole() throws Exception {
+    HashMap<String, Object> ctx = new HashMap<String, Object>() ;
+    ScriptRunner runner = new ScriptRunner(".", ctx) ;
+    runner.require("src/main/resources/js/io.js");
+    runner.require("src/main/resources/js/io-unit-test.js");
+  }
 }

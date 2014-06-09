@@ -3,8 +3,11 @@ package com.neverwinterdp.util.monitor;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.json.MetricsModule;
@@ -54,6 +57,12 @@ public class ApplicationMonitor {
     return registry.timer(name(name)) ;
   }
   
+  public int remove(String keyExp) {
+    NameMetricFilter filter = new NameMetricFilter(keyExp);
+    registry.removeMatching(filter); ;
+    return filter.getMatchCount() ;
+  }
+  
   private String name(String ... name) {
     StringBuilder b = new StringBuilder() ;
     for(int i = 0; i < name.length; i++) {
@@ -82,5 +91,26 @@ public class ApplicationMonitor {
   
   public String toJSON() throws JsonProcessingException {
     return mapper.writeValueAsString(this) ;
+  }
+  
+  static public class NameMetricFilter implements MetricFilter {
+    int matchCount =  0 ;
+    private Pattern pattern ;
+    
+    public NameMetricFilter(String nameExp) {
+      nameExp = nameExp.replace("*", ".*") ;
+      pattern = Pattern.compile(nameExp) ;
+    }
+ 
+    public int getMatchCount() { return this.matchCount ; }
+    
+    public boolean matches(String name, Metric metric) {
+      if(pattern.matcher(name).matches()) {
+        matchCount++ ;
+        return true ;
+      }
+      return false;
+    }
+    
   }
 }

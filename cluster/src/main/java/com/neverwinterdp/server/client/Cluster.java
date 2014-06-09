@@ -1,5 +1,7 @@
 package com.neverwinterdp.server.client;
 
+import java.util.Map;
+
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterMember;
@@ -13,6 +15,7 @@ public class Cluster {
   
   public Server server ;
   public Module module ;
+  private Map<String, Plugin> plugins ;
   
   public Cluster() {
     connect() ;
@@ -27,7 +30,13 @@ public class Cluster {
     clusterClient = new HazelcastClusterClient(connect) ;
     server = new Server(clusterClient) ;
     module = new Module(clusterClient) ;
+    this.plugins = Plugin.Util.loadByAnnotation("com.neverwinterdp.server.client") ;
+    for(Plugin plugin : plugins.values()) {
+      plugin.init(clusterClient);
+    }
   }
+  
+  public <T extends Plugin> T plugin(String name) { return (T) plugins.get(name) ; }
   
   public String getMembers() {
     ClusterRegistraton reg = clusterClient.getClusterRegistration() ;

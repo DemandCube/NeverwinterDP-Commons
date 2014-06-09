@@ -47,6 +47,7 @@ public class JSScriptUnitTest {
     HashMap<String, Object> ctx = new HashMap<String, Object>() ;
     ctx.put("clusterAPI", cluster) ;
     ScriptRunner runner = new ScriptRunner(".", ctx) ;
+    runner.require("src/main/resources/js/io.js");
     runner.require("src/main/resources/js/assert.js");
     runner.require("src/main/resources/js/cluster.js");
     runner.require("src/main/resources/js/cluster-unit-test.js");
