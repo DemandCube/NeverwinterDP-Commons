@@ -20,23 +20,23 @@ import org.junit.Test;
 
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 
-public class MiniClusterStartsWithCountJobTest extends AbstractMiniClusterUnitTest {
-  Configuration  conf  ;
+public class BackupMiniClusterStartsWithCountJobTest extends AbstractMiniClusterUnitTest {
+
+  private Configuration   conf = new HdfsConfiguration(new YarnConfiguration());
   private MiniDFSCluster  dfsCluster;
   private MiniYARNCluster yarnCluster;
 
   @Before
   public void beforeTest() throws Exception {
-    yarnCluster = createMiniYARNCluster(new YarnConfiguration(), 2);
-    conf = new HdfsConfiguration(yarnCluster.getConfig());
-    dfsCluster = createMiniDFSCluster(conf, "target/hadoop", 2);
+    dfsCluster = createMiniDFSCluster("build/hadoop", 2);
+    yarnCluster = createMiniYARNCluster(2) ;
   }
 
   @After
-  public void afterTest() throws IOException {
+  public void afterTest() throws Exception {
     dfsCluster.shutdown();
     yarnCluster.stop();
-    yarnCluster.close();
+    yarnCluster.close() ;
   }
 
   @Test
@@ -66,7 +66,7 @@ public class MiniClusterStartsWithCountJobTest extends AbstractMiniClusterUnitTe
 
   private Map<String, Integer> getResultAsMap(String outputAsStr) throws IOException {
     System.out.println("\n\n");
-    System.out.println(" outputAsStr = " + outputAsStr);
+    System.out.println(" outputAsStr = " +  outputAsStr);
     System.out.println("\n\n");
     Map<String, Integer> result = new HashMap<String, Integer>();
     for (String line : outputAsStr.split("\n")) {

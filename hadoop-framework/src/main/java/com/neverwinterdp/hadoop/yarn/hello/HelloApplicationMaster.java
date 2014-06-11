@@ -1,4 +1,4 @@
-package com.neverwinterdp.yarn;
+package com.neverwinterdp.hadoop.yarn.hello;
 
 import java.util.Collections;
 
@@ -18,7 +18,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Records;
 
 public class HelloApplicationMaster {
-
   public static void main(String[] args) throws Exception {
     System.out.println("HelloApplicationMaster: in main(..................)") ;
     final String command = args[0];
@@ -51,7 +50,8 @@ public class HelloApplicationMaster {
 
     // Make container requests to ResourceManager
     for (int i = 0; i < n; ++i) {
-      ContainerRequest containerAsk = new ContainerRequest(capability, null, null, priority);
+      ContainerRequest containerAsk = 
+          new ContainerRequest(capability, null, null, priority);
       System.out.println("Making res-req " + i);
       rmClient.addContainerRequest(containerAsk);
     }
