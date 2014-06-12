@@ -10,12 +10,12 @@ public class AppOptionsUnitTest {
   @Test
   public void test() {
     String[] args = {
-      "--command", "java -Dsys.prop=prop package.Hello1 -param1 -param2 arg1",
-      "--command", "java -Dsys.prop=prop package.Hello2 -param1 -param2 arg1"
+      "--cmd:echo=\"echo this is a test\""
     };
     
     AppOptions options = new AppOptions() ; 
     new JCommander(options, args) ;
-    assertEquals(2, options.commands.size()) ;
+    System.out.println("echo = " + options.cmd.get("echo"));
+    assertEquals("echo this is a test", options.getCommand("echo")) ;
   }
 }

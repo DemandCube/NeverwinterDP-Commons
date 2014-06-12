@@ -8,6 +8,11 @@ eclipse {
   }
 }
 
+
+configurations.all {
+  exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
+}
+
 dependencies {
   compile project(':utils')
   compile project(':api')
@@ -15,5 +20,11 @@ dependencies {
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 
   compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
+  //compile group: 'org.apache.storm', name: 'storm-core', version: '0.9.1-incubating'
+  compile group: 'storm', name: 'storm', version: '0.8.1'
+  
+  compile group: 'org.twitter4j', name: 'twitter4j-core', version: '3.0.3'
+  compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '3.0.3'
+
   compile group: 'org.apache.mrunit', name: 'mrunit', version: '1.0.0', classifier: 'hadoop2'
 }

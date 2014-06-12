@@ -12,14 +12,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.LocalResource;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.apache.hadoop.yarn.api.records.Resource;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.client.api.YarnClientApplication;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -70,11 +68,11 @@ public class AppClient  {
     Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(), Environment.PWD.$() + File.separator + "*", ":");
   }
   
-  public void run(String[] args) throws Exception {
-    run(args, new YarnConfiguration()) ;
+  public AppClientReporter run(String[] args) throws Exception {
+    return run(args, new YarnConfiguration()) ;
   }
   
-  public void run(String[] args, Configuration conf) throws Exception {
+  public AppClientReporter run(String[] args, Configuration conf) throws Exception {
     AppOptions appOpts = new AppOptions() ;
     new JCommander(appOpts, args) ;
     
@@ -88,7 +86,7 @@ public class AppClient  {
 
     System.out.println("Set up the container launch context for the application master") ;
     ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
-    amContainer.setCommands(appOpts.buildCommands()) ;
+    amContainer.setCommands(appOpts.buildAppMasterCommands()) ;
 
     System.out.println("Setup jar for ApplicationMaster if the jar parameter is set") ;
     if(appOpts.jarFile != null) {
@@ -119,22 +117,6 @@ public class AppClient  {
     System.out.println("Submitting application " + appId);
     yarnClient.submitApplication(appContext);
 
-    monitor(yarnClient, appId) ;
-  }
-  
-  private void monitor(YarnClient yarnClient, ApplicationId appId) throws Exception {
-    ApplicationReport appReport = yarnClient.getApplicationReport(appId);
-    YarnApplicationState appState = appReport.getYarnApplicationState();
-    while (appState != YarnApplicationState.FINISHED && 
-           appState != YarnApplicationState.KILLED && 
-           appState != YarnApplicationState.FAILED) {
-      Thread.sleep(100);
-      appReport = yarnClient.getApplicationReport(appId);
-      appState = appReport.getYarnApplicationState();
-    }
-    System.out.println(
-      "Application " + appId + " finished with state " + appState + 
-      " at " + appReport.getFinishTime()
-    );
+    return new AppClientReporter(yarnClient, appId) ;
   }
 }

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.hadoop.yarn.AppClient;
+import com.neverwinterdp.hadoop.yarn.AppClientReporter;
 
 public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
   MiniYARNCluster miniYarnCluster ;
@@ -29,6 +30,9 @@ public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
       "--mini-cluster-env",
       "--command", "java com.neverwinterdp.hadoop.yarn.lih.SampleAM -container_mem 300 --container_cnt 1 --command date" 
     } ;
-    new AppClient().run(args, new YarnConfiguration(miniYarnCluster.getConfig()));
+    AppClient appClient = new AppClient() ;
+    AppClientReporter reporter = 
+        appClient.run(args, new YarnConfiguration(miniYarnCluster.getConfig()));
+    reporter.monitor(); 
   }
 }

@@ -1,9 +1,6 @@
 package com.neverwinterdp.hadoop.yarn.hello;
 
-import java.util.Collections;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
@@ -17,11 +14,14 @@ import org.apache.hadoop.yarn.client.api.NMClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Records;
 
+import com.beust.jcommander.JCommander;
+import com.neverwinterdp.hadoop.yarn.AppOptions;
+
 public class HelloApplicationMaster {
   public static void main(String[] args) throws Exception {
     System.out.println("HelloApplicationMaster: in main(..................)") ;
-    final String command = args[0];
-    final int n = Integer.valueOf(args[1]);
+    AppOptions appOptions = new AppOptions() ;
+    new JCommander(appOptions, args) ;
     
     // Initialize clients to ResourceManager and NodeManagers
     Configuration conf = new YarnConfiguration();
@@ -49,29 +49,21 @@ public class HelloApplicationMaster {
     capability.setVirtualCores(1);
 
     // Make container requests to ResourceManager
-    for (int i = 0; i < n; ++i) {
-      ContainerRequest containerAsk = 
-          new ContainerRequest(capability, null, null, priority);
+    for(int i = 0; i < appOptions.allocateContainer; ++i) {
+      ContainerRequest containerAsk = new ContainerRequest(capability, null, null, priority);
       System.out.println("Making res-req " + i);
       rmClient.addContainerRequest(containerAsk);
     }
 
     // Obtain allocated containers and launch 
     int allocatedContainers = 0;
-    while (allocatedContainers < n) {
+    while (allocatedContainers < appOptions.allocateContainer) {
       AllocateResponse response = rmClient.allocate(0);
       for (Container container : response.getAllocatedContainers()) {
         ++allocatedContainers;
-
         // Launch container by create ContainerLaunchContext
-        ContainerLaunchContext ctx = 
-            Records.newRecord(ContainerLaunchContext.class);
-        ctx.setCommands(
-            Collections.singletonList(
-                command + 
-                " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
-                " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
-                ));
+        ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
+        ctx.setCommands(appOptions.buildAppCommands());
         System.out.println("Launching container " + allocatedContainers);
         nmClient.startContainer(container, ctx);
       }
@@ -80,8 +72,8 @@ public class HelloApplicationMaster {
 
     // Now wait for containers to complete
     int completedContainers = 0;
-    while (completedContainers < n) {
-      AllocateResponse response = rmClient.allocate(completedContainers/n);
+    while (completedContainers < appOptions.allocateContainer) {
+      AllocateResponse response = rmClient.allocate(completedContainers/appOptions.allocateContainer);
       for (ContainerStatus status : response.getCompletedContainersStatuses()) {
         ++completedContainers;
         System.out.println("Completed container " + completedContainers);

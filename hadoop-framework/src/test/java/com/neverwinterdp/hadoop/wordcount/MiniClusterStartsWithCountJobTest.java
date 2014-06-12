@@ -29,7 +29,7 @@ public class MiniClusterStartsWithCountJobTest extends AbstractMiniClusterUnitTe
   public void beforeTest() throws Exception {
     yarnCluster = createMiniYARNCluster(new YarnConfiguration(), 2);
     conf = new HdfsConfiguration(yarnCluster.getConfig());
-    dfsCluster = createMiniDFSCluster(conf, "target/hadoop", 2);
+    dfsCluster = createMiniDFSCluster(conf, "build/hadoop", 2);
   }
 
   @After

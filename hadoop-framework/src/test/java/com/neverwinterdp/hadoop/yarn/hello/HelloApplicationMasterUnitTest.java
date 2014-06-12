@@ -10,8 +10,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.HdfsConfiguration;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.ApplicationConstants.Environment;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -27,8 +25,6 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.client.api.YarnClientApplication;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler;
 import org.apache.hadoop.yarn.util.Apps;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.hadoop.yarn.util.Records;
@@ -77,16 +73,24 @@ public class HelloApplicationMasterUnitTest extends AbstractMiniClusterUnitTest 
 
     // Set up the container launch context for the application master
     ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
+//    amContainer.setCommands(
+//        Collections.singletonList(
+//            "java -Xmx128M " +
+//                HelloApplicationMaster.class.getName() +
+//                " " + command +
+//                " " + String.valueOf(n) + 
+//                " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
+//                " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
+//            )
+//        );
+    
     amContainer.setCommands(
-        Collections.singletonList(
-            "java -Xmx128M " +
-                HelloApplicationMaster.class.getName() +
-                " " + command +
-                " " + String.valueOf(n) + 
-                " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
-                " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
-            )
-        );
+      Collections.singletonList(
+        command +
+        " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
+        " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
+      )
+    );
 
     // Setup jar for ApplicationMaster
     LocalResource appMasterJar = Records.newRecord(LocalResource.class);
