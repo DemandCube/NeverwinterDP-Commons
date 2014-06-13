@@ -40,33 +40,6 @@ public class AppClient  {
     appMasterJar.setVisibility(LocalResourceVisibility.PUBLIC);
   }
 
-  void setupAppMasterEnv(AppOptions appOpts, Configuration conf, Map<String, String> appMasterEnv) {
-    if(appOpts.miniClusterEnv) {
-      String cps = System.getProperty("java.class.path") ;
-      String[] cp = cps.split(":") ;
-      for(String selCp : cp) {
-        System.out.println("Add classpath: " + selCp);
-        Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(), selCp, ":");
-      }
-    } else {
-      StringBuilder classPathEnv = new StringBuilder();
-      classPathEnv.append(Environment.CLASSPATH.$()).append(File.pathSeparatorChar);
-      classPathEnv.append("./*");
-
-      String[] classpath = conf.getStrings(
-          YarnConfiguration.YARN_APPLICATION_CLASSPATH,
-          YarnConfiguration.DEFAULT_YARN_APPLICATION_CLASSPATH
-      ) ;
-      for (String selClasspath : classpath) {
-        classPathEnv.append(File.pathSeparatorChar);
-        classPathEnv.append(selClasspath.trim());
-      }
-
-      String envStr = classPathEnv.toString();
-      appMasterEnv.put(Environment.CLASSPATH.name(), envStr);
-    }
-    Apps.addToEnvironment(appMasterEnv, Environment.CLASSPATH.name(), Environment.PWD.$() + File.separator + "*", ":");
-  }
   
   public AppClientReporter run(String[] args) throws Exception {
     return run(args, new YarnConfiguration()) ;
@@ -97,7 +70,7 @@ public class AppClient  {
     
     System.out.println("Setup the classpath for ApplicationMaster") ;
     Map<String, String> appMasterEnv = new HashMap<String, String>();
-    setupAppMasterEnv(appOpts, conf, appMasterEnv);
+    Util.setupAppMasterEnv(appOpts.miniClusterEnv, conf, appMasterEnv);
     amContainer.setEnvironment(appMasterEnv);
 
     System.out.println("Set up resource type requirements for ApplicationMaster") ;

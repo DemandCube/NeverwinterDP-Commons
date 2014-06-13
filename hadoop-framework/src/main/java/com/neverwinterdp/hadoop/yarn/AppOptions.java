@@ -40,29 +40,4 @@ public class AppOptions {
     System.out.println("Master Command: " + b.toString());
     return holder ;
   }
-  
-  public List<String> buildAppCommands() {
-    List<String> holder = new ArrayList<String>() ;
-    StringBuilder b = new StringBuilder() ;
-    for(String selCommand : conf.values()) {
-      if(selCommand.startsWith("\"") && selCommand.endsWith("\"")) {
-        selCommand = selCommand.substring(1, selCommand.length() - 1) ;
-      }
-      b.append(selCommand).append(" ");
-    }
-    b.append(" 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout") ; 
-    b.append(" 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr") ;
-    holder.add(b.toString()) ;
-    System.out.println("App Command: " + b.toString());
-    return holder ;
-  }
-  
-  public String getCommand(String name) {
-    String value = conf.get(name) ;
-    if(value == null) return null ;
-    if(value.startsWith("\"") && value.endsWith("\"")) {
-      value = value.substring(1, value.length() - 1) ;
-    }
-    return value ;
-  }
 }

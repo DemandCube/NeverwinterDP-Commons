@@ -28,7 +28,7 @@ public class HelloAppContainerManger implements AppContainerManager {
 
   public void onAllocatedContainer(AppMaster master, Container container) {
     try {
-      master.startContainer(container, "date") ;
+      master.startContainer(container, "java com.neverwinterdp.hadoop.yarn.hello.HelloWorker") ;
     } catch (YarnException e) {
       LOGGER.error("Error on start a container", e);
     } catch (IOException e) {

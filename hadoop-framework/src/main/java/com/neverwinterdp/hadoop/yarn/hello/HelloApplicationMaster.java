@@ -1,6 +1,9 @@
 package com.neverwinterdp.hadoop.yarn.hello;
 
+import java.util.Collections;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
@@ -64,7 +67,11 @@ public class HelloApplicationMaster {
         ++allocatedContainers;
         // Launch container by create ContainerLaunchContext
         ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
-        ctx.setCommands(appOptions.buildAppCommands());
+        ctx.setCommands(Collections.singletonList(
+            "date " +
+            " 1>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stdout" + 
+            " 2>" + ApplicationConstants.LOG_DIR_EXPANSION_VAR + "/stderr" 
+          ));
         System.out.println("Launching container " + allocatedContainers);
         nmClient.startContainer(container, ctx);
       }

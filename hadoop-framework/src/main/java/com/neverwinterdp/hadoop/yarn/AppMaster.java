@@ -2,6 +2,7 @@ package com.neverwinterdp.hadoop.yarn;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.hadoop.yarn.hello.HelloAppContainerManger;
 
 public class AppMaster {
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppMaster.class.getName());
@@ -116,6 +116,11 @@ public class AppMaster {
   
   public void startContainer(Container container, String command) throws YarnException, IOException {
     ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
+    System.out.println("Setup the classpath for the container " + container.getId()) ;
+    Map<String, String> appMasterEnv = new HashMap<String, String>();
+    Util.setupAppMasterEnv(true, conf, appMasterEnv);
+    ctx.setEnvironment(appMasterEnv);
+    
     StringBuilder sb = new StringBuilder();
     List<String> commands = Collections.singletonList(
         sb.append(command).
