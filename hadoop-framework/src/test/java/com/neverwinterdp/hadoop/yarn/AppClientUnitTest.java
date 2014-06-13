@@ -1,6 +1,5 @@
 package com.neverwinterdp.hadoop.yarn;
 
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.junit.After;
@@ -27,10 +26,9 @@ public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
   public void testAppClient() throws Exception {
     String[] args = { 
       "--mini-cluster-env",
-      "--app-name", "Hello Yarn",
-      "--app-main", "com.neverwinterdp.hadoop.yarn.hello.HelloApplicationMaster",
-      "--app-allocate-container", "2",
-      "--cmd:date=date"
+      "--name", "Hello Yarn",
+      "--container-manager", "com.neverwinterdp.hadoop.yarn.hello.HelloAppContainerManger",
+      "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
     } ;
     AppClient appClient = new AppClient() ;
     AppClientReporter reporter = 

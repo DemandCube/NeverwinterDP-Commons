@@ -49,7 +49,8 @@ public class HelloApplicationMaster {
     capability.setVirtualCores(1);
 
     // Make container requests to ResourceManager
-    for(int i = 0; i < appOptions.allocateContainer; ++i) {
+    int requestContainer = 3 ;
+    for(int i = 0; i < requestContainer; ++i) {
       ContainerRequest containerAsk = new ContainerRequest(capability, null, null, priority);
       System.out.println("Making res-req " + i);
       rmClient.addContainerRequest(containerAsk);
@@ -57,7 +58,7 @@ public class HelloApplicationMaster {
 
     // Obtain allocated containers and launch 
     int allocatedContainers = 0;
-    while (allocatedContainers < appOptions.allocateContainer) {
+    while (allocatedContainers < requestContainer) {
       AllocateResponse response = rmClient.allocate(0);
       for (Container container : response.getAllocatedContainers()) {
         ++allocatedContainers;
@@ -72,8 +73,8 @@ public class HelloApplicationMaster {
 
     // Now wait for containers to complete
     int completedContainers = 0;
-    while (completedContainers < appOptions.allocateContainer) {
-      AllocateResponse response = rmClient.allocate(completedContainers/appOptions.allocateContainer);
+    while (completedContainers < requestContainer) {
+      AllocateResponse response = rmClient.allocate(completedContainers/requestContainer);
       for (ContainerStatus status : response.getCompletedContainersStatuses()) {
         ++completedContainers;
         System.out.println("Completed container " + completedContainers);
