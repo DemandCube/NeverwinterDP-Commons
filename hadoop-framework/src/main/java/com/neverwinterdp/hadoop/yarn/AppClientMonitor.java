@@ -14,11 +14,11 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-public class AppClientReporter {
+public class AppClientMonitor {
   private YarnClient yarnClient;
   private ApplicationId appId;
   
-  public AppClientReporter(YarnClient yarnClient, ApplicationId appId) {
+  public AppClientMonitor(YarnClient yarnClient, ApplicationId appId) {
     this.yarnClient = yarnClient ;
     this.appId = appId ;
   }
@@ -29,6 +29,10 @@ public class AppClientReporter {
   
   public ApplicationReport getApplicationReport() throws YarnException, IOException { 
     return yarnClient.getApplicationReport(appId) ; 
+  }
+  
+  public void kill() throws YarnException, IOException {
+    yarnClient.killApplication(appId);
   }
   
   public void monitor() throws Exception {

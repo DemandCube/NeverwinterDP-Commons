@@ -51,4 +51,9 @@ public class MemberSelector implements Serializable {
     if(members == null) return client.execute(command) ; 
     else return client.execute(command, members) ;
   }
+  
+  public MemberSelector setMemberRole(String role) {
+    this.memberRole = role ;
+    return this ;
+  }
 }

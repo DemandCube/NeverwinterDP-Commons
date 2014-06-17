@@ -44,16 +44,20 @@ public class AppMaster {
   public AppMaster() {
   }
   
+  public Configuration getConfiguration() { return this.conf ; }
+  
   public AppMonitor getAppMonitor() { return this.appMonitor ; }
 
+  public AMRMClient<ContainerRequest> getAMRMClient() { return this.amrmClient ; }
+  
+  public NMClient getNMClient() { return this.nmClient ; }
+  
   public boolean run(String[] args) throws Exception {
     AppOptions appOpts = new AppOptions() ;
     new JCommander(appOpts, args) ;
     
     conf = new YarnConfiguration();
-    for(Map.Entry<String, String> entry : appOpts.conf.entrySet()) {
-      conf.set(entry.getKey(), entry.getValue()) ;
-    }
+    appOpts.overrideConfiguration(conf);
     
     Class<?> containerClass = Class.forName(appOpts.containerManager) ;
     containerManager = (AppContainerManager)containerClass.newInstance() ;
@@ -68,18 +72,16 @@ public class AppMaster {
     nmClient.start();
 
     // Register with RM
-    amrmClientAsync.registerApplicationMaster(
-      "", //appMasterHostname, 
-      0,   //appMasterRpcPort, 
-      ""  //appMasterTrackingUrl
-    );
+    amrmClientAsync.registerApplicationMaster(appOpts.appHostName, appOpts.appRpcPort, appOpts.appTrackingUrl);
     
     containerManager.onInit(this);
     containerManager.waitForComplete(this);
     containerManager.onExit(this);
     amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
+    amrmClientAsync.stop();
     amrmClientAsync.close(); 
-    nmClient.close(); 
+    nmClient.stop();
+    nmClient.close();
     return true;
   }
 
@@ -109,9 +111,19 @@ public class AppMaster {
     return null;
   }
   
-  public void add(ContainerRequest containerReq) {
+  public void asyncAdd(ContainerRequest containerReq) {
     amrmClientAsync.addContainerRequest(containerReq);
     appMonitor.onContainerRequest(containerReq);
+  }
+  
+  public void add(ContainerRequest containerReq) {
+    amrmClient.addContainerRequest(containerReq);
+    appMonitor.onContainerRequest(containerReq);
+  }
+  
+  public List<Container> getAllocatedContainers() throws YarnException, IOException {
+    AllocateResponse response = amrmClient.allocate(0);
+    return response.getAllocatedContainers() ;
   }
   
   public void startContainer(Container container, String command) throws YarnException, IOException {
@@ -165,7 +177,9 @@ public class AppMaster {
       amrmClientAsync.stop();
     }
 
-    public void onShutdownRequest() {  }
+    public void onShutdownRequest() { 
+      containerManager.onShutdownRequest(AppMaster.this); 
+    }
 
     public float getProgress() { return 0; }
   }

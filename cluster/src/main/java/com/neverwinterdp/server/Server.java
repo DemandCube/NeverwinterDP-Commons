@@ -206,6 +206,11 @@ public class Server {
     }
   }
   
+  public void dumpInfo(Appendable out) {
+    config.dumpInfo(out);
+    runtimeEnvironment.dumpInfo(out);
+  }
+  
   static public class Options {
     @DynamicParameter(names = "-P", description = "Module properties")
     Map<String, String> properties = new HashMap<String, String>();
@@ -222,12 +227,16 @@ public class Server {
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
+    server.dumpInfo(System.out);
     return server ;
   }
   
   static public void main(String[] args) throws InterruptedException {
-    Server server = create(args) ;
-    Thread.currentThread().setDaemon(true);
+    for(String sel : args) {
+      System.out.println("arg = " + sel);
+    }
+    final Server server = create(args) ;
     Thread.currentThread().join() ;
+    System.out.println("exit Server(Update++--++--++) !!!!");
   }
 }

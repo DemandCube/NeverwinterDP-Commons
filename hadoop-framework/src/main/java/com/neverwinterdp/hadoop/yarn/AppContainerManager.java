@@ -9,5 +9,6 @@ public interface AppContainerManager {
   public void onCompleteContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) ;
   public void onFailedContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) ;
   public void waitForComplete(AppMaster appMaster);
+  public void onShutdownRequest(AppMaster appMaster) ;
   public void onExit(AppMaster appMaster) ;
 }

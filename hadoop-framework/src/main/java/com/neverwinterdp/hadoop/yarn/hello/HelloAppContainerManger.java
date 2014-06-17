@@ -22,7 +22,7 @@ public class HelloAppContainerManger implements AppContainerManager {
     for (int i = 0; i < 2; i++) {
       ContainerRequest containerReq = 
           appMaster.createContainerRequest(0/*priority*/, 1/*core*/, 128/*memory*/);
-      appMaster.add(containerReq) ;
+      appMaster.asyncAdd(containerReq) ;
     }
   }
 
@@ -49,6 +49,10 @@ public class HelloAppContainerManger implements AppContainerManager {
     }
   }
 
+  public void onShutdownRequest(AppMaster appMaster)  {
+    
+  }
+  
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
     AppMonitor appMonitor = appMaster.getAppMonitor() ;

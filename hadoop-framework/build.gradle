@@ -1,5 +1,3 @@
-apply plugin: 'maven-publish'
-
 archivesBaseName = 'commons.hadoop-framework'
 
 eclipse {
@@ -20,6 +18,7 @@ dependencies {
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 
   compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
+
   //compile group: 'org.apache.storm', name: 'storm-core', version: '0.9.1-incubating'
   compile group: 'storm', name: 'storm', version: '0.8.1'
   
@@ -27,4 +26,10 @@ dependencies {
   compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '3.0.3'
 
   compile group: 'org.apache.mrunit', name: 'mrunit', version: '1.0.0', classifier: 'hadoop2'
+}
+
+
+clean.doLast {
+  new File("target").deleteDir() ;
+  println("Delete target......................................") ;
 }

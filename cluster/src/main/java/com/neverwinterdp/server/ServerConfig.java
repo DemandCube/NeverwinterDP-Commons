@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.neverwinterdp.util.text.StringUtil;
+import com.neverwinterdp.util.text.TabularPrinter;
 
 /**
  * @author Tuan Nguyen
@@ -84,5 +85,18 @@ public class ServerConfig {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+  
+  public void dumpInfo(Appendable out) {
+    int[] width = {35, 35} ;
+    TabularPrinter p = new TabularPrinter(out, width) ;
+    p.header("Server Config", "");
+    p.row("Group", group);
+    p.row("Host", host);
+    p.row("Listen Port", listenPort);
+    p.row("Server Version", version);
+    p.row("Roles", StringUtil.join(roles, ","));
+    p.row("Cluster Framework", clusterFramework);
+    p.row("Description", description);
   }
 }

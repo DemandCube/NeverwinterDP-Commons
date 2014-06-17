@@ -3,10 +3,12 @@ package com.neverwinterdp.server.client;
 import java.util.Map;
 
 import com.neverwinterdp.server.ServerRegistration;
+import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterRegistraton;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
+import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.util.JSONSerializer;
 
 
@@ -55,6 +57,25 @@ public class Cluster {
   }
   
   public ClusterClient getClusterClient() { return this.clusterClient ; }
+  
+  public boolean waitForRunningMembers(MemberSelector selector, int numberOfMembers, long timeout) {
+    ServerCommandResult<ServerState>[] results  = server.ping(selector) ;
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      boolean ok = true ;
+      for(ServerCommandResult<ServerState> sel : results) {
+        if(ServerState.RUNNING.equals(sel.getResult())) continue ;
+        ok = false ;
+        break ;
+      }
+      if(ok) return true ;
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+      }
+    }
+    return false ;
+  }
   
   public void close() {
     if(clusterClient != null) clusterClient.shutdown(); 

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 
 import com.beust.jcommander.DynamicParameter;
@@ -17,8 +18,27 @@ public class AppOptions {
   @Parameter(names = "--jar", description = "Command list to launch the container")
   public String jarFile  ;
   
-  @Parameter(names = "--name", description = "The application name")
+  @Parameter(names = "--app-home", description = "The shared location of the application directory")
+  public String appHome ;
+  
+  @Parameter(
+    names = "--upload-app", 
+    description = "The local app home on the client, that should be copy and deploy to app home"
+  )
+  public String uploadApp ;
+  
+  @Parameter(names = "--app-name", description = "The application name")
   public String appName = "Yarn Application"  ;
+  
+  @Parameter(names = "--app-host-name", description = "The application host name")
+  public String appHostName = ""  ;
+  
+  @Parameter(names = "--app-rpc-port", description = "The application rpc port")
+  public int appRpcPort = 0  ;
+  
+  @Parameter(names = "--app-tracking-url", description = "The application tracking url")
+  public String appTrackingUrl = ""  ;
+  
   
   @Parameter(names = "--container-manager", description = "The application container manager class")
   public String containerManager   ;
@@ -39,5 +59,11 @@ public class AppOptions {
     holder.add(b.toString()) ;
     System.out.println("Master Command: " + b.toString());
     return holder ;
+  }
+  
+  public void overrideConfiguration(Configuration aconf) {
+    for(Map.Entry<String, String> entry : conf.entrySet()) {
+      aconf.set(entry.getKey(), entry.getValue()) ;
+    }
   }
 }

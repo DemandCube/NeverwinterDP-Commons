@@ -41,6 +41,6 @@ public class AppMonitor {
   public void onAllocatedContainer(Container container, List<String> commands) {
     allocatedContainerCount.incrementAndGet() ;
     ContainerInfo cmonitor = new ContainerInfo(container, commands) ;
-    containerInfos.put(cmonitor.getContainerId(), cmonitor) ;
+    containerInfos.put(cmonitor.getContainerId().getId(), cmonitor) ;
   }
 }

@@ -17,7 +17,8 @@ import org.junit.Assert;
 public class AbstractMiniClusterUnitTest {
   
   protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
-    return createMiniYARNCluster(new YarnConfiguration(), numOfNodeManagers) ;
+    YarnConfiguration conf = new YarnConfiguration() ;
+    return createMiniYARNCluster(conf, numOfNodeManagers) ;
   }
   
   protected MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
