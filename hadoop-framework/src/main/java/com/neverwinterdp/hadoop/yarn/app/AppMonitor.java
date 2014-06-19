@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,13 +29,11 @@ public class AppMonitor {
   public void onCompletedContainer(ContainerStatus status) {
     ContainerInfo cmonitor = containerInfos.get(status.getContainerId().getId()) ;
     completedContainerCount.incrementAndGet();
-    cmonitor.setCompleteStatus("SUCCESS");
   }
   
   public void onFailedContainer(ContainerStatus status) {
     ContainerInfo cmonitor = containerInfos.get(status.getContainerId().getId()) ;
     failedContainerCount.incrementAndGet();
-    cmonitor.setCompleteStatus("ERROR");
   }
   
   public void onAllocatedContainer(Container container, List<String> commands) {

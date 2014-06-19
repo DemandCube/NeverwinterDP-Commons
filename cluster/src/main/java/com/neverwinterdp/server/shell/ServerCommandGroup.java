@@ -26,6 +26,7 @@ public class ServerCommandGroup extends CommandGroup {
     add("exit", Exit.class);
     add("registration", Registration.class);
     add("metric", Metric.class);
+    add("metric-clear", MetricClear.class);
   }
   
   static public class Ping extends Command {
@@ -117,6 +118,23 @@ public class ServerCommandGroup extends CommandGroup {
         }
       } else {
         
+      }
+    }
+  }
+  
+  static public class MetricClear extends Command {
+    @ParametersDelegate
+    MemberSelector memberSelector = new MemberSelector();
+    
+    @Parameter(names = {"--name-exp"}, description = "filter by regrex syntax")
+    String nameExp = "*" ;
+    
+    public void execute(ShellContext ctx) {
+      ServerCommandResult<Integer>[] results = 
+          ctx.getCluster().server.clearMetric(memberSelector, nameExp) ;
+      for(ServerCommandResult<Integer> sel : results) {
+        Integer match = sel.getResult() ;
+        ctx.console().println("Clear " + match + " on " + sel.getFromMember()) ;
       }
     }
   }

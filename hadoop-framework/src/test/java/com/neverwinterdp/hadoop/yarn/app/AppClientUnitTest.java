@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -8,8 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
+import com.neverwinterdp.hadoop.yarn.app.AppClient;
+import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 
 public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
+  static {
+    System.setProperty("java.net.preferIPv4Stack", "true") ;
+  }
+  
   MiniYARNCluster miniYarnCluster ;
 
   @Before
@@ -29,7 +35,7 @@ public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
     String[] args = { 
       "--mini-cluster-env",
       "--app-name", "Hello Yarn",
-      "--container-manager", "com.neverwinterdp.hadoop.yarn.hello.HelloAppContainerManger",
+      "--container-manager", "com.neverwinterdp.hadoop.yarn.app.hello.HelloAppContainerManger",
       "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
     } ;
     AppClient appClient = new AppClient() ;

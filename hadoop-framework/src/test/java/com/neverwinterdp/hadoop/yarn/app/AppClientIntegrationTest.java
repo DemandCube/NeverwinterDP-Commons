@@ -1,13 +1,16 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import org.junit.Test;
+
+import com.neverwinterdp.hadoop.yarn.app.AppClient;
+import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
 
 public class AppClientIntegrationTest  {
 
   @Test
-  public void testAppClient() throws Exception {
+  public void testIntegrationAppClient() throws Exception {
     String[] args = { 
-        "--app-home", "/tmp/neverwinterdp/libs/",
+        "--app-home", "/tmp/app/hadoop-framework",
         "--upload-app", "build/libs" ,
         "--app-name", "Hello Yarn",
         "--container-manager", "com.neverwinterdp.hadoop.yarn.hello.HelloAppContainerManger",

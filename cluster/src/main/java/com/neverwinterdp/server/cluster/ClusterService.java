@@ -1,10 +1,13 @@
 package com.neverwinterdp.server.cluster;
 
+import java.util.Map;
+
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.server.service.ServiceRegistration;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -27,6 +30,10 @@ public interface ClusterService {
   public void updateClusterRegistration() ;
   
   public void addClusterListener(ClusterListener<Server> listener) ;
+  
+  public Map<ClusterMember, ServiceRegistration> waitForService(String module, String serviceId, long timeout) throws InterruptedException ;
+  
+  public Map<ClusterMember, ServiceRegistration> waitForService(Class<?> type, long timeout) throws InterruptedException ;
   
   /**
    * This method is designed to run certain command on a service such start, stop, ping to check 

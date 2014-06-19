@@ -1,5 +1,6 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.Container;
@@ -12,7 +13,8 @@ public class ContainerInfo {
   private int    memory ;
   private int    cores ;
   private List<String> commands ;
-  private String completeStatus ;
+  private ContainerProgressStatus progressStatus ;
+  private InetSocketAddress rpcAddress ;
   
   public ContainerInfo() {}
       
@@ -22,6 +24,7 @@ public class ContainerInfo {
     this.memory = container.getResource().getMemory() ;
     this.cores = container.getResource().getVirtualCores() ;
     this.commands = commands ;
+    this.progressStatus = new ContainerProgressStatus(ContainerState.ALLOCATED) ;
   }
 
   public ContainerId getContainerId() {
@@ -64,11 +67,17 @@ public class ContainerInfo {
     this.commands = commands;
   }
 
-  public String getCompleteStatus() {
-    return completeStatus;
+  public ContainerProgressStatus getProgressStatus() {
+    return progressStatus;
   }
 
-  public void setCompleteStatus(String completeStatus) {
-    this.completeStatus = completeStatus;
+  public void setProgressStatus(ContainerProgressStatus progressStatus) {
+    this.progressStatus = progressStatus;
+  }
+  
+  public InetSocketAddress getRpcAddress() { return this.rpcAddress ; }
+  
+  public void setRpcAddress(InetSocketAddress rpcAddress) {
+    this.rpcAddress = rpcAddress ;
   }
 }

@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.hello;
+package com.neverwinterdp.hadoop.yarn.app.hello;
 
 import java.io.IOException;
 
@@ -9,12 +9,14 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.AppContainerManager;
-import com.neverwinterdp.hadoop.yarn.AppMaster;
-import com.neverwinterdp.hadoop.yarn.AppMonitor;
-import com.neverwinterdp.hadoop.yarn.ContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
+import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
+import com.neverwinterdp.hadoop.yarn.app.AppMaster;
+import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
+import com.neverwinterdp.hadoop.yarn.app.ContainerInfo;
+import com.neverwinterdp.util.text.TabularPrinter;
 
-public class HelloAppContainerManger implements AppContainerManager {
+public class HelloAppContainerManger implements ContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(HelloAppContainerManger.class);
   
   public void onInit(AppMaster appMaster) {
@@ -28,7 +30,10 @@ public class HelloAppContainerManger implements AppContainerManager {
 
   public void onAllocatedContainer(AppMaster master, Container container) {
     try {
-      master.startContainer(container, "java com.neverwinterdp.hadoop.yarn.hello.HelloWorker") ;
+      AppContainerConfig config = new AppContainerConfig(master, container) ;
+      config.setWorker(HelloWorker.class) ;
+      master.startContainer(container, config.toCommand()) ;
+      LOGGER.info("Start container with command: " + config.toCommand());
     } catch (YarnException e) {
       LOGGER.error("Error on start a container", e);
     } catch (IOException e) {
@@ -44,7 +49,7 @@ public class HelloAppContainerManger implements AppContainerManager {
 
   public void waitForComplete(AppMaster appMaster) {
     try {
-      Thread.sleep(5000);
+      Thread.sleep(10000);
     } catch (InterruptedException ex) {
     }
   }
@@ -57,10 +62,15 @@ public class HelloAppContainerManger implements AppContainerManager {
     LOGGER.info("Start onExit(AppMaster appMaster)");
     AppMonitor appMonitor = appMaster.getAppMonitor() ;
     ContainerInfo[] info = appMonitor.getContainerInfos() ;
+    int[] colWidth = {20, 20, 20, 20} ;
+    TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
+    printer.header("Id", "Progress", "Error", "State");
     for(ContainerInfo sel : info) {
-      if(!"SUCCESS".equals(sel.getCompleteStatus())) {
-        LOGGER.error("failed on container with command " + sel.getCommands());
-      }
+      printer.row(
+        sel.getContainerId().getId(), 
+        sel.getProgressStatus().getProgress(),
+        sel.getProgressStatus().getError() != null,
+        sel.getProgressStatus().getContainerState());
     }
     LOGGER.info("Finish onExit(AppMaster appMaster)");
   }

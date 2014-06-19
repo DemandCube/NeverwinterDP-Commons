@@ -69,12 +69,17 @@ abstract public class ServiceModule extends AbstractModule {
   
   static public class PropertiesSet extends HashMap<String, Map<String, String>> {
     public void add(String key, String value) {
+      put("", key, value) ;
       String mapName = "" ;
       int separatorPos = key.indexOf(":") ;
       if(separatorPos > 0) {
         mapName = key.substring(0, separatorPos) ;
         key = key.substring(separatorPos + 1);
+        put(mapName, key, value) ;
       }
+    }
+    
+    void put(String mapName, String key, String value) {
       Map<String, String> map = get(mapName) ;
       if(map == null) {
         map = new HashMap<String, String>() ;

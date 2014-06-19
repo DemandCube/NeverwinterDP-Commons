@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
+import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
@@ -27,9 +28,12 @@ public class ServerModule extends AbstractModule {
   @Override
   protected void configure() {
     Names.bindProperties(binder(), properties) ;
-    
     HazelcastClusterService clusterService = new HazelcastClusterService() ;
-    String hostId = clusterService.getMember().toString() ;
+    ClusterMember member = clusterService.getMember();
+    properties.put("cluster.ip-address", member.getIpAddress()) ;
+    properties.put("cluster.listen-port", Integer.toString(member.getPort())) ;
+    String hostId = member.toString() ;
+
     bind(ClusterService.class).toInstance(clusterService);
     
     ApplicationMonitor appMonitor = new ApplicationMonitor(hostId, "server") ;

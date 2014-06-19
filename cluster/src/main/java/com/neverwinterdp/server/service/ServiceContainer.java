@@ -60,8 +60,10 @@ public class ServiceContainer {
     for (Binding<Service> sel : serviceBindings) {
       Service instance = container.getInstance(sel.getKey());
       Named named = (Named) sel.getKey().getAnnotation();
-      instance.getServiceRegistration().setModule(moduleStatus.getModuleName());
-      instance.getServiceRegistration().setServiceId(named.value());
+      ServiceRegistration sReg = instance.getServiceRegistration() ;
+      sReg.setModule(moduleStatus.getModuleName());
+      sReg.setServiceId(named.value());
+      sReg.setClassName(instance.getClass().getName());
     }
     
     Map<Key<?>, Binding<?>> bindings = container.getBindings() ;

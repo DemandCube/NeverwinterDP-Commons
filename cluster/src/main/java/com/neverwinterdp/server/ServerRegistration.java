@@ -50,4 +50,12 @@ public class ServerRegistration implements Serializable {
     }
     return null ;
   }
+  
+  public ServiceRegistration findByClass(Class<?> type) {
+    for(int i = 0; i < services.size(); i++) {
+      ServiceRegistration registration = services.get(i) ;
+      if(type.getName().equals(registration.getClassName())) return registration ;
+    }
+    return null ;
+  }
 }

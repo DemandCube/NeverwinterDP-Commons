@@ -16,12 +16,12 @@ import org.junit.Assert;
 
 public class AbstractMiniClusterUnitTest {
   
-  protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
+  static protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
     YarnConfiguration conf = new YarnConfiguration() ;
     return createMiniYARNCluster(conf, numOfNodeManagers) ;
   }
   
-  protected MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
+  static protected MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
     yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 64);
     yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class, ResourceScheduler.class);
     MiniYARNCluster miniYarnCluster = new MiniYARNCluster("yarn", numOfNodeManagers, 1, 1);
@@ -31,11 +31,11 @@ public class AbstractMiniClusterUnitTest {
     return miniYarnCluster ;
   }
   
-  protected MiniDFSCluster createMiniDFSCluster(String dir, int numDataNodes) throws Exception {
+  static protected MiniDFSCluster createMiniDFSCluster(String dir, int numDataNodes) throws Exception {
     return createMiniDFSCluster(new Configuration(), dir, numDataNodes) ;
   }
   
-  protected MiniDFSCluster createMiniDFSCluster(Configuration conf, String dir, int numDataNodes) throws Exception {
+  static protected MiniDFSCluster createMiniDFSCluster(Configuration conf, String dir, int numDataNodes) throws Exception {
     File baseDir = new File(dir).getAbsoluteFile();
     FileUtil.fullyDelete(baseDir);
     conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());

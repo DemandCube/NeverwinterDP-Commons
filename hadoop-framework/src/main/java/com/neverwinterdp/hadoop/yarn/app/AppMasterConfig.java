@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import org.apache.hadoop.yarn.api.ApplicationConstants;
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 
-public class AppOptions {
+public class AppMasterConfig {
   @Parameter(names = "--mini-cluster-env", description = "Setup the mini cluster env for testing")
   boolean miniClusterEnv = false ;
   
@@ -44,12 +44,12 @@ public class AppOptions {
   public String containerManager   ;
   
   @DynamicParameter(names = "--conf:", description = "The yarn configuration overrided properties")
-  Map<String, String> conf = new HashMap<String, String>()  ;
+  public Map<String, String> conf = new HashMap<String, String>()  ;
   
   public List<String> buildAppMasterCommands() {
     List<String> holder = new ArrayList<String>() ;
     StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(AppMaster.class.getName()) ;
+    b.append("/usr/bin/java ").append(AppMaster.class.getName()) ;
     b.append(" --container-manager " + containerManager);
     for(Map.Entry<String, String> entry : conf.entrySet()) {
       b.append(" --conf:").append(entry.getKey()).append("=").append(entry.getValue()) ;

@@ -9,11 +9,13 @@ import java.io.Serializable;
 public class ServiceRegistration implements Serializable {
   private String       module ;
   private String       serviceId ;
+  private String       className ;
   private String       name;
   private float        version;
   private String       description;
   private ServiceState state = ServiceState.INIT;
-
+  private Object       serviceInfo ;
+  
   public ServiceRegistration() {
   }
 
@@ -33,6 +35,9 @@ public class ServiceRegistration implements Serializable {
     this.name = name;
   }
 
+  public String getClassName() { return this.className ; }
+  public void   setClassName(String className) { this.className = className ; }
+  
   public float getVersion() {
     return version;
   }
@@ -57,4 +62,8 @@ public class ServiceRegistration implements Serializable {
     this.state = state;
   }
 
+  public <T> T getServiceInfo() { return (T) serviceInfo ; }
+  public void setServiceInfo(Object serviceInfo) {
+    this.serviceInfo = serviceInfo ;
+  }
 }

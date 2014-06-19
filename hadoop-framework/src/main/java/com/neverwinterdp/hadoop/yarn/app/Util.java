@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import java.io.File;
 import java.util.Map;

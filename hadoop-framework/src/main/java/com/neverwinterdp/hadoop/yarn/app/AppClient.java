@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn;
+package com.neverwinterdp.hadoop.yarn.app;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class AppClient  {
   
   public AppClientMonitor run(String[] args, Configuration conf) throws Exception {
     try {
-      AppOptions appOpts = new AppOptions() ;
+      AppMasterConfig appOpts = new AppMasterConfig() ;
       new JCommander(appOpts, args) ;
       appOpts.overrideConfiguration(conf);
       
@@ -84,7 +84,7 @@ public class AppClient  {
     }
   }
   
-  public void uploadApp(AppOptions appOpts) throws Exception {
+  public void uploadApp(AppMasterConfig appOpts) throws Exception {
     if(appOpts.uploadApp == null) return ;
     HdfsConfiguration hdfsConf = new HdfsConfiguration() ;
     appOpts.overrideConfiguration(hdfsConf);
@@ -97,7 +97,7 @@ public class AppClient  {
     dfs.copyFromLocalFile(false, true, new Path(appOpts.uploadApp), appHomePath);
   }
   
-  Map<String, LocalResource> createLocalResources(Configuration conf, AppOptions opts) throws Exception {
+  Map<String, LocalResource> createLocalResources(Configuration conf, AppMasterConfig opts) throws Exception {
     Map<String, LocalResource> libs = new HashMap<String, LocalResource>() ;
     FileSystem fs = FileSystem.get(conf) ;
     RemoteIterator<LocatedFileStatus> itr = fs.listFiles(new Path(opts.appHome), true) ;

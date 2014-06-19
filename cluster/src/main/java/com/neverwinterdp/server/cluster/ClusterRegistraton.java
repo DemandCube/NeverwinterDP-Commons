@@ -18,10 +18,21 @@ abstract public class ClusterRegistraton {
   abstract public void remove(ClusterMember member) ;
   abstract public int  getNumberOfServers() ;
   
-  public Map<ClusterMember, ServiceRegistration> findByServiceId(String module, String id) {
+  public Map<ClusterMember, ServiceRegistration> findByServiceId(String module, String serviceId) {
     Map<ClusterMember, ServiceRegistration> map = new HashMap<ClusterMember, ServiceRegistration>() ;
     for(ServerRegistration sel : getServerRegistration()) {
-      ServiceRegistration registration = sel.findByServiceId(module, id) ;
+      ServiceRegistration registration = sel.findByServiceId(module, serviceId) ;
+      if(registration != null) {
+        map.put(sel.getClusterMember(), registration) ;
+      }
+    }
+    return map ;
+  }
+  
+  public Map<ClusterMember, ServiceRegistration> findByClass(Class<?> type) {
+    Map<ClusterMember, ServiceRegistration> map = new HashMap<ClusterMember, ServiceRegistration>() ;
+    for(ServerRegistration sel : getServerRegistration()) {
+      ServiceRegistration registration = sel.findByClass(type) ;
       if(registration != null) {
         map.put(sel.getClusterMember(), registration) ;
       }
