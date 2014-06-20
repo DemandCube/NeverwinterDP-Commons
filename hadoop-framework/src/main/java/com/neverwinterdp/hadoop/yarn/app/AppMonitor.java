@@ -16,6 +16,22 @@ public class AppMonitor {
   private AtomicInteger requestedContainerCount = new AtomicInteger() ;
   private Map<Integer, ContainerInfo> containerInfos = new LinkedHashMap<Integer, ContainerInfo>() ;
   
+  public AtomicInteger getCompletedContainerCount() {
+    return completedContainerCount;
+  }
+
+  public AtomicInteger getAllocatedContainerCount() {
+    return allocatedContainerCount;
+  }
+
+  public AtomicInteger getFailedContainerCount() {
+    return failedContainerCount;
+  }
+
+  public AtomicInteger getRequestedContainerCount() {
+    return requestedContainerCount;
+  }
+
   public ContainerInfo getContainerInfo(int id) { return containerInfos.get(id) ; }
   
   public ContainerInfo[] getContainerInfos() {

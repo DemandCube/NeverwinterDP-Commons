@@ -121,12 +121,9 @@ public class AppMaster {
 
   public ContainerRequest createContainerRequest(int priority, int numOfCores, int memory) {
     //Priority for worker containers - priorities are intra-application
-    Priority containerPriority = Records.newRecord(Priority.class);
-    containerPriority.setPriority(priority);
+    Priority containerPriority = Priority.newInstance(priority);
     // Resource requirements for worker containers
-    Resource resource = Records.newRecord(Resource.class);
-    resource.setMemory(memory);
-     resource.setVirtualCores(numOfCores);
+    Resource resource = Resource.newInstance(memory, numOfCores);
     ContainerRequest containerReq = 
       new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
     return containerReq;
@@ -187,11 +184,11 @@ public class AppMaster {
         int exitStatus = status.getExitStatus();
         ContainerInfo containerInfo = appMonitor.getContainerInfo(status.getContainerId().getId()) ;
         if (exitStatus != ContainerExitStatus.SUCCESS) {
-          containerManager.onFailedContainer(AppMaster.this, status, containerInfo);
           appMonitor.onFailedContainer(status);
+          containerManager.onFailedContainer(AppMaster.this, status, containerInfo);
         } else {
-          containerManager.onCompleteContainer(AppMaster.this, status, containerInfo);
           appMonitor.onCompletedContainer(status);
+          containerManager.onCompleteContainer(AppMaster.this, status, containerInfo);
         }
       }
     }

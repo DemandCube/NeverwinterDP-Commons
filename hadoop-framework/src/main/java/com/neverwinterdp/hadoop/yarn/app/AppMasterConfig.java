@@ -43,13 +43,17 @@ public class AppMasterConfig {
   @Parameter(names = "--container-manager", description = "The application container manager class")
   public String containerManager   ;
   
+  @Parameter(names = "--max-memory", description = "Maximum amount of memory allocate to jvm")
+  public int maxMemory = 128 ;
+  
   @DynamicParameter(names = "--conf:", description = "The yarn configuration overrided properties")
   public Map<String, String> conf = new HashMap<String, String>()  ;
   
   public List<String> buildAppMasterCommands() {
     List<String> holder = new ArrayList<String>() ;
     StringBuilder b = new StringBuilder() ;
-    b.append("/usr/bin/java ").append(AppMaster.class.getName()) ;
+    b.append("java ").append(" -Xmx" + maxMemory + "m ").
+      append(AppMaster.class.getName()) ;
     b.append(" --container-manager " + containerManager);
     for(Map.Entry<String, String> entry : conf.entrySet()) {
       b.append(" --conf:").append(entry.getKey()).append("=").append(entry.getValue()) ;

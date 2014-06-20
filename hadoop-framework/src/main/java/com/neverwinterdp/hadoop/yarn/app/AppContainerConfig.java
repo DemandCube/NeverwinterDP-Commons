@@ -22,6 +22,9 @@ public class AppContainerConfig {
   @Parameter(names = "--worker", required=true, description = "App worker")
   public String worker ;
   
+  @Parameter(names = "--max-memory", description = "Maximum amount of memory allocate to jvm")
+  public int maxMemory = 128 ;
+  
   @DynamicParameter(names = "--conf:", description = "The yarn configuration overrided properties")
   public Map<String, String> conf = new HashMap<String, String>()  ;
 
@@ -39,7 +42,8 @@ public class AppContainerConfig {
   
   public String toCommand() {
     StringBuilder b = new StringBuilder() ;
-    b.append("/usr/bin/java ").append(AppContainer.class.getName()) ;
+    b.append("java ").append(" -Xmx" + maxMemory + "m ").
+      append(AppContainer.class.getName()) ;
     b.append(" --container-id ").append(this.containerId) ;
     b.append(" --app-master-rpc-ip ").append(this.appMasterRpcIpAddress) ;
     b.append(" --app-master-rpc-port ").append(this.appMasterRpcPort) ;
