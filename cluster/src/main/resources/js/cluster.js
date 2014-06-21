@@ -90,7 +90,11 @@ function ModuleRegistrationPrinter(printer, member, moduleRegistrations) {
       { field: 'runningStatus', header: 'Running Status'} 
     ];
     this.printer.h2("Member: " + this.member.ipAddress + ":" + this.member.port);
-    this.printer.printTable(this.moduleRegistrations,  fconfig);
+    if(this.moduleRegistrations == null) {
+      this.printer.println(JSON.stringify("There is an error, the registration list is null")) ;
+    } else {
+      this.printer.printTable(this.moduleRegistrations,  fconfig);
+    }
   };
 }
 

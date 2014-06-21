@@ -17,6 +17,9 @@ public class MemberSelector implements Serializable {
   @Parameter(names = {"--member-role"}, description = "Select the member by role")
   public String memberRole ;
   
+  @Parameter(names = {"--member-name"}, description = "Select the member by host:port")
+  public String memberName ;
+  
   @Parameter(names = {"--timeout"}, description = "Command timeout")
   public long timeout = 10000 ;
   
@@ -26,12 +29,15 @@ public class MemberSelector implements Serializable {
   public MemberSelector(CommandParams params) {
     this.member = params.getString("member") ;
     this.memberRole = params.getString("member-role") ;
+    this.memberName = params.getString("member-name") ;
     this.timeout = params.getLong("timeout", 10000l) ;
   }
   
   public ClusterMember[] getMembers(ClusterClient clusterClient) {
     if(member != null) {
       return new ClusterMember[] { clusterClient.getClusterMember(member)} ;
+    } else if(memberName != null) {
+      return clusterClient.getClusterRegistration().findClusterMemberByName(memberName) ;
     } else if(memberRole != null) {
       return clusterClient.getClusterRegistration().findClusterMemberByRole(memberRole) ;
     }

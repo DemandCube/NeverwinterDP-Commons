@@ -12,8 +12,8 @@ dependencies {
   compile project(':utils')
   compile project(':api')
 
-  compile group: 'com.hazelcast', name: 'hazelcast', version: '3.2.1'
-  compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.2.1'
+  compile group: 'com.hazelcast', name: 'hazelcast', version: '3.2.3'
+  compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.2.3'
 
   compile group: 'com.google.inject', name: 'guice', version: '3.0'
 

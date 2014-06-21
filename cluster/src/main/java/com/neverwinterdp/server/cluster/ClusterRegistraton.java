@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.service.ServiceRegistration;
@@ -46,6 +47,17 @@ abstract public class ClusterRegistraton {
       if(sel.getRoles().contains(role)) {
         holder.add(sel.getClusterMember()) ;
       }
+    }
+    return holder.toArray(new ClusterMember[holder.size()]);
+  }
+  
+  public ClusterMember[] findClusterMemberByName(String name) {
+    List<ClusterMember> holder = new ArrayList<ClusterMember>() ;
+    name = name.replace("*", ".*") ;
+    Pattern pattern = Pattern.compile(name) ;
+    for(ServerRegistration sel : getServerRegistration()) {
+      String serverName = sel.getServerName() ;
+      if(pattern.matcher(serverName).matches()) holder.add(sel.getClusterMember()) ;
     }
     return holder.toArray(new ClusterMember[holder.size()]);
   }
