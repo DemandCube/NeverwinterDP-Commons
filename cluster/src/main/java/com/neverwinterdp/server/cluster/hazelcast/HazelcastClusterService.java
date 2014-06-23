@@ -30,8 +30,9 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
+import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -45,7 +46,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   private ClusterMember member ;
   private ClusterRegistraton clusterRegistration ;
   private Server server ;
-  private MonitorRegistry registry ;
+  private ApplicationMonitor appMonitor ;
   private List<ClusterListener<Server>> listeners = new ArrayList<ClusterListener<Server>>() ;
   private ITopic<ClusterEvent> clusterEventTopic ;
   private String               clusterEventTopicListenerId ;
@@ -60,8 +61,8 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
     }
   }
   
-  public void setMonitorRegistry(MonitorRegistry registry) {
-    this.registry = registry ;
+  public void setApplicationMonitor(ApplicationMonitor appMonitor) {
+    this.appMonitor = appMonitor ;
   }
  
   public void setLoggerFactory(LoggerFactory factory) {
@@ -93,6 +94,28 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   public void updateClusterRegistration() {
     clusterRegistration.update(server.getServerRegistration());
+  }
+  
+  public Map<ClusterMember, ServiceRegistration> waitForService(String module, String serviceId, long timeout) throws InterruptedException {
+    ClusterRegistraton registration = getClusterRegistration() ;
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      Map<ClusterMember, ServiceRegistration> map = registration.findByServiceId(module, serviceId) ;
+      if(map.size() > 0) return map ;
+      Thread.sleep(200);
+    }
+    return null ;
+  }
+  
+  public Map<ClusterMember, ServiceRegistration> waitForService(Class<?> type, long timeout) throws InterruptedException {
+    ClusterRegistraton registration = getClusterRegistration() ;
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      Map<ClusterMember, ServiceRegistration> map = registration.findByClass(type) ;
+      if(map.size() > 0) return map ;
+      Thread.sleep(200);
+    }
+    return null ;
   }
   
   public void addClusterListener(ClusterListener<Server> listener) {
@@ -133,7 +156,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   public void onMessage(Message<ClusterEvent> message) {
     long start = System.currentTimeMillis() ;
     ClusterEvent event = message.getMessageObject() ;
-    Timer.Context timeCtx = registry.timer("event", event.getType().toString()).time() ;
+    Timer.Context timeCtx = appMonitor.timer("event", event.getType().toString()).time() ;
     logger.info("Start onMessage(...), event = " + event.getType());
     for(int i = 0; i < listeners.size(); i++) {
       ClusterListener<Server> listener = listeners.get(i) ;

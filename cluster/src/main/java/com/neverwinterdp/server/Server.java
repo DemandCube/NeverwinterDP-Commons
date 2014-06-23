@@ -21,7 +21,7 @@ import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -52,7 +52,7 @@ public class Server {
   private ServerState      serverState  = null;
   
   @Inject
-  private MonitorRegistry monitorRegistry ;
+  private ApplicationMonitor appMonitor ;
   
   /**
    * The configuration for the server such name, group, version, description,
@@ -98,7 +98,7 @@ public class Server {
     return this.runtimeEnvironment ; 
   }
 
-  public MonitorRegistry getMonitorRegistry() { return this.monitorRegistry ; }
+  public ApplicationMonitor getApplicationMonitor() { return this.appMonitor ; }
   
   /**
    * This lifecycle method be called after the configuration is set. The method
@@ -206,6 +206,11 @@ public class Server {
     }
   }
   
+  public void dumpInfo(Appendable out) {
+    config.dumpInfo(out);
+    runtimeEnvironment.dumpInfo(out);
+  }
+  
   static public class Options {
     @DynamicParameter(names = "-P", description = "Module properties")
     Map<String, String> properties = new HashMap<String, String>();
@@ -222,12 +227,16 @@ public class Server {
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
+    server.dumpInfo(System.out);
     return server ;
   }
   
   static public void main(String[] args) throws InterruptedException {
-    Server server = create(args) ;
-    Thread.currentThread().setDaemon(true);
+    for(String sel : args) {
+      System.out.println("arg = " + sel);
+    }
+    final Server server = create(args) ;
     Thread.currentThread().join() ;
+    System.out.println("exit Server(Update++--++--++) !!!!");
   }
 }

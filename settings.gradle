@@ -1,3 +1,4 @@
 include 'utils'
 include 'api'
 include 'cluster'
+include 'hadoop-framework'

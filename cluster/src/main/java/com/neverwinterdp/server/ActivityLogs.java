@@ -7,7 +7,7 @@ import java.util.List;
 import com.neverwinterdp.server.ActivityLog.Type;
 
 /**
- * @author Tuan Nguyen
+ * @author Than Nguyen
  * @email  tuan08@gmail.com
  * 
  * TODO: remove this class and the relation, replace by the MonitorRegistry

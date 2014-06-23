@@ -3,13 +3,12 @@ package com.neverwinterdp.server.shell;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.neverwinterdp.server.cluster.ClusterClient;
-import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
+import com.neverwinterdp.server.client.Cluster;
 
 public class ShellContext {
   private Map<String, Object> variables = new HashMap<String, Object>() ;
   private Console console ;
-  private ClusterClient client ;
+  private Cluster cluster ;
   private ExecuteContext currentExecuteContext ;
   private ExecuteContext lastExecuteContext ;
   
@@ -21,15 +20,15 @@ public class ShellContext {
   
   public Console console() { return this.console ; }
   
-  public ClusterClient getClusterClient() { return this.client ; }
+  public Cluster getCluster() { return this.cluster ; }
   
   public ExecuteContext getExecuteContext() { return this.currentExecuteContext ; }
   
   public ExecuteContext getLastExecuteContext() { return this.lastExecuteContext ; }
   
   public void connect(String ... members) {
-    if(client != null) client.shutdown();
-    client = new HazelcastClusterClient(members) ;
+    if(cluster == null) cluster = new Cluster(members) ;
+    else cluster.connect(members);
   }
   
   public void onStartCommand(CommandGroup group, Command command, String[] args) {
@@ -43,6 +42,6 @@ public class ShellContext {
   }
   
   public void close() {
-    if(client != null) client.shutdown();
+    if(cluster != null) cluster.close(); 
   }
 } 

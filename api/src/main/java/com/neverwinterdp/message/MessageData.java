@@ -2,9 +2,8 @@ package com.neverwinterdp.message;
 
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.type.TypeReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.neverwinterdp.util.JSONSerializer;
 
 /**

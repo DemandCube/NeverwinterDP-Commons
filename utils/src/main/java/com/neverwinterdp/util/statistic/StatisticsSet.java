@@ -171,29 +171,29 @@ public class StatisticsSet implements Serializable {
   public List<Map.Entry<String, Statistic>> sort(TreeMap<String, Statistic> map, String order) {
     List<Map.Entry<String, Statistic>> holder = new ArrayList<Map.Entry<String, Statistic>>();
     holder.addAll(map.entrySet());
-    if ("desc".equals(order)) {
-      Collections.sort(holder, new EntryComparator(-1));
-    } else if ("asc".equals(order)) {
-      Collections.sort(holder, new EntryComparator(1));
-    }
+//    if ("desc".equals(order)) {
+//      Collections.sort(holder, new EntryComparator(-1));
+//    } else if ("asc".equals(order)) {
+//      Collections.sort(holder, new EntryComparator(1));
+//    }
     return holder;
   }
 
-  static class EntryComparator implements Comparator<Map.Entry<String, Statistic>> {
-    private int direction;
-
-    EntryComparator(int direction) {
-      this.direction = direction;
-    }
-
-    public int compare(Entry<String, Statistic> e0, Entry<String, Statistic> e1) {
-      long val = e0.getValue().getFrequency() - e1.getValue().getFrequency();
-      int ret = 0;
-      if (val > 1) ret = 1;
-      else if (val < 0) ret = -1;
-      return ret * direction;
-    }
-  };
+//  static class EntryComparator implements Comparator<Map.Entry<String, Statistic>> {
+//    private int direction;
+//
+//    EntryComparator(int direction) {
+//      this.direction = direction;
+//    }
+//
+//    public int compare(Entry<String, Statistic> e0, Entry<String, Statistic> e1) {
+//      long val = e0.getValue().getFrequency() - e1.getValue().getFrequency();
+//      int ret = 0;
+//      if (val > 1) ret = 1;
+//      else if (val < 0) ret = -1;
+//      return ret * direction;
+//    }
+//  };
 
   static public void main(String[] args) {
     StatisticsSet map = new StatisticsSet();

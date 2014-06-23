@@ -12,6 +12,7 @@ import com.neverwinterdp.server.service.ServiceRegistration;
  * @email  tuan08@gmail.com
  */
 public class ServerRegistration implements Serializable {
+  private String   serverName ;
   private ClusterMember             clusterMember;
   private Set<String> roles = new HashSet<String>() ;
   private ServerState               serverState;
@@ -22,6 +23,7 @@ public class ServerRegistration implements Serializable {
 
   public ServerRegistration(ServerConfig config, ClusterMember member, 
                             ServerState state, List<ServiceRegistration> services) {
+    this.serverName = config.getServerName() ;
     this.clusterMember = member ;
     this.serverState = state;
     this.services = services;
@@ -30,6 +32,8 @@ public class ServerRegistration implements Serializable {
     }
   }
 
+  public String getServerName() { return this.serverName ; }
+  
   public ClusterMember getClusterMember() { return this.clusterMember ; }
   
   public Set<String> getRoles() { return roles ; }
@@ -42,10 +46,19 @@ public class ServerRegistration implements Serializable {
     return services;
   }
   
-  public ServiceRegistration findByServiceId(String id) {
+  public ServiceRegistration findByServiceId(String module, String id) {
     for(int i = 0; i < services.size(); i++) {
       ServiceRegistration registration = services.get(i) ;
-      if(id.equals(registration.getServiceId())) return registration ;
+      if(module.equals(registration.getModule()) && 
+        id.equals(registration.getServiceId())) return registration ;
+    }
+    return null ;
+  }
+  
+  public ServiceRegistration findByClass(Class<?> type) {
+    for(int i = 0; i < services.size(); i++) {
+      ServiceRegistration registration = services.get(i) ;
+      if(type.getName().equals(registration.getClassName())) return registration ;
     }
     return null ;
   }

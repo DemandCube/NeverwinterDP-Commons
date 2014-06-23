@@ -60,8 +60,11 @@ public class Shell {
     }
   }
   
+  public void executeJSScript(String script) {
+  }
+  
   public void close() {
-    
+    context.close();
   }
   
   private String processVariables(String line) {
@@ -93,6 +96,8 @@ public class Shell {
     String[] line = StringUtil.splitAsArray(script, '\n');
     StringBuilder b = new StringBuilder() ;
     for(String selLine : line) {
+      selLine = selLine.trim() ;
+      if(selLine.length() == 0) continue ;
       if(selLine.startsWith("#")) continue ;
       boolean endLine = !selLine.endsWith("\\") ;
       if(!endLine) {

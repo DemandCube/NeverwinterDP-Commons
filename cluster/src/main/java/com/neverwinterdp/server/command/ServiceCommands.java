@@ -5,6 +5,8 @@ import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.BeanInspector;
+import com.neverwinterdp.util.monitor.ComponentMonitorable;
+import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -32,6 +34,15 @@ public class ServiceCommands {
     }
   }
   
+  static public class GetServiceMonitor extends ServiceCommand<ComponentMonitorSnapshot> {
+    public ComponentMonitorSnapshot execute(Server server, Service service) throws Exception {
+      if(service instanceof ComponentMonitorable) {
+        return ((ComponentMonitorable)service).getComponentMonitor().getComponentMonitorSnapshot() ;
+      }
+      return null ;
+    }
+  }
+  
   static public class MethodCall<T> extends ServiceCommand<T> {
     private String methodName ;
     private Object[] args ;
@@ -49,7 +60,7 @@ public class ServiceCommands {
     }
     
     public String getActivityLogName() { 
-      return getTargetService().getServiceId() + "/"  + methodName; 
+      return getTargetServiceId() + "/"  + methodName; 
     }
   }
 }

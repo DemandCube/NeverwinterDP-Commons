@@ -13,13 +13,10 @@ import com.neverwinterdp.server.service.ServiceRegistration;
 abstract public class ServiceCommand<T> implements Serializable {
   private long    timeout = 5000l ; 
   private boolean logEnable ;
-  private ServiceRegistration targetService ;
+  private String  targetModule ;
+  private String  targetServiceId ;
   
   public ServiceCommand() {
-  }
-  
-  public ServiceCommand(ServiceRegistration descriptor) {
-    this.targetService = descriptor ;
   }
   
   public long getTimeout() { return timeout ; }
@@ -34,9 +31,18 @@ abstract public class ServiceCommand<T> implements Serializable {
     return this ;
   }
 
-  public ServiceRegistration getTargetService() { return this.targetService ; }
+  public String getTargetModule() { return this.targetModule ; }
+  
+  public String getTargetServiceId() { return this.targetServiceId ; }
+  
   public void setTargetService(ServiceRegistration target) {
-    this.targetService = target ;
+    this.targetModule = target.getModule() ;
+    this.targetServiceId = target.getServiceId() ;
+  }
+
+  public void setTargetService(String module, String serviceId) {
+    this.targetModule = module ;
+    this.targetServiceId = serviceId ;
   }
   
   abstract public T execute(Server server, Service service)  throws Exception ;

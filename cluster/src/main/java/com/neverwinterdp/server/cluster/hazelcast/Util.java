@@ -29,6 +29,7 @@ class Util {
     ServiceCommandWrapper<T> wrapper = new ServiceCommandWrapper<T>(command) ;
     Future<T> future = exService.submitToMember(wrapper, hzmember) ;
     ServiceCommandResult<T> result = new ServiceCommandResult<T>() ;
+    result.setFromMember(member);
     try {
       T ret = future.get(command.getTimeout(), TimeUnit.MILLISECONDS) ;
       result.setResult(ret);
@@ -52,6 +53,7 @@ class Util {
       Member hzmember = hzmembers.get(i) ;
       Future<T> future = futures.get(hzmember) ;
       results[i] = new ServiceCommandResult<T>() ;
+      results[i].setFromMember(member[i]);
       try {
         T ret = future.get(waitTime, TimeUnit.MILLISECONDS) ;
         results[i].setResult(ret);
@@ -78,6 +80,7 @@ class Util {
       Member hzmember = entry.getKey() ;
       Future<T> future = entry.getValue() ;
       results[idx] = new ServiceCommandResult<T>() ;
+      results[idx].setFromMember(new ClusterMemberImpl(hzmember)) ;
       try {
         T ret = future.get(waitTime, TimeUnit.MILLISECONDS) ;
         results[idx].setResult(ret);

@@ -28,7 +28,7 @@ public class ShellUnitTest {
         "  --autostart \\"  + "\n" +
         "  -Pproperty=value -Pproperty1=value1 \\"  + "\n" +
         "  -Pcustom:property=value -Pcustom:property1=value1 \\"  + "\n" +
-        "  HelloModule"  + "\n" +
+        "  --module HelloModule"  + "\n" +
         ":echo \"this is a test\"" ;
     String[] lines = shell.parseScript(script) ;
     for(String line : lines) {
@@ -79,21 +79,23 @@ public class ShellUnitTest {
         ":echo \"===================START TEST=====================\"" + "\n" +
         ":set firstMember=" + firstMember + "\n" +
         ":connect --member $firstMember" + "\n" +
-        "module list --available" + "\n" +
+        "module list --type available" + "\n" +
         "server registration" + "\n" +
         "module install " +
         "  --member $firstMember --autostart " +
         "  -Phello:install=from-install " +
-        "  HelloModuleDisable" + "\n" +
-        "module list --installed" +"\n" +
+        "  --module  HelloModuleDisable" + "\n" +
+        "module list --type installed" +"\n" +
         ":sleep 2000" +"\n" + 
         "server registration" + "\n" +
-        "module uninstall HelloModuleDisable" + "\n" +
-        "module list --available" + "\n" +
+        "module uninstall --module HelloModuleDisable" + "\n" +
+        "module list --type available" + "\n" +
         "server registration" + "\n" +
+        "server metric --type timer --filter * " + "\n" +
         ":echo \"===================END TEST=====================\"" + "\n" +
         "" ;
     shell.executeScript(SCRIPT);
+    shell.close() ; 
     close(instance) ;
   }
   

@@ -8,21 +8,18 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.ObjectCodec;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.SerializerProvider;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.type.TypeReference;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
  * $Author: Tuan Nguyen$ 
@@ -41,7 +38,6 @@ public class JSONSerializer {
   }
 
   public void setIgnoreUnknownProperty(boolean b) {
-    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, !b);
   }
 
   public <T> byte[] toBytes(T idoc)  {
@@ -113,14 +109,6 @@ public class JSONSerializer {
     }
   }
 
-  public <T> T fromJsonNode(JsonNode node, Class<T> type) throws IOException {
-    return mapper.readValue(node , type);
-  }
-
-  public <T> T fromJsonNode(JsonNode node, TypeReference<T> typeRef) throws IOException {
-    return mapper.readValue(node , typeRef);
-  }
-  
   public JsonNode fromString(String data) throws IOException {
     StringReader reader = new StringReader(data) ;
     return mapper.readTree(reader);
@@ -142,7 +130,7 @@ public class JSONSerializer {
     public Object deserialize(JsonParser jsonParser, DeserializationContext ctx) throws IOException {
       ObjectCodec oc = jsonParser.getCodec();
       JsonNode node = oc.readTree(jsonParser);
-      String resultType = node.get("type").getTextValue();
+      String resultType = node.get("type").asText();
       try {
         Class type = Class.forName(resultType)  ;
         JsonNode rnode = node.get("data") ;
@@ -165,11 +153,8 @@ public class JSONSerializer {
   
   static public void configure(ObjectMapper mapper) {
     mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, false) ;
-    mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
-    //mapper.getSerializationConfig().withSerializationInclusion(JsonSerialize.Inclusion.NON_NULL) ;
     DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter() ;
     prettyPrinter.indentArraysWith(new DefaultPrettyPrinter.Lf2SpacesIndenter()) ;
-    mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true) ;
     mapper.setDateFormat(COMPACT_DATE_TIME) ;
   }
 }

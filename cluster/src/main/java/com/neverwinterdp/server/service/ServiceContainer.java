@@ -25,7 +25,7 @@ import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ServiceModule;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
 
 /**
  * @author Tuan Nguyen
@@ -33,7 +33,7 @@ import com.neverwinterdp.util.monitor.MonitorRegistry;
  */
 public class ServiceContainer {
   @Inject
-  private MonitorRegistry registry;
+  private ApplicationMonitor registry;
   @Inject
   private ClusterService  clusterService;
 
@@ -60,8 +60,10 @@ public class ServiceContainer {
     for (Binding<Service> sel : serviceBindings) {
       Service instance = container.getInstance(sel.getKey());
       Named named = (Named) sel.getKey().getAnnotation();
-      instance.getServiceRegistration().setModule(moduleStatus.getModuleName());
-      instance.getServiceRegistration().setServiceId(named.value());
+      ServiceRegistration sReg = instance.getServiceRegistration() ;
+      sReg.setModule(moduleStatus.getModuleName());
+      sReg.setServiceId(named.value());
+      sReg.setClassName(instance.getClass().getName());
     }
     
     Map<Key<?>, Binding<?>> bindings = container.getBindings() ;

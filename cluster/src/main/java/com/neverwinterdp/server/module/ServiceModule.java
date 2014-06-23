@@ -18,7 +18,7 @@ abstract public class ServiceModule extends AbstractModule {
   public void init(Map<String, String> overridedProperties, RuntimeEnvironment env) {
     this.overridedProperties = overridedProperties ;
     properties.put("module.data.drop", "false") ;
-    properties.put("module.data.dir",  "false") ;
+    properties.put("module.data.dir", env.getDataDir()) ;
   }
   
   final protected void configure() {
@@ -30,6 +30,11 @@ abstract public class ServiceModule extends AbstractModule {
   
   protected <T extends Service> void bind(String serviceId, Class<T> type) {
     Key<Service> key = Key.get(Service.class, Names.named(serviceId)) ;
+    bind(key).to(type).asEagerSingleton(); ;
+  }
+  
+  protected <T extends Service> void bindService(Class<T> type) {
+    Key<Service> key = Key.get(Service.class, Names.named(type.getSimpleName())) ;
     bind(key).to(type).asEagerSingleton(); ;
   }
   
@@ -64,12 +69,17 @@ abstract public class ServiceModule extends AbstractModule {
   
   static public class PropertiesSet extends HashMap<String, Map<String, String>> {
     public void add(String key, String value) {
+      put("", key, value) ;
       String mapName = "" ;
       int separatorPos = key.indexOf(":") ;
       if(separatorPos > 0) {
         mapName = key.substring(0, separatorPos) ;
         key = key.substring(separatorPos + 1);
+        put(mapName, key, value) ;
       }
+    }
+    
+    void put(String mapName, String key, String value) {
       Map<String, String> map = get(mapName) ;
       if(map == null) {
         map = new HashMap<String, String>() ;

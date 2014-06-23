@@ -2,6 +2,7 @@ package com.neverwinterdp.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.neverwinterdp.util.text.TabularPrinter;
 
 /**
  * @author Tuan Nguyen
@@ -89,5 +90,18 @@ public class RuntimeEnvironment {
     String value = System.getProperty(name) ;
     if(value != null) return value ;
     return defaultValue ;
+  }
+  
+  public void dumpInfo(Appendable out) {
+    int[] width = {35, 35} ;
+    TabularPrinter p = new TabularPrinter(out, width) ;
+    p.header("Runtime Environment", "");
+    p.row("Server Name", serverName);
+    p.row("App Dir", appDir);
+    p.row("Config Dir", configDir) ;
+    p.row("Log Dir", logDir);
+    p.row("TMP Dir", tmpDir) ;
+    p.row("Working Dir", workingDir);
+    p.row("Data Dir", dataDir);
   }
 }

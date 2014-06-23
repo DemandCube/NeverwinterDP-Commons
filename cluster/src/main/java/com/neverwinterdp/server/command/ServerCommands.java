@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.util.monitor.MonitorRegistry;
+import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -55,18 +56,26 @@ public class ServerCommands {
     }
   }
   
-  static public class GetMonitorRegistry extends ServerCommand<String> {
-    static ObjectMapper mapper ;
-    static {
-      mapper = new ObjectMapper() ; 
-      mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      mapper.registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
+  static public class GetMonitorSnapshot extends ServerCommand<ApplicationMonitorSnapshot> {
+    public ApplicationMonitorSnapshot execute(Server server) throws Exception {
+      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
+      return appMonitor.snapshot() ;
+    }
+  }
+  
+  static public class ClearMonitor extends ServerCommand<Integer> {
+    private String nameExp ;
+    
+    public ClearMonitor() {
     }
     
-    public String execute(Server server) throws Exception {
-      MonitorRegistry registry = server.getMonitorRegistry() ;
-      String json = mapper.writeValueAsString(registry) ;
-      return json ;
+    public ClearMonitor(String nameExp) {
+      this.nameExp = nameExp ;
+    }
+    
+    public Integer execute(Server server) throws Exception {
+      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
+      return appMonitor.remove(nameExp) ;
     }
   }
 }
