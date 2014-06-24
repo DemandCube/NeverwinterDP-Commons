@@ -1,5 +1,6 @@
 package com.neverwinterdp.message;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
  */
-public class Message {
+public class Message implements Serializable {
   private MessageHeader            header = new MessageHeader();
   private MessageData              data;
   private List<MessageTrace>       traces;

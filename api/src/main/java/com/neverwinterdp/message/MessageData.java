@@ -1,5 +1,6 @@
 package com.neverwinterdp.message;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +11,7 @@ import com.neverwinterdp.util.JSONSerializer;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class MessageData {
+public class MessageData implements Serializable {
   static public enum SerializeType { json, xml, binary }
   
   private String        type;

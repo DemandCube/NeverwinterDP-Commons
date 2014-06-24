@@ -1,5 +1,6 @@
 package com.neverwinterdp.message;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -7,7 +8,7 @@ import java.util.Date;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class MessageTrace {
+public class MessageTrace implements Serializable {
   final static public SimpleDateFormat COMPACT_DATE_TIME = new SimpleDateFormat("dd/MM/yyyy@HH:mm:ss")  ;
   
   private String host      ;

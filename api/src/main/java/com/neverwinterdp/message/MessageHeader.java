@@ -1,10 +1,12 @@
 package com.neverwinterdp.message;
 
+import java.io.Serializable;
+
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
  */
-public class MessageHeader {
+public class MessageHeader implements Serializable {
   private float      version;
   private String     topic;
   private String     key;

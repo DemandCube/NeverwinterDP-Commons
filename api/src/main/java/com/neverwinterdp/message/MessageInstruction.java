@@ -1,12 +1,13 @@
 package com.neverwinterdp.message;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class MessageInstruction {
+public class MessageInstruction implements Serializable {
   private String targetService ;
   private String instruction ;
   private Map<String, String> params ;
