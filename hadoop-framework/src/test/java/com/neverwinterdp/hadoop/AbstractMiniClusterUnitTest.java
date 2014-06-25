@@ -8,6 +8,7 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.MiniDFSNNTopology;
+import org.apache.hadoop.service.Service.STATE;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
@@ -18,7 +19,15 @@ public class AbstractMiniClusterUnitTest {
   
   static protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
     YarnConfiguration conf = new YarnConfiguration() ;
-    return createMiniYARNCluster(conf, numOfNodeManagers) ;
+    MiniYARNCluster cluster = createMiniYARNCluster(conf, numOfNodeManagers) ;
+    long stopTime = System.currentTimeMillis() + 30000;
+    while(stopTime < System.currentTimeMillis() && !cluster.isInState(STATE.STARTED)) {
+      Thread.sleep(100);
+    }
+    if(!cluster.isInState(STATE.STARTED)) {
+      throw new Exception("Cannot start the mini cluster after 25s") ;
+    }
+    return cluster ;
   }
   
   static protected MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
