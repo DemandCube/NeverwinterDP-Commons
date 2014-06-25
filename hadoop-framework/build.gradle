@@ -7,6 +7,12 @@ eclipse {
 }
 
 
+repositories {
+  maven {
+    url "http://clojars.org/repo"
+  }
+}
+
 configurations.all {
   exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
 }
