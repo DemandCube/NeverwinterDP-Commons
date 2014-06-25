@@ -20,13 +20,6 @@ public class AbstractMiniClusterUnitTest {
   static protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
     YarnConfiguration conf = new YarnConfiguration() ;
     MiniYARNCluster cluster = createMiniYARNCluster(conf, numOfNodeManagers) ;
-    long stopTime = System.currentTimeMillis() + 30000;
-    while(stopTime > System.currentTimeMillis() && !cluster.isInState(STATE.STARTED)) {
-      Thread.sleep(100);
-    }
-    if(!cluster.isInState(STATE.STARTED)) {
-      throw new Exception("Cannot start the mini cluster after 25s") ;
-    }
     return cluster ;
   }
   
@@ -37,6 +30,9 @@ public class AbstractMiniClusterUnitTest {
     miniYarnCluster.init(yarnConf);
     yarnConf.set("yarn.resourcemanager.scheduler.address", "0.0.0.0:8030") ;
     miniYarnCluster.start();
+    //wait to make sure the server is started
+    //TODO: find a way to fix this
+    Thread.sleep(3000);
     return miniYarnCluster ;
   }
   
