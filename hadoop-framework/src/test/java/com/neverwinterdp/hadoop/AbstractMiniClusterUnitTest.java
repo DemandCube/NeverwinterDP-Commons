@@ -21,7 +21,7 @@ public class AbstractMiniClusterUnitTest {
     YarnConfiguration conf = new YarnConfiguration() ;
     MiniYARNCluster cluster = createMiniYARNCluster(conf, numOfNodeManagers) ;
     long stopTime = System.currentTimeMillis() + 30000;
-    while(stopTime < System.currentTimeMillis() && !cluster.isInState(STATE.STARTED)) {
+    while(stopTime > System.currentTimeMillis() && !cluster.isInState(STATE.STARTED)) {
       Thread.sleep(100);
     }
     if(!cluster.isInState(STATE.STARTED)) {
