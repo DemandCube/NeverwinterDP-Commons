@@ -26,7 +26,7 @@ public class MetricFormater {
     } ;
     int[] width = {
       30,
-      6, 6, 6, 6,
+      10, 6, 6, 6,
       6, 6, 6, 6, 6, 6,
       6, 6, 6, 6, 6,
       8, 8
