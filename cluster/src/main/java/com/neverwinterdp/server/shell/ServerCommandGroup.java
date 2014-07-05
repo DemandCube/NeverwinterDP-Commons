@@ -8,8 +8,8 @@ import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.client.MemberSelector;
 import com.neverwinterdp.server.command.ServerCommandResult;
+import com.neverwinterdp.server.gateway.MemberSelector;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
@@ -34,7 +34,7 @@ public class ServerCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getCluster().server.ping(memberSelector)) ;
+      printServerStateResults(ctx, ctx.getClusterGateway().server.ping(memberSelector)) ;
     }
   }
   
@@ -44,7 +44,7 @@ public class ServerCommandGroup extends CommandGroup {
     String filter;
     
     public void execute(ShellContext ctx) {
-      ServerRegistration[] registration = ctx.getCluster().getClusterRegistration().getServerRegistration() ;
+      ServerRegistration[] registration = ctx.getClusterGateway().getClusterRegistration().getServerRegistration() ;
       Console console = ctx.console() ;
       String indent = "  " ;
       for(ServerRegistration server : registration) {
@@ -78,7 +78,7 @@ public class ServerCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getCluster().server.shutdown(memberSelector)) ;
+      printServerStateResults(ctx, ctx.getClusterGateway().server.shutdown(memberSelector)) ;
     }
   }
 
@@ -90,7 +90,7 @@ public class ServerCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getCluster().server.exit(memberSelector)) ;
+      printServerStateResults(ctx, ctx.getClusterGateway().server.exit(memberSelector)) ;
     }
   }
   
@@ -98,26 +98,19 @@ public class ServerCommandGroup extends CommandGroup {
     @ParametersDelegate
     MemberSelector memberSelector = new MemberSelector();
     
-    @Parameter(names = {"-t","--type"}, description = "Metric type: counter, timer, meter, histogram")
-    String type = "timer" ;
-    
     @Parameter(names = {"-f","--filter"}, description = "filter by regrex syntax")
     String filter = "*" ;
     
     
     public void execute(ShellContext ctx) {
       ServerCommandResult<ApplicationMonitorSnapshot>[] results = 
-          ctx.getCluster().server.metric(memberSelector) ;
-      if("timer".equals(type)) {
-        MetricFormater formater = new MetricFormater("  ") ;
-        for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {
-          ApplicationMonitorSnapshot snapshot = sel.getResult() ;
-          ctx.console().header(sel.getFromMember().toString());
-          Map<String, TimerSnapshot> timers = snapshot.getRegistry().findTimers(filter) ;
-          ctx.console().println(formater.format(timers));
-        }
-      } else {
-        
+          ctx.getClusterGateway().server.metric(memberSelector, filter) ;
+      MetricFormater formater = new MetricFormater("  ") ;
+      for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {
+        ApplicationMonitorSnapshot snapshot = sel.getResult() ;
+        ctx.console().header(sel.getFromMember().toString() + " - member name " + sel.getFromMember().getMemberName());
+        Map<String, TimerSnapshot> timers = snapshot.getRegistry().getTimers() ;
+        ctx.console().println(formater.format(timers));
       }
     }
   }
@@ -131,7 +124,7 @@ public class ServerCommandGroup extends CommandGroup {
     
     public void execute(ShellContext ctx) {
       ServerCommandResult<Integer>[] results = 
-          ctx.getCluster().server.clearMetric(memberSelector, nameExp) ;
+          ctx.getClusterGateway().server.clearMetric(memberSelector, nameExp) ;
       for(ServerCommandResult<Integer> sel : results) {
         Integer match = sel.getResult() ;
         ctx.console().println("Clear " + match + " on " + sel.getFromMember()) ;

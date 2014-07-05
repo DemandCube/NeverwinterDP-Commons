@@ -92,11 +92,8 @@ public class BuiltinCommandGroup extends CommandGroup {
 
     public void execute(ShellContext context) throws Exception {
       HashMap<String, Object> ctx = new HashMap<String, Object>() ;
-      ctx.put("clusterAPI", context.getCluster()) ;
+      ctx.put("JAVA_CLUSTER_GATEWAY", context.getClusterGateway()) ;
       ScriptRunner runner = new ScriptRunner(".", ctx) ;
-      runner.require("classpath:js/io.js");
-      runner.require("classpath:js/assert.js");
-      runner.require("classpath:js/cluster.js");
       for(String selFile :files) {
         runner.require(selFile);
       }

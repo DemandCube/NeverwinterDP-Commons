@@ -57,17 +57,26 @@ public class ServerCommands {
   }
   
   static public class GetMonitorSnapshot extends ServerCommand<ApplicationMonitorSnapshot> {
+    private String filter ;
+    
+    public GetMonitorSnapshot() { }
+    
+    public GetMonitorSnapshot(String filter) {
+      this.filter = filter ;
+    }
+    
     public ApplicationMonitorSnapshot execute(Server server) throws Exception {
       ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
-      return appMonitor.snapshot() ;
+      ApplicationMonitorSnapshot snapshot = appMonitor.snapshot() ;
+      snapshot.filter(filter);
+      return snapshot ;
     }
   }
   
   static public class ClearMonitor extends ServerCommand<Integer> {
     private String nameExp ;
     
-    public ClearMonitor() {
-    }
+    public ClearMonitor() { }
     
     public ClearMonitor(String nameExp) {
       this.nameExp = nameExp ;

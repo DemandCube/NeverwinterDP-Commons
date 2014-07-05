@@ -13,4 +13,6 @@ public interface ClusterMember {
   public String getIpAddress();
 
   public int getPort();
+  
+  public String getMemberName() ;
 }

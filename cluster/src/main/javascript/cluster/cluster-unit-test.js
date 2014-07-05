@@ -1,53 +1,53 @@
 function testCluster() {
-  var members = cluster.members() ;
+  var members = cluster.ClusterGateway.members() ;
   Assert.assertTrue(members.length > 0)
-  console.printJSON(cluster.members()) ;
-  var clusterRegistration = cluster.clusterRegistration() ;
+  console.printJSON(cluster.ClusterGateway.members()) ;
+  var clusterRegistration = cluster.ClusterGateway.clusterRegistration() ;
   Assert.assertNotNull(clusterRegistration)
   //console.printJSON(clusterRegistration) ;
-  var printer = new ClusterRegistrationPrinter(console, clusterRegistration);
+  var printer = new cluster.ClusterRegistrationPrinter(console, clusterRegistration);
   printer.printServerRegistration() ;
   printer.printServiceRegistration() ;
 }
 
 function testServer() {
-  var member = cluster.members()[0] ;
+  var member = cluster.ClusterGateway.members()[0] ;
   var ipPort = member.ipAddress + ":" +  member.port ;
 
-  cluster.server.ping({
+  cluster.ClusterGateway.server.ping({
     params: { "member-role": "master" },
 
     onResponse: function(resp) {
-      new ResponsePrinter(console, resp).print();
+      new cluster.ResponsePrinter(console, resp).print();
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
       Assert.assertEquals("RUNNING", resp.results[0].result) ;
     }
   }) ;
 
-  cluster.server.metric({
+  cluster.ClusterGateway.server.metric({
     params: { "member-role": "master" },
 
     onResponse: function(resp) {
       //console.printJSON(resp) ;
       var result = resp.results[0] ;
-      var printer = new MetricPrinter(console, result.fromMember, result.result);
+      var printer = new cluster.MetricPrinter(console, result.fromMember, result.result);
       printer.printCounter();
       printer.printTimer();
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;
 
-  cluster.server.clearMetric({
+  cluster.ClusterGateway.server.clearMetric({
     params: { "member-role": "master", "expression": "*Hello*" },
 
     onResponse: function(resp) {
       console.h1("Remove *Hello* metric monitor") ;
-      new ResponsePrinter(console, resp).print() ;
+      new cluster.ResponsePrinter(console, resp).print() ;
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;
 
-  cluster.server.shutdown({
+  cluster.ClusterGateway.server.shutdown({
     params: { "member-role": "master" },
 
     onResponse: function(resp) {
@@ -57,7 +57,7 @@ function testServer() {
     }
   }) ;
 
-  cluster.server.start({
+  cluster.ClusterGateway.server.start({
     params: { "member": ipPort },
 
     onResponse: function(resp) {
@@ -69,24 +69,25 @@ function testServer() {
 }
 
 function testModule() {
-  var member = cluster.members()[0] ;
+  var member = cluster.ClusterGateway.members()[0] ;
   var memberIpPort = member.ipAddress + ":" +  member.port ;
 
-  cluster.module.list({
+  cluster.ClusterGateway.module.list({
     params: { "member-role": "master", "type": "available" },
 
     onResponse: function(resp) {
       console.println("List the available modules") ;
+      console.printJSON(resp) ;
       for(var i = 0; i < resp.results.length; i++) {
         var result = resp.results[i];
-        var printer = new ModuleRegistrationPrinter(console, result.fromMember, result.result);
+        var printer = new cluster.ModuleRegistrationPrinter(console, result.fromMember, result.result);
         printer.printModuleRegistration() ;
       }
       Assert.assertTrue(resp.success && !resp.isEmpty()) ;
     }
   }) ;
 
-  cluster.module.install({
+  cluster.ClusterGateway.module.install({
     params: { 
       "member": memberIpPort,  
       "autostart": true,
@@ -101,7 +102,7 @@ function testModule() {
     }
   }) ;
 
-  cluster.module.uninstall({
+  cluster.ClusterGateway.module.uninstall({
     params: { 
       "member": memberIpPort,  
       "module": ["HelloModuleDisable"]

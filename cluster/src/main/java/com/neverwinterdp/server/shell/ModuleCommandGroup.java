@@ -9,8 +9,8 @@ import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
-import com.neverwinterdp.server.client.MemberSelector;
 import com.neverwinterdp.server.command.ServerCommandResult;
+import com.neverwinterdp.server.gateway.MemberSelector;
 import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ModuleRegistration.InstallStatus;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
@@ -33,7 +33,7 @@ public class ModuleCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      list(ctx, ctx.getCluster().module.list(memberSelector, type), "List installed") ;
+      list(ctx, ctx.getClusterGateway().module.list(memberSelector, type), "List installed") ;
     }
   }
   
@@ -55,7 +55,7 @@ public class ModuleCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      list(ctx, ctx.getCluster().module.install(memberSelector, modules, autostart, properties), "Install") ;
+      list(ctx, ctx.getClusterGateway().module.install(memberSelector, modules, autostart, properties), "Install") ;
     }
   }
   
@@ -71,7 +71,7 @@ public class ModuleCommandGroup extends CommandGroup {
     MemberSelector memberSelector = new MemberSelector();
     
     public void execute(ShellContext ctx) {
-      list(ctx, ctx.getCluster().module.uninstall(memberSelector, modules), "Uninstall") ;
+      list(ctx, ctx.getClusterGateway().module.uninstall(memberSelector, modules), "Uninstall") ;
     }
   }
   

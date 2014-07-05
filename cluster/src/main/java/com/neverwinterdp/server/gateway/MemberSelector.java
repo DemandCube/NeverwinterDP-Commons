@@ -1,6 +1,7 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.server.cluster.ClusterClient;
@@ -42,6 +43,14 @@ public class MemberSelector implements Serializable {
       return clusterClient.getClusterRegistration().findClusterMemberByRole(memberRole) ;
     }
     return null ;
+  }
+  
+  public ClusterMember selectRandomMember(ClusterClient clusterClient) {
+    ClusterMember[] members = getMembers(clusterClient) ;
+    if(members == null || members.length == 0) {
+      throw new RuntimeException("Expect at least 1 member") ;
+    }
+    return members[new Random().nextInt(members.length)] ;
   }
   
   public <T> ServerCommandResult<T>[] execute(ClusterClient client, ServerCommand<T> command) {

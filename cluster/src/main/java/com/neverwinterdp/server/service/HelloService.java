@@ -48,7 +48,7 @@ public class HelloService extends AbstractService implements ComponentMonitorabl
   
   @Inject
   public void init(ApplicationMonitor mRegistry) {
-    this.monitorRegistry = mRegistry.createComponentMonitor("HelloModule", "HelloService") ;
+    this.monitorRegistry = mRegistry.createComponentMonitor("HelloModule", getClass().getSimpleName()) ;
   }
 
   public ComponentMonitor getComponentMonitor() { 

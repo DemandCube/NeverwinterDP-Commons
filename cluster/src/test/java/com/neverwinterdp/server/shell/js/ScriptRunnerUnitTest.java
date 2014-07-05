@@ -19,7 +19,7 @@ public class ScriptRunnerUnitTest {
   public void testConsole() throws Exception {
     HashMap<String, Object> ctx = new HashMap<String, Object>() ;
     ScriptRunner runner = new ScriptRunner(".", ctx) ;
-    runner.require("src/main/resources/js/io.js");
-    runner.require("src/main/resources/js/io-unit-test.js");
+    runner.require("src/main/javascript/util/io.js");
+    runner.require("src/main/javascript/util/io-unit-test.js");
   }
 }

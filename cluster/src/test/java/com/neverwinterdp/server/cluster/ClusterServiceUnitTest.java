@@ -71,7 +71,7 @@ public class ClusterServiceUnitTest {
     ping.setTargetService(helloService);
     ServiceCommandResult<ServiceState> sel = client.execute(ping, member) ;
     if(sel.hasError()) {
-      sel.getError().printStackTrace(); 
+      System.out.println(sel.getError());
       fail() ;
     }
     assertEquals(ServiceState.START, sel.getResult()) ;
@@ -117,7 +117,7 @@ public class ClusterServiceUnitTest {
     helloCall.setTargetService(helloService);
     ServiceCommandResult<String> sel = client.execute(helloCall, member) ;
     if(sel.hasError()) {
-      sel.getError().printStackTrace();
+      System.out.println(sel.getError());
     }
     assertEquals("Hello Tuan", sel.getResult()) ;
 

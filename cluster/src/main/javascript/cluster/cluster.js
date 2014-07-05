@@ -1,4 +1,6 @@
-function Response(results) {
+cluster = {} ;
+
+cluster.Response = function(results) {
   this.results = results ;
   this.success = true ;
 
@@ -27,7 +29,7 @@ function Response(results) {
   }
 }
 
-function ResponsePrinter(printer, response) {
+cluster.ResponsePrinter = function(printer, response) {
   this.printer = printer;
   this.response = response ;
 
@@ -43,7 +45,7 @@ function ResponsePrinter(printer, response) {
   };
 }
 
-function ClusterRegistrationPrinter(printer, clusterRegistration) {
+cluster.ClusterRegistrationPrinter = function(printer, clusterRegistration) {
   this.printer = printer;
   this.clusterRegistration = clusterRegistration ;
 
@@ -76,7 +78,7 @@ function ClusterRegistrationPrinter(printer, clusterRegistration) {
   };
 }
 
-function ModuleRegistrationPrinter(printer, member, moduleRegistrations) {
+cluster.ModuleRegistrationPrinter = function(printer, member, moduleRegistrations) {
   this.printer = printer;
   this.member = member ;
   this.moduleRegistrations = moduleRegistrations ;
@@ -98,7 +100,7 @@ function ModuleRegistrationPrinter(printer, member, moduleRegistrations) {
   };
 }
 
-function MetricPrinter(printer, member, appMonitor) {
+cluster.MetricPrinter = function(printer, member, appMonitor) {
   this.printer = printer;
   this.member = member ;
   this.appMonitor = appMonitor ;
@@ -124,7 +126,7 @@ function MetricPrinter(printer, member, appMonitor) {
       { field: "rateUnits"}
     ];
     var metrics = this.getMetrics(this.appMonitor.registry.timers);
-    this.printer.h2("Timer on " + (this.member.ipAddress + ":" + this.member.port));
+    this.printer.h2("Timer on " + (this.member.ipAddress + ":" + this.member.port) + " - member name " + this.member.memberName);
     this.printer.printTable(metrics,  fconfig);
   },
 
@@ -149,14 +151,14 @@ function MetricPrinter(printer, member, appMonitor) {
   }
 }
 
-cluster = {
+cluster.ClusterGateway = {
   members: function() {
-    var json = clusterAPI.getMembers() ;
+    var json = JAVA_CLUSTER_GATEWAY.getMembers() ;
     return JSON.parse(json) ;
   },
 
   clusterRegistration: function() {
-    var json = clusterAPI.clusterRegistration() ;
+    var json = JAVA_CLUSTER_GATEWAY.clusterRegistration() ;
     return JSON.parse(json) ;
   },
 
@@ -164,10 +166,10 @@ cluster = {
     call: function(command, config) {
       if(config.params == null)  config.params = {} ; 
       config.params._commandName = command ;
-      var json = clusterAPI.server.call(JSON.stringify(config.params)) ;
+      var json = JAVA_CLUSTER_GATEWAY.server.call(JSON.stringify(config.params)) ;
       var results = JSON.parse(json) ;
       if(config.onResponse) {
-        config.onResponse(new Response(results));
+        config.onResponse(new cluster.Response(results));
       }
     },
 
@@ -188,10 +190,10 @@ cluster = {
     call: function(command, config) {
       if(config.params == null)  config.params = {} ; 
       config.params._commandName = command ;
-      var json = clusterAPI.module.call(JSON.stringify(config.params)) ;
+      var json = JAVA_CLUSTER_GATEWAY.module.call(JSON.stringify(config.params)) ;
       var results = JSON.parse(json) ;
       if(config.onResponse) {
-        config.onResponse(new Response(results));
+        config.onResponse(new cluster.Response(results));
       }
     },
 
@@ -203,7 +205,7 @@ cluster = {
   },
 
   plugin: function(pluginName, command, config) {
-    var plugin = clusterAPI.plugin(pluginName) ;
+    var plugin = JAVA_CLUSTER_GATEWAY.plugin(pluginName) ;
     if(config.params == null)  config.params = {} ; 
     config.params._commandName = command ;
     var json = plugin.call(JSON.stringify(config.params)) ;

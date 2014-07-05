@@ -1,11 +1,22 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CommandParams extends HashMap<String, Object> {
+  
+  public CommandParams()  {
+    
+  }
+
+  public CommandParams field(String name, Object value) {
+    put(name, value) ;
+    return this ;
+  }
+  
   public String getString(String name) {
     return (String) get(name) ;
   }
@@ -33,7 +44,11 @@ public class CommandParams extends HashMap<String, Object> {
   }
   
   public List<String> getStringList(String name) {
-    return (List<String>) get(name) ;
+    Object val = get(name) ;
+    if(val instanceof String[]) {
+      return Arrays.asList((String[]) val) ;
+    }
+    return (List<String>) val ;
   }
   
   public Map<String, String> getProperties() {
@@ -51,9 +66,15 @@ public class CommandParams extends HashMap<String, Object> {
     List<String> holder = new ArrayList<String>();
     for(Map.Entry<String, Object> entry : entrySet()) {
       String key = entry.getKey() ;
-      if(key.startsWith("-")) holder.add(key) ;
-      else holder.add("--" + key) ;
-      holder.add(entry.getValue().toString()) ;
+      if(key.startsWith("-P")) {
+        holder.add(key + "=" + entry.getValue()) ;
+      } else if(key.startsWith("-")) {
+        holder.add(key) ;
+        holder.add(entry.getValue().toString()) ;
+      } else {
+        holder.add("--" + key) ;
+        holder.add(entry.getValue().toString()) ;
+      }
     }
     return holder.toArray(new String[holder.size()]) ;
   }

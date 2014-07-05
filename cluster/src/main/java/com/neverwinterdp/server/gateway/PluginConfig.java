@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

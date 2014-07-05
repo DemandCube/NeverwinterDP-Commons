@@ -1,37 +1,22 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import com.neverwinterdp.server.ServerState;
-import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 
-public class Server {
-  private ClusterClient clusterClient ;
-  
-  public Server(ClusterClient clusterClient) {
-    this.clusterClient = clusterClient ;
-  }
-  
-  public String call(String json) {
-    try {
-      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-      String commandName = params.getString("_commandName") ;
-      ServerCommandResult<?>[] results = null ;
-      if("ping".equals(commandName)) results = ping(params) ;
-      else if("metric".equals(commandName)) results = metric(params) ;
-      else if("clearMetric".equals(commandName)) results = clearMetric(params) ;
-      else if("start".equals(commandName)) results = start(params) ;
-      else if("shutdown".equals(commandName)) results = shutdown(params) ;
-      else if("exit".equals(commandName)) results = exit(params) ;
-      if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
-      return "{ 'success': false, 'message': 'unknown command'}" ;
-    } catch(Throwable t) {
-      t.printStackTrace();
-      throw t ;
-    }
+public class Server extends Plugin {
+  protected Object doCall(String commandName, CommandParams params) throws Exception {
+    ServerCommandResult<?>[] results = null ;
+    if("ping".equals(commandName)) results = ping(params) ;
+    else if("metric".equals(commandName)) results = metric(params) ;
+    else if("clearMetric".equals(commandName)) results = clearMetric(params) ;
+    else if("start".equals(commandName)) results = start(params) ;
+    else if("shutdown".equals(commandName)) results = shutdown(params) ;
+    else if("exit".equals(commandName)) results = exit(params) ;
+    if(results != null) return results ;
+    return null ;
   }
 
   public ServerCommandResult<ServerState>[] ping(CommandParams params) {
@@ -47,11 +32,12 @@ public class Server {
   
   public ServerCommandResult<ApplicationMonitorSnapshot>[] metric(CommandParams params) {
     MemberSelector memberSelector = new MemberSelector(params) ;
-    return metric(memberSelector) ;
+    String expression = params.getString("filter") ;
+    return metric(memberSelector, expression) ;
   }
   
-  public ServerCommandResult<ApplicationMonitorSnapshot>[] metric(MemberSelector memberSelector) {
-    ServerCommand<ApplicationMonitorSnapshot> cmd = new ServerCommands.GetMonitorSnapshot() ;
+  public ServerCommandResult<ApplicationMonitorSnapshot>[] metric(MemberSelector memberSelector, String filter) {
+    ServerCommand<ApplicationMonitorSnapshot> cmd = new ServerCommands.GetMonitorSnapshot(filter) ;
     return memberSelector.execute(clusterClient, cmd) ;
   }
   

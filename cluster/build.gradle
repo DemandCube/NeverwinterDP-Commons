@@ -11,6 +11,7 @@ eclipse {
 dependencies {
   compile project(':utils')
   compile project(':api')
+  compile project(':netty')
 
   compile group: 'com.hazelcast', name: 'hazelcast', version: '3.2.3'
   compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.2.3'
@@ -24,3 +25,16 @@ dependencies {
 
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 }
+
+task jsJar(type:Jar) { 
+  baseName = 'commons.cluster' 
+  classifier = 'js'
+  //from sourceSets.main
+  from "src/main/javascript"
+  include '**/*'
+}
+
+artifacts { 
+  //archives file: file('build/libs/commons.cluster-1.0-SNAPSHOT-js.jar')
+  archives jsJar
+} 

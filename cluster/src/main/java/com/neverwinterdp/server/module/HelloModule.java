@@ -10,7 +10,7 @@ public class HelloModule extends ServiceModule {
     properties.put("hello", "hello property") ;
     properties.put("hello:hello", "hello map property") ;
     
-    bind("HelloService", HelloService.class); 
+    bindService(HelloService.class); 
     bind("HelloServiceInstance", new HelloService()); ;
   }
 }

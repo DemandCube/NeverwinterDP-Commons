@@ -43,7 +43,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   private Logger logger ;
   private HazelcastInstance hzinstance ;
-  private ClusterMember member ;
+  private ClusterMemberImpl member ;
   private ClusterRegistraton clusterRegistration ;
   private Server server ;
   private ApplicationMonitor appMonitor ;
@@ -61,6 +61,8 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
     }
   }
   
+  public HazelcastInstance getHazelcastInstance() { return this.hzinstance ; }
+  
   public void setApplicationMonitor(ApplicationMonitor appMonitor) {
     this.appMonitor = appMonitor ;
   }
@@ -72,8 +74,14 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   public void onInit(Server server) {
     this.server = server ;
+    
+    Member hzmember= hzinstance.getCluster().getLocalMember() ;
+    member.setMemberName(server.getRuntimeEnvironment().getServerName());
+    hzmember.setStringAttribute("member-name", member.getMemberName());
+    
     clusterEventTopic = hzinstance.getTopic(CLUSTER_EVENT_TOPIC);
     clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
+    
     IMap<String, ServerRegistration> registrationMap = hzinstance.getMap(CLUSTER_REGISTRATON) ;
     clusterRegistration = new ClusterRegistrationImpl(registrationMap) ;
   }

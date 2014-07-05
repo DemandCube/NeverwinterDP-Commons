@@ -3,12 +3,12 @@ package com.neverwinterdp.server.shell;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.neverwinterdp.server.client.Cluster;
+import com.neverwinterdp.server.gateway.ClusterGateway;
 
 public class ShellContext {
   private Map<String, Object> variables = new HashMap<String, Object>() ;
   private Console console ;
-  private Cluster cluster ;
+  private ClusterGateway cluster ;
   private ExecuteContext currentExecuteContext ;
   private ExecuteContext lastExecuteContext ;
   
@@ -20,14 +20,14 @@ public class ShellContext {
   
   public Console console() { return this.console ; }
   
-  public Cluster getCluster() { return this.cluster ; }
+  public ClusterGateway getClusterGateway() { return this.cluster ; }
   
   public ExecuteContext getExecuteContext() { return this.currentExecuteContext ; }
   
   public ExecuteContext getLastExecuteContext() { return this.lastExecuteContext ; }
   
   public void connect(String ... members) {
-    if(cluster == null) cluster = new Cluster(members) ;
+    if(cluster == null) cluster = new ClusterGateway(members) ;
     else cluster.connect(members);
   }
   

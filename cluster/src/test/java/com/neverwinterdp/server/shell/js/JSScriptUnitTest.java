@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.server.Server;
-import com.neverwinterdp.server.client.Cluster;
+import com.neverwinterdp.server.gateway.ClusterGateway;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -19,7 +19,7 @@ public class JSScriptUnitTest {
   }
   
   static protected Server[]      instance ;
-  static protected Cluster cluster ;
+  static protected ClusterGateway clusterGateway ;
 
   @BeforeClass
   static public void setup() throws Exception {
@@ -31,12 +31,12 @@ public class JSScriptUnitTest {
     for(int i = 0; i < instance.length; i++) {
       instance[i] = Server.create(args) ;  
     }
-    cluster = new Cluster() ;
+    clusterGateway = new ClusterGateway() ;
   }
 
   @AfterClass
   static public void teardown() throws Exception {
-    cluster.close() ; 
+    clusterGateway.close() ; 
     for(int i = 0; i < instance.length; i++) {
       instance[i].exit(0) ;
     }
@@ -45,11 +45,11 @@ public class JSScriptUnitTest {
   @Test
   public void testScriptLib() throws Exception {
     HashMap<String, Object> ctx = new HashMap<String, Object>() ;
-    ctx.put("clusterAPI", cluster) ;
+    ctx.put("JAVA_CLUSTER_GATEWAY", clusterGateway) ;
     ScriptRunner runner = new ScriptRunner(".", ctx) ;
-    runner.require("src/main/resources/js/io.js");
-    runner.require("src/main/resources/js/assert.js");
-    runner.require("src/main/resources/js/cluster.js");
-    runner.require("src/main/resources/js/cluster-unit-test.js");
+    runner.require("src/main/javascript/util/io.js");
+    runner.require("src/main/javascript/util/assert.js");
+    runner.require("src/main/javascript/cluster/cluster.js");
+    runner.require("src/main/javascript/cluster/cluster-unit-test.js");
   }
 }

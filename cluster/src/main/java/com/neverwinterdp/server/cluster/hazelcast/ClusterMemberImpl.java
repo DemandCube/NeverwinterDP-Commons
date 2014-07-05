@@ -16,6 +16,7 @@ class ClusterMemberImpl implements ClusterMember, Serializable {
   private String hostname ;
   private String ipAddress ;
   private int    port ;
+  private String memberName ;
   
   public ClusterMemberImpl() {
   }
@@ -25,6 +26,7 @@ class ClusterMemberImpl implements ClusterMember, Serializable {
     this.hostname = member.getSocketAddress().getHostName() ;
     this.ipAddress = member.getSocketAddress().getAddress().getHostAddress() ; 
     this.port = member.getSocketAddress().getPort() ;
+    this.memberName = member.getStringAttribute("member-name") ;
   }
 
   public String getUuid() { return uuid ; }
@@ -35,6 +37,11 @@ class ClusterMemberImpl implements ClusterMember, Serializable {
 
   public int getPort() { return this.port  ; }
 
+  public String getMemberName() { return this.memberName ; }
+  public void setMemberName(String memberName) {
+    this.memberName = memberName ;
+  }
+  
   public int hashCode() {
     if(uuid == null) return 17 ;
     return uuid.hashCode() ;

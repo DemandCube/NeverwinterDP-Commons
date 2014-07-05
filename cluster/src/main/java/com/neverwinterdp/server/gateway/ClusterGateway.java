@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import java.util.Map;
 
@@ -12,27 +12,29 @@ import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.util.JSONSerializer;
 
 
-public class Cluster {
+public class ClusterGateway {
   private ClusterClient clusterClient ;
   
   public Server server ;
   public Module module ;
   private Map<String, Plugin> plugins ;
   
-  public Cluster() {
+  public ClusterGateway() {
     connect() ;
   }
   
-  public Cluster(String ... connect) {
+  public ClusterGateway(String ... connect) {
     connect(connect) ;
   }
   
   public void connect(String ... connect)  {
     if(clusterClient != null) clusterClient.shutdown(); 
     clusterClient = new HazelcastClusterClient(connect) ;
-    server = new Server(clusterClient) ;
-    module = new Module(clusterClient) ;
-    this.plugins = Plugin.Util.loadByAnnotation("com.neverwinterdp.server.client") ;
+    server = new Server() ;
+    module = new Module() ;
+    plugins = Plugin.Util.loadByAnnotation("com.neverwinterdp.server.gateway") ;
+    plugins.put("server", server) ;
+    plugins.put("module", module) ;
     for(Plugin plugin : plugins.values()) {
       plugin.init(clusterClient);
     }

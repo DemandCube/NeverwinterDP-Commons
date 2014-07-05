@@ -1,36 +1,21 @@
-package com.neverwinterdp.server.client;
+package com.neverwinterdp.server.gateway;
 
 import java.util.List;
 import java.util.Map;
 
-import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerModuleCommands;
 import com.neverwinterdp.server.module.ModuleRegistration;
-import com.neverwinterdp.util.JSONSerializer;
 
-public class Module {
-  private ClusterClient clusterClient ;
-  
-  public Module(ClusterClient clusterClient) {
-    this.clusterClient = clusterClient ;
-  }
-  
-  public String call(String json) {
-    try {
-      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-      String commandName = params.getString("_commandName") ;
-      ServerCommandResult<?>[] results = null ;
-      if("list".equals(commandName)) results = list(params) ;
-      else if("install".equals(commandName)) results = install(params) ;
-      else if("uninstall".equals(commandName)) results = uninstall(params) ;
-      if(results != null) return JSONSerializer.INSTANCE.toString(results) ;
-      return "{ 'success': false, 'message': 'unknown command'}" ;
-    } catch(Throwable t) {
-      t.printStackTrace(); 
-      throw t ;
-    }
+public class Module extends Plugin {
+  protected Object doCall(String commandName, CommandParams params) throws Exception {
+    ServerCommandResult<?>[] results = null ;
+    if("list".equals(commandName)) results = list(params) ;
+    else if("install".equals(commandName)) results = install(params) ;
+    else if("uninstall".equals(commandName)) results = uninstall(params) ;
+    if(results != null) return results ;
+    return "{ 'success': false, 'message': 'unknown command'}" ;
   }
   
   public ServerCommandResult<ModuleRegistration[]>[] list(CommandParams params) {
