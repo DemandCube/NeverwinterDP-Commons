@@ -36,6 +36,8 @@ public class ApplicationMonitorSnapshot implements Serializable {
     return registry.timer(name(name)) ;
   }
   
+  public void filter(String exp) { registry.filter(exp); }
+  
   private String name(String ... name) {
     StringBuilder b = new StringBuilder() ;
     for(int i = 0; i < name.length; i++) {

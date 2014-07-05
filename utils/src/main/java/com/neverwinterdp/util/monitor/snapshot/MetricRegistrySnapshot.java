@@ -1,9 +1,8 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -101,6 +100,12 @@ public class MetricRegistrySnapshot implements Serializable {
     return findAll(timers, exp) ;
   }
   
+  public void filter(String exp) {
+    if(exp == null) return ;
+    filter(counters, exp) ;
+    filter(timers, exp) ;
+  }
+  
   private <T> T find(Map<String, T> map, String exp) {
     exp.replace("*", ".*") ;
     Pattern pattern = Pattern.compile(exp) ;
@@ -120,5 +125,16 @@ public class MetricRegistrySnapshot implements Serializable {
       if(pattern.matcher(key).matches()) holder.put(key, entry.getValue()) ;
     }
     return holder ;
+  }
+  
+  private <T> void filter(Map<String, T> map, String exp) {
+    exp = exp.replace("*", ".*") ;
+    Pattern pattern = Pattern.compile(exp) ;
+    Iterator<Map.Entry<String, T>> i = map.entrySet().iterator() ;
+    while(i.hasNext()) {
+      Map.Entry<String, T> entry = i.next() ;
+      String key = entry.getKey() ;
+      if(!pattern.matcher(key).matches()) i.remove();
+    }
   }
 }
