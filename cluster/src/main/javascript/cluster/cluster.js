@@ -211,7 +211,7 @@ cluster.ClusterGateway = {
     var json = plugin.call(JSON.stringify(config.params)) ;
     var results = JSON.parse(json) ;
     if(config.onResponse) {
-      config.onResponse(new Response(results));
+      config.onResponse(new cluster.Response(results));
     }
   }
 }
