@@ -1,0 +1,13 @@
+archivesBaseName = 'commons.netty'
+
+eclipse {
+  project {
+    name = 'commons.netty'
+  }
+}
+
+dependencies {
+  compile project(':utils')
+  compile group: 'io.netty', name: 'netty-all', version: '4.0.20.Final'
+}
+
