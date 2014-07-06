@@ -74,9 +74,9 @@ public class WeightedAverageFormula implements MergeFormula {
 	    m5_rate += meter.getM5Rate() * weights[i];
 	    i++;
 	}
-	mergedmeter.setM1Rate(m1_rate / totalWeights);
-	mergedmeter.setM5Rate(m5_rate / totalWeights);
-	mergedmeter.setM15Rate(m15_rate / totalWeights);
+	mergedmeter.setM1_rate(m1_rate / totalWeights);
+	mergedmeter.setM5_rate(m5_rate / totalWeights);
+	mergedmeter.setM15_rate(m15_rate / totalWeights);
 
     }
 
@@ -88,7 +88,7 @@ public class WeightedAverageFormula implements MergeFormula {
 	    mean_rate += meter.getMeanRate() * weights[i];
 	    i++;
 	}
-	mergedmeter.setMeanRate(mean_rate / totalWeights);
+	mergedmeter.setMean_rate(mean_rate / totalWeights);
 
     }
 

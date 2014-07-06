@@ -150,20 +150,12 @@ public class TimerSnapshot  implements Serializable  {
 	return m15_rate;
     }
 
-    public void setM15Rate(double m15_rate) {
-	this.m15_rate = m15_rate;
-    }
-
     public void setM15_rate(double m15_rate) {
 	this.m15_rate = m15_rate;
     }
 
     public double getM1Rate() {
 	return m1_rate;
-    }
-
-    public void setM1Rate(double m1_rate) {
-	this.m1_rate = m1_rate;
     }
 
     public void setM1_rate(double m1_rate) {
@@ -174,9 +166,6 @@ public class TimerSnapshot  implements Serializable  {
 	return m5_rate;
     }
 
-    public void setM5Rate(double m5_rate) {
-	this.m5_rate = m5_rate;
-    }
 
     public void setM5_rate(double m5_rate) {
 	this.m5_rate = m5_rate;

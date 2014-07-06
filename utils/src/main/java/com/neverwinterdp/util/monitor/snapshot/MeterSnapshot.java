@@ -8,6 +8,7 @@ public class MeterSnapshot implements Serializable {
     double m1_rate;
     double m5_rate;
     double mean_rate;
+    String units;
 
     public MeterSnapshot(){
 	
@@ -25,7 +26,7 @@ public class MeterSnapshot implements Serializable {
 	return m15_rate;
     }
 
-    public void setM15Rate(double m15_rate) {
+    public void setM15_rate(double m15_rate) {
 	this.m15_rate = m15_rate;
     }
 
@@ -33,7 +34,7 @@ public class MeterSnapshot implements Serializable {
 	return m1_rate;
     }
 
-    public void setM1Rate(double m1_rate) {
+    public void setM1_rate(double m1_rate) {
 	this.m1_rate = m1_rate;
     }
 
@@ -41,7 +42,7 @@ public class MeterSnapshot implements Serializable {
 	return m5_rate;
     }
 
-    public void setM5Rate(double m5_rate) {
+    public void setM5_rate(double m5_rate) {
 	this.m5_rate = m5_rate;
     }
 
@@ -49,7 +50,7 @@ public class MeterSnapshot implements Serializable {
 	return mean_rate;
     }
 
-    public void setMeanRate(double mean_rate) {
+    public void setMean_rate(double mean_rate) {
 	this.mean_rate = mean_rate;
     }
 
@@ -61,6 +62,6 @@ public class MeterSnapshot implements Serializable {
 	this.units = units;
     }
 
-    String units;
+    
 
 }

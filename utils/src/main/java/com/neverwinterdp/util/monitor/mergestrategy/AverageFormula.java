@@ -72,9 +72,9 @@ public class AverageFormula implements MergeFormula {
 	    m1_rate += meter.getM1Rate();
 	    m5_rate += meter.getM5Rate();
 	}
-	mergedmeter.setM1Rate(m1_rate / size);
-	mergedmeter.setM5Rate(m5_rate / size);
-	mergedmeter.setM15Rate(m15_rate / size);
+	mergedmeter.setM1_rate(m1_rate / size);
+	mergedmeter.setM5_rate(m5_rate / size);
+	mergedmeter.setM15_rate(m15_rate / size);
 
     }
 
@@ -85,7 +85,7 @@ public class AverageFormula implements MergeFormula {
 	for (MeterSnapshot meter : meters) {
 	    mean_rate += meter.getMeanRate();
 	}
-	mergedmeter.setMeanRate(mean_rate / meters.size());
+	mergedmeter.setMean_rate(mean_rate / meters.size());
 
     }
 

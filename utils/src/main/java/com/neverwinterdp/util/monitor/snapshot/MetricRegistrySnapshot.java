@@ -146,7 +146,6 @@ public class MetricRegistrySnapshot implements Serializable {
 	String json;
 	try {
 	    json = mapper.writeValueAsString(registry);
-
 	    StringReader reader = new StringReader(json);
 
 	    regSnapshot = mapper
@@ -271,6 +270,7 @@ public class MetricRegistrySnapshot implements Serializable {
 	}
 	return holder;
     }
+    
     private <T> void filter(Map<String, T> map, String exp) {
         exp = exp.replace("*", ".*") ;
         Pattern pattern = Pattern.compile(exp) ;
@@ -280,6 +280,11 @@ public class MetricRegistrySnapshot implements Serializable {
           String key = entry.getKey() ;
           if(!pattern.matcher(key).matches()) i.remove();
         }
-      }
-
+    }
+    
+    public static void updateRemoteMap(String producerName,
+    	    MetricRegistrySnapshot regSnapshot) {
+    	registriesMap = getRegistriesMap();
+    	registriesMap.put(producerName, regSnapshot);
+        }
 }
