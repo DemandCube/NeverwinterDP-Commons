@@ -11,7 +11,7 @@ import com.neverwinterdp.server.command.ServiceCommandResult;
  * @email  tuan08@gmail.com
  */
 public interface ClusterClient {
-  public ClusterRegistraton getClusterRegistration() ;
+  public ClusterRegistration getClusterRegistration() ;
   public void addListener(ClusterListener<ClusterClient> listener) ;
   public void removeListener(ClusterListener<ClusterClient> listener) ;
   

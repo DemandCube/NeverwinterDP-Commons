@@ -3,12 +3,12 @@ package com.neverwinterdp.server.cluster.hazelcast;
 import com.hazelcast.core.IMap;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.ClusterRegistraton;
+import com.neverwinterdp.server.cluster.ClusterRegistration;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class ClusterRegistrationImpl extends ClusterRegistraton {
+public class ClusterRegistrationImpl extends ClusterRegistration {
   private IMap<String, ServerRegistration> registrationMap ;
   
   public ClusterRegistrationImpl(IMap<String, ServerRegistration> map) {

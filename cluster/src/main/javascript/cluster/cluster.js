@@ -164,9 +164,7 @@ cluster.ClusterGateway = {
 
   server : {
     call: function(command, config) {
-      if(config.params == null)  config.params = {} ; 
-      config.params._commandName = command ;
-      var json = JAVA_CLUSTER_GATEWAY.server.call(JSON.stringify(config.params)) ;
+      var json = JAVA_CLUSTER_GATEWAY.call('server', command, JSON.stringify(config.params)) ;
       var results = JSON.parse(json) ;
       if(config.onResponse) {
         config.onResponse(new cluster.Response(results));
@@ -188,9 +186,7 @@ cluster.ClusterGateway = {
 
   module : {
     call: function(command, config) {
-      if(config.params == null)  config.params = {} ; 
-      config.params._commandName = command ;
-      var json = JAVA_CLUSTER_GATEWAY.module.call(JSON.stringify(config.params)) ;
+      var json = JAVA_CLUSTER_GATEWAY.call('module', command, JSON.stringify(config.params)) ;
       var results = JSON.parse(json) ;
       if(config.onResponse) {
         config.onResponse(new cluster.Response(results));
@@ -213,5 +209,9 @@ cluster.ClusterGateway = {
     if(config.onResponse) {
       config.onResponse(new cluster.Response(results));
     }
+  },
+
+  call: function(pluginName, command, config) {
+    return this.plugin(pluginName, command, config) ;
   }
 }

@@ -1,0 +1,32 @@
+<div>
+  <h3 style="margin: 3px 0px">Server</h3>
+  <hr/>
+
+  <ul style="margin: 10px 0px; border: none" class="UINavigationMenu">
+    <li>By Member Name
+      <ul>
+        <%var members = clusterRegistration.getMembers() %>
+        <%for(var i = 0; i < members.length; i++) { %>
+          <li><a href="#"><%=members[i].memberName%></a></li>
+        <%}%>
+      </ul>
+    </li>
+
+    <li>By Member Role
+      <ul>
+        <%var roleSet = clusterRegistration.getRoleSet(); %>
+        <%for(var i = 0; i < roleSet.length; i++) { %>
+          <li>
+            <%=roleSet[i]%>
+            <ul>
+              <%var members = clusterRegistration.getMemberByRole(roleSet[i]) ; %>
+              <%for(var j = 0; j < members.length; j++) { %>
+                <li><a href="#"><%=members[j].memberName%></a></li>
+              <%}%>
+            </ul>
+          </li>
+        <%}%>
+      </ul>
+    </li>
+  </ul>
+</div>

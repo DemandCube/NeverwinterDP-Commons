@@ -1,12 +1,15 @@
 package com.neverwinterdp.server.gateway;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.ClusterRegistraton;
+import com.neverwinterdp.server.cluster.ClusterRegistration;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.util.JSONSerializer;
@@ -15,8 +18,9 @@ import com.neverwinterdp.util.JSONSerializer;
 public class ClusterGateway {
   private ClusterClient clusterClient ;
   
-  public Server server ;
-  public Module module ;
+  public ClusterPlugin cluster ;
+  public ServerPlugin server ;
+  public ModulePlugin module ;
   private Map<String, Plugin> plugins ;
   
   public ClusterGateway() {
@@ -30,9 +34,11 @@ public class ClusterGateway {
   public void connect(String ... connect)  {
     if(clusterClient != null) clusterClient.shutdown(); 
     clusterClient = new HazelcastClusterClient(connect) ;
-    server = new Server() ;
-    module = new Module() ;
+    cluster = new ClusterPlugin() ;
+    server  = new ServerPlugin() ;
+    module  = new ModulePlugin() ;
     plugins = Plugin.Util.loadByAnnotation("com.neverwinterdp.server.gateway") ;
+    plugins.put("cluster", cluster) ;
     plugins.put("server", server) ;
     plugins.put("module", module) ;
     for(Plugin plugin : plugins.values()) {
@@ -42,8 +48,41 @@ public class ClusterGateway {
   
   public <T extends Plugin> T plugin(String name) { return (T) plugins.get(name) ; }
   
+  public String call(String group, String command, String jsonParams) {
+    CommandParams params = JSONSerializer.INSTANCE.fromString(jsonParams, CommandParams.class) ;
+    return call(group, command, params) ;
+  }
+  
+  public String call(String group, String command, CommandParams params) {
+    try {
+      Plugin plugin = plugin(group) ;
+      return plugin.call(command, params) ;
+    } catch(Throwable t) {
+      Map<String, Object> result = new HashMap<String, Object>() ;
+      result.put("success", false) ;
+      StringWriter w = new StringWriter() ;
+      t.printStackTrace(new PrintWriter(w));; 
+      result.put("message", w.toString()) ;
+      return JSONSerializer.INSTANCE.toString(result) ;
+    }
+  }
+  
+  public Object execute(String group, String command, CommandParams params) {
+    try {
+      Plugin plugin = plugin(group) ;
+      return plugin.execute(command, params) ;
+    } catch(Throwable t) {
+      Map<String, Object> result = new HashMap<String, Object>() ;
+      result.put("success", false) ;
+      StringWriter w = new StringWriter() ;
+      t.printStackTrace(new PrintWriter(w));; 
+      result.put("message", w.toString()) ;
+      return JSONSerializer.INSTANCE.toString(result) ;
+    }
+  }
+  
   public String getMembers() {
-    ClusterRegistraton reg = clusterClient.getClusterRegistration() ;
+    ClusterRegistration reg = clusterClient.getClusterRegistration() ;
     ServerRegistration[] sreg = reg.getServerRegistration() ;
     ClusterMember[] member = new ClusterMember[sreg.length] ;
     for(int i = 0; i < member.length; i++) member[i] = sreg[i].getClusterMember() ;
@@ -54,7 +93,7 @@ public class ClusterGateway {
     return  JSONSerializer.INSTANCE.toString(clusterClient.getClusterRegistration())  ;
   }
   
-  public ClusterRegistraton getClusterRegistration() {
+  public ClusterRegistration getClusterRegistration() {
     return  clusterClient.getClusterRegistration()  ;
   }
   

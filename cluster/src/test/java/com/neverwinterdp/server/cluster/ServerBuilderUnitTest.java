@@ -49,7 +49,7 @@ public class ServerBuilderUnitTest {
     
     
     ClusterClient client = new HazelcastClusterClient() ;
-    ClusterRegistraton cReg = client.getClusterRegistration() ;
+    ClusterRegistration cReg = client.getClusterRegistration() ;
     assertEquals(1, cReg.findClusterMemberByRole("master").length) ;
   }
 }

@@ -27,7 +27,8 @@ public class HttpGatewayRouteHandler extends RouteHandlerGeneric {
     byteBuf.readBytes(bytes) ;
     HttpGatewayRequest grequest = JSONSerializer.INSTANCE.fromBytes(bytes, HttpGatewayRequest.class) ;
     HttpGatewayResponse gresponse = new HttpGatewayResponse(grequest) ;
-    gresponse.setData(cluster.server.ping(grequest.getParams())) ;
+    gresponse.setData(cluster.execute(grequest.getGroup(), grequest.getCommand(), grequest.getParams())) ;
+    System.out.println("Response data = " + gresponse.getData()) ;
     writeJSON(ctx, request, gresponse);
   }
 }

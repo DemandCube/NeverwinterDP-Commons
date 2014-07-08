@@ -25,7 +25,7 @@ import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterListener;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterService;
-import com.neverwinterdp.server.cluster.ClusterRegistraton;
+import com.neverwinterdp.server.cluster.ClusterRegistration;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServiceCommand;
@@ -44,7 +44,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   private Logger logger ;
   private HazelcastInstance hzinstance ;
   private ClusterMemberImpl member ;
-  private ClusterRegistraton clusterRegistration ;
+  private ClusterRegistration clusterRegistration ;
   private Server server ;
   private ApplicationMonitor appMonitor ;
   private List<ClusterListener<Server>> listeners = new ArrayList<ClusterListener<Server>>() ;
@@ -98,14 +98,14 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   public ClusterMember getMember() { return member ; }
   
-  public ClusterRegistraton getClusterRegistration() { return clusterRegistration ; }
+  public ClusterRegistration getClusterRegistration() { return clusterRegistration ; }
   
   public void updateClusterRegistration() {
     clusterRegistration.update(server.getServerRegistration());
   }
   
   public Map<ClusterMember, ServiceRegistration> waitForService(String module, String serviceId, long timeout) throws InterruptedException {
-    ClusterRegistraton registration = getClusterRegistration() ;
+    ClusterRegistration registration = getClusterRegistration() ;
     long stopTime = System.currentTimeMillis() + timeout ;
     while(System.currentTimeMillis() < stopTime) {
       Map<ClusterMember, ServiceRegistration> map = registration.findByServiceId(module, serviceId) ;
@@ -116,7 +116,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   }
   
   public Map<ClusterMember, ServiceRegistration> waitForService(Class<?> type, long timeout) throws InterruptedException {
-    ClusterRegistraton registration = getClusterRegistration() ;
+    ClusterRegistration registration = getClusterRegistration() ;
     long stopTime = System.currentTimeMillis() + timeout ;
     while(System.currentTimeMillis() < stopTime) {
       Map<ClusterMember, ServiceRegistration> map = registration.findByClass(type) ;

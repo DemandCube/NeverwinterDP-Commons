@@ -15,7 +15,7 @@ import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterEvent;
 import com.neverwinterdp.server.cluster.ClusterListener;
 import com.neverwinterdp.server.cluster.ClusterMember;
-import com.neverwinterdp.server.cluster.ClusterRegistraton;
+import com.neverwinterdp.server.cluster.ClusterRegistration;
 import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
@@ -28,7 +28,7 @@ import com.neverwinterdp.server.command.ServiceCommandResult;
  */
 public class HazelcastClusterClient implements ClusterClient,  MessageListener<ClusterEvent>  {
   private HazelcastInstance hzclient ;
-  private ClusterRegistraton clusterRegistration ;
+  private ClusterRegistration clusterRegistration ;
   private List<ClusterListener<ClusterClient>> listeners = new ArrayList<ClusterListener<ClusterClient>>() ;
   private ITopic<ClusterEvent> clusterEventTopic ;
   private String               clusterEventTopicListenerId ;
@@ -54,7 +54,7 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
     clusterEventTopicListenerId = clusterEventTopic.addMessageListener(this) ;
   }
   
-  public ClusterRegistraton getClusterRegistration() {
+  public ClusterRegistration getClusterRegistration() {
     return clusterRegistration ;
   }
   

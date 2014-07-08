@@ -16,13 +16,20 @@ abstract public class Plugin {
     this.clusterClient = clusterClient;
   }
   
+  public <T> T execute(String command, String jsonParams) throws Exception {
+    CommandParams params = JSONSerializer.INSTANCE.fromString(jsonParams, CommandParams.class) ;
+    return (T) doCall(command, params) ;
+  }
+  
+  public <T> T execute(String command, CommandParams params) throws Exception {
+    return (T) doCall(command, params) ;
+  }
+
   public String call(String json) {
     try {
       CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
       String commandName = params.getString("_commandName") ;
-      Object result = doCall(commandName, params) ;
-      if(result != null) return JSONSerializer.INSTANCE.toString(result) ;
-      return "{ 'success': false, 'message': 'unknown command'}" ;
+      return call(commandName, params) ;
     } catch(Throwable t) {
       Map<String, Object> result = new HashMap<String, Object>() ;
       result.put("success", false) ;
@@ -31,13 +38,17 @@ abstract public class Plugin {
     }
   }
   
-  public <T> T execute(String command, String jsonParams) throws Exception {
-    CommandParams params = JSONSerializer.INSTANCE.fromString(jsonParams, CommandParams.class) ;
-    return (T) doCall(command, params) ;
-  }
-  
-  public <T> T execute(String command, CommandParams params) throws Exception {
-    return (T) doCall(command, params) ;
+  public String call(String command, CommandParams params) {
+    try {
+      Object result = doCall(command, params) ;
+      if(result != null) return JSONSerializer.INSTANCE.toString(result) ;
+      return "{ 'success': false, 'message': 'unknown command'}" ;
+    } catch(Throwable t) {
+      Map<String, Object> result = new HashMap<String, Object>() ;
+      result.put("success", false) ;
+      result.put("message", t.getMessage()) ;
+      return JSONSerializer.INSTANCE.toString(result) ;
+    }
   }
   
   abstract protected Object doCall(String command, CommandParams parans) throws Exception ;
