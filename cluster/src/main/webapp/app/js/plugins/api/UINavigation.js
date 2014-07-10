@@ -2,13 +2,13 @@ define([
   'jquery',
   'underscore', 
   'backbone',
-  'service/ClusterGateway',
+  'site/UIWorkspace',
   'text!plugins/api/UINavigation.jtpl'
-], function($, _, Backbone, ClusterGateway, Template) {
+], function($, _, Backbone, UIWorkspace, Template) {
   var UINavigation = Backbone.View.extend({
 
     initialize: function () {
-      _.bindAll(this, 'render') ;
+      _.bindAll(this, 'render', 'onSelectUIComponent') ;
     },
     
     _template: _.template(Template),
@@ -17,7 +17,19 @@ define([
       var params = { 
       } ;
       $(this.el).html(this._template(params));
-      $(this.el).trigger("create") ;
+    },
+
+    events: {
+      'click .onSelectUIComponent': 'onSelectUIComponent'
+    },
+    
+    onSelectUIComponent: function(evt) {
+      var name = $(evt.target).closest('.onSelectUIComponent').attr('name') ;
+      console.log('on select: ' + name) ;
+
+      require(['plugins/api/UI' + name + 'Api'], function(UIApi) { 
+        UIWorkspace.setUIComponent(UIApi) ;
+      }) ;
     }
   });
 

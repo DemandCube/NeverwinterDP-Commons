@@ -69,6 +69,7 @@ public class ModuleContainer {
         logger.info("Module " + moduleNames[i] + " is already installed");
         continue ;
       }
+      
       ModuleRegistration mreg = availableModules.get(moduleNames[i]) ;
       if(mreg == null) {
         logger.info("Module " + moduleNames[i] + " is not available");

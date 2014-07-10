@@ -43,7 +43,11 @@ define([
   var ClusterGateway = {
     clusterRegistration: new ClusterRegistration()  ,
 
-    getClusterRegistration: function() { return this.clusterRegistration ; }
+    getClusterRegistration: function() { return this.clusterRegistration ; } ,
+
+    call: function(group, command, params) {
+      return Server.clusterRequest(group, command, {} ) ;
+    }
   }
   return ClusterGateway ;
 });

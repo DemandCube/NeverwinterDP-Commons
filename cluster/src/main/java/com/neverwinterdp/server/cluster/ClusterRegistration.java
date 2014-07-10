@@ -69,4 +69,12 @@ abstract public class ClusterRegistration {
     }
     return holder.toArray(new ClusterMember[holder.size()]);
   }
+  
+  public ClusterMember getClusterMemberByName(String name) {
+    for(ServerRegistration sel : getServerRegistration()) {
+      String serverName = sel.getServerName() ;
+      if(serverName.equals(name)) return sel.getClusterMember() ;
+    }
+    return null ;
+  }
 }

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
+import com.neverwinterdp.util.jvm.JVMInfo;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 /**
@@ -85,6 +86,12 @@ public class ServerCommands {
     public Integer execute(Server server) throws Exception {
       ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
       return appMonitor.remove(nameExp) ;
+    }
+  }
+  
+  static public class GetJVMInfo extends ServerCommand<JVMInfo> {
+    public JVMInfo execute(Server server) throws Exception {
+      return new JVMInfo() ;
     }
   }
 }

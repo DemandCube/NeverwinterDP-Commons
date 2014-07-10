@@ -1,21 +1,23 @@
 package com.neverwinterdp.server.gateway;
 
+import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
+import com.neverwinterdp.util.jvm.JVMInfo;
 import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
 
 public class ServerPlugin extends Plugin {
   protected Object doCall(String commandName, CommandParams params) throws Exception {
-    ServerCommandResult<?>[] results = null ;
-    if("ping".equals(commandName)) results = ping(params) ;
-    else if("metric".equals(commandName)) results = metric(params) ;
-    else if("clearMetric".equals(commandName)) results = clearMetric(params) ;
-    else if("start".equals(commandName)) results = start(params) ;
-    else if("shutdown".equals(commandName)) results = shutdown(params) ;
-    else if("exit".equals(commandName)) results = exit(params) ;
-    if(results != null) return results ;
+    if("ping".equals(commandName)) return ping(params) ;
+    else if("registration".equals(commandName)) return registration(params) ;
+    else if("metric".equals(commandName)) return metric(params) ;
+    else if("clearMetric".equals(commandName)) return clearMetric(params) ;
+    else if("start".equals(commandName)) return start(params) ;
+    else if("shutdown".equals(commandName)) return shutdown(params) ;
+    else if("exit".equals(commandName)) return exit(params) ;
+    else if("jvminfo".equals(commandName)) return jvminfo(params) ;
     return null ;
   }
 
@@ -28,6 +30,15 @@ public class ServerPlugin extends Plugin {
     ServerCommand<ServerState> ping = new ServerCommands.Ping() ;
     ServerCommandResult<ServerState>[] results = memberSelector.execute(clusterClient, ping) ;
     return results ;
+  }
+  
+  public ServerCommandResult<ServerRegistration>[] registration(CommandParams params) {
+    return registration(new MemberSelector(params));
+  }
+  
+  public ServerCommandResult<ServerRegistration>[] registration(MemberSelector memberSelector) {
+    ServerCommands.GetServerRegistration cmd = new ServerCommands.GetServerRegistration() ;
+    return memberSelector.execute(clusterClient, cmd) ;
   }
   
   public ServerCommandResult<ApplicationMonitorSnapshot>[] metric(CommandParams params) {
@@ -83,5 +94,14 @@ public class ServerPlugin extends Plugin {
     ServerCommand<ServerState> ping = new ServerCommands.Exit() ;
     ServerCommandResult<ServerState>[] results = memberSelector.execute(clusterClient, ping) ;
     return results ;
+  }
+  
+  public ServerCommandResult<JVMInfo>[] jvminfo(CommandParams params) {
+    return jvminfo(new MemberSelector(params));
+  }
+  
+  public ServerCommandResult<JVMInfo>[] jvminfo(MemberSelector memberSelector) {
+    ServerCommands.GetJVMInfo cmd = new ServerCommands.GetJVMInfo() ;
+    return memberSelector.execute(clusterClient, cmd) ;
   }
 }

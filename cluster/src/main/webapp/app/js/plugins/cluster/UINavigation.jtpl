@@ -2,26 +2,28 @@
   <h3 style="margin: 3px 0px">Server</h3>
   <hr/>
 
-  <ul style="margin: 10px 0px; border: none" class="UINavigationMenu">
-    <li>By Member Name
+  <ul style="margin: 10px; font-size: 1em" class="UINavigationMenu">
+    <li>
+      <a class="ui-action onListServer">Servers</a>
       <ul>
         <%var members = clusterRegistration.getMembers() %>
         <%for(var i = 0; i < members.length; i++) { %>
-          <li><a href="#"><%=members[i].memberName%></a></li>
+          <li><a class="ui-action onServerInfo"><%=members[i].memberName%></a></li>
         <%}%>
       </ul>
     </li>
 
-    <li>By Member Role
+    <li>
+      <a class="ui-action ui-disabled">Roles</a>
       <ul>
         <%var roleSet = clusterRegistration.getRoleSet(); %>
         <%for(var i = 0; i < roleSet.length; i++) { %>
           <li>
-            <%=roleSet[i]%>
+            <a class="ui-action ui-disabled"><%=roleSet[i]%></a>
             <ul>
               <%var members = clusterRegistration.getMemberByRole(roleSet[i]) ; %>
               <%for(var j = 0; j < members.length; j++) { %>
-                <li><a href="#"><%=members[j].memberName%></a></li>
+                <li><a class="ui-action onServerInfo"><%=members[j].memberName%></a></li>
               <%}%>
             </ul>
           </li>

@@ -21,6 +21,8 @@ define([
     
     setUIComponent: function(uicomp) {
       this.uicomponent  = uicomp ;
+      $(this.el).empty();
+      $(this.el).unbind();
       uicomp.setElement($('#UIWorkspace')).render();
     }
   });

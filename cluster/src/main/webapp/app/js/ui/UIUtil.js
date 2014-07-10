@@ -63,6 +63,19 @@ define([
       throw message ;
     }
   };
+
+  var UIUtil = {
+    Validator: Validator,
+
+    getAncestorOfType: function(uicomp, type) {
+      var uiParent = uicomp.uiParent ;
+      while(uiParent != null) {
+        if(type == uiParent.type) return uiParent ;
+        uiParent = uiParent.uiParent ;
+      }
+      return null ;
+    }
+  }
  
-  return Validator ;
+  return UIUtil ;
 });

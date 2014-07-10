@@ -1,5 +1,9 @@
+body {
+  font-family:"Helvetica Neue", Arial, Helvetica, sans-serif !important;
+}
+
 table {
-  width: 100%;
+  width: 99%;
   border-collapse:collapse;
   margin: 0px auto;
 }
@@ -12,9 +16,9 @@ th, td {
 .ui-action {
   cursor: pointer ;
   text-decoration: none ;
-  color: #06c;
+  color: #06c !important ;
   padding: 3px ;
-  font-weight: bold ;
+  font-weight: bold !important;
 }
 
 .ui-action:hover, .ui-action:focus {
@@ -29,6 +33,17 @@ a.ui-disabled {
   pointer-events: none;
   cursor: default;
   text-decoration: none ;
-  font-weight: normal ;
+  font-weight: normal !important ;
 }
 
+
+#UINavigation {
+  width: 200px;
+  float: left ;
+}
+
+#UIWorkspace {
+  margin-left: 200px ;
+  padding-right: 20px ;
+  overflow: auto ;
+}

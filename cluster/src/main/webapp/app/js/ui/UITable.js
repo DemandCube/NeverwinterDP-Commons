@@ -3,13 +3,13 @@ define([
   'underscore', 
   'backbone',
   'util/PageList',
+  'ui/UIUtil',
   'ui/UIPopup',
   'ui/UIBean',
   'text!ui/UITable.jtpl',
   'text!ui/UITableRows.jtpl',
   'css!ui/UITable.css'
-], function($, _, Backbone, PageList, UIPopup, UIBean, 
-            UITableTmpl, UITableRowsTmpl) {
+], function($, _, Backbone, PageList, UIUtil, UIPopup, UIBean, UITableTmpl, UITableRowsTmpl) {
   var UITableBean = UIBean.extend({
     config: {
       beans: {
@@ -59,12 +59,13 @@ define([
   var UITable = Backbone.View.extend({
     initialize: function (options) {
       this.tableId = this.randomId() ;
+      if(this.onInit) {
+        this.onInit(options) ;
+      }
       _.bindAll(this, 'render', 'onSwitchToolbar',
                 'onToggleColumnSelector', 'onToggleColumn', 'onSelectDisplayRow', 
                 'onDfltToolbarAction', 'onDfltBeanFilter',
                 'onFilterMoreOption', 'onFilter', 
-                'onSearch',
-                'onBeanFieldClick', 'onBeanAction',
                 'onSelectPage') ;
     },
     
@@ -145,6 +146,10 @@ define([
       item.bean.persistableState = 'MODIFIED' ;
       this._updateBeanStateCount() ;
       this.renderRows() ;
+    },
+
+    getAncestorOfType: function(type) {
+      return UIUtil.getAncestorOfType(this, type) ;
     },
     
     /**
@@ -313,7 +318,6 @@ define([
       var uicomp = new UITableBean().init(this, bean, row) ;
       var popupConfig = {title: "Edit Bean", minWidth: 600, modal: true} ;
       UIPopup.activate(uicomp, popupConfig) ;
-      console.log('on edit bean') ;
     },
     
     _filter: function() {

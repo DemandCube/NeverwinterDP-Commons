@@ -4,8 +4,7 @@ define([
   'underscore', 
   'backbone',
   'plugins/PluginManager',
-  'text!site/UINavigation.jtpl'
-], function($, jqueryui, _, Backbone, PluginManager, NavigationTmpl) {
+], function($, jqueryui, _, Backbone, PluginManager) {
   var UINavigation = Backbone.View.extend({
     el: $("#UINavigation"),
     
@@ -13,14 +12,10 @@ define([
       _.bindAll(this, 'render') ;
     },
     
-    _template: _.template(NavigationTmpl),
 
-    _blockTmpl: _.template("<div style='padding: 10px 5px' class='<%=name%>'></div>"),
+    _blockTmpl: _.template("<div style='padding: 10px' class='<%=name%>'></div>"),
     
     render: function() {
-      //var params = { } ;
-      //$(this.el).html(this._template(params));
-      //$(this.el).trigger("create") ;
       var plugins = PluginManager.getPlugins() ;
       for(var i = 0; i < plugins.length; i++) {
         var plugin = plugins[i] ;

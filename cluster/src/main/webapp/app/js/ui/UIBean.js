@@ -2,10 +2,10 @@ define([
   'jquery', 
   'underscore', 
   'backbone',
-  'ui/Validator',
+  'ui/UIUtil',
   'text!ui/UIBean.jtpl',
   'css!ui/UIBean.css'
-], function($, _, Backbone, Validator, UIBeanTmpl) {
+], function($, _, Backbone, UIUtil, UIBeanTmpl) {
   var SearchFilterTemplate = _.template(
     "<h4>Search For <%=fieldConfig.label%>(<%=items.length%>)</h4>" +
     "<%for(var i = 0; i < items.length; i++) { %>" +
@@ -40,24 +40,6 @@ define([
     };
   };
   
-  var BeanConfig = function(bconfig) {
-    this.beanConfig = bconfig ;
-    
-    this.disableEditAction = function(bool) {
-      this.beanConfig.edit.disable = bool ;
-    };
-    
-    this.disableField = function(name, bool) {
-      var fields = this.beanConfig.fields ;
-      for(var i = 0; i < fields.length; i++) {
-        if(fields[i].field == name) {
-          fields[i].disable = bool ;
-          return ;
-        }
-      }
-    };
-  };
-  
   /**
    *@type ui.UIBean 
    */
@@ -87,7 +69,7 @@ define([
       var size = Object.keys(this.beanStates).length ;
       var select = false ;
       if(size == 0) select = true ;
-      this.beanStates[name] = { bean: bean, editMode: false, select: select, state: {}} ;
+      this.beanStates[name] = { bean: bean, editMode: false, select: select} ;
     },
     
     /**@memberOf ui.UIBean*/
@@ -99,13 +81,9 @@ define([
       this.beanArray = array ;
       this.beanName = name ;
       for(var i = 0; i < array.length; i++) {
-        this.beanStates[name + '_' + i] = { bean: array[i], editMode: false, select: false, state: {}} ;
+        this.beanStates[name + '_' + i] = { bean: array[i], editMode: false, select: false} ;
       }
       this._toggleBean(name + '_' + i) ;
-    },
-    
-    getBeanConfig: function(name) {
-      return new BeanConfig(this.config.beans[name]) ;
     },
     
     getBeanState: function(name) {
@@ -130,6 +108,10 @@ define([
         $.extend(true, beanState.bean, beanState.origin) ;
       }
       this.render() ;
+    },
+
+    getAncestorOfType: function(type) {
+      return UIUtil.getAncestorOfType(this, type) ;
     },
     
     _template: _.template(UIBeanTmpl),
@@ -179,7 +161,7 @@ define([
       var idx = this.beanArray.length ;
       this.beanArray.push({}) ;
       var beanName = this.beanName + '_' + idx ;
-      this.beanStates[beanName] = { bean: this.beanArray[idx], editMode: true, select: false, state: {}} ;
+      this.beanStates[beanName] = { bean: this.beanArray[idx], editMode: true, select: false} ;
       this._toggleBean(beanName) ;
       this.render() ;
     },
@@ -203,7 +185,7 @@ define([
       if(idx == 0) {
         var bean = {} ;
         this.beanArray.push(bean) ;
-        holder[this.beanName + '_' + idx] = { bean: bean, editMode: true, select: false, state: {}} ;
+        holder[this.beanName + '_' + idx] = { bean: bean, editMode: true, select: false} ;
       }
       this.beanStates = holder ;
       this._toggleBean(null) ;
@@ -481,8 +463,8 @@ define([
         }
         var validator = fields[i].validator ;
         if(validator == null) continue ;
-        if(Validator[validator.name] != undefined) {
-          var validate = Validator[validator.name] ;
+        if(UIUtil.Validator[validator.name] != undefined) {
+          var validate = UIUtil.Validator[validator.name] ;
           try {
             if (value instanceof Array) {
               for(var j = 0; j < value.length; j++) {

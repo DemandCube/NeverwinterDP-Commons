@@ -2,8 +2,9 @@ define([
   'jquery', 
   'underscore', 
   'backbone',
+  'ui/UIUtil',
   'text!ui/UICollapsible.jtpl',
-], function($, _, Backbone, UICollapsibleTmpl) {
+], function($, _, Backbone, UIUtil, UICollapsibleTmpl) {
   /**
    *@type ui.UICollapsible 
    */
@@ -11,16 +12,38 @@ define([
     
     initialize: function (options) {
       this.clear() ;
+      this.type = 'UICollapsible' ;
       this.onInit(options) ;
       _.bindAll(this, 'render', 'onToggleBlock', 'onAction') ;
     },
     
     onInit: function(options) { },
+
     
     add: function(component, collapsed) {
       component.collapible = {} ;
       if(collapsed) component.collapible.collapsed = true ;
+      component.uiParent = this ;
       this.components.push(component) ; 
+    },
+
+    remove: function(component) {
+      var holder = [] ;
+      for(var i = 0; i < this.components.length; i++) {
+        if(this.components[i] !=  component) {
+          holder.push(this.components[i]) ;
+        }
+      }
+      this.components = holder() ;
+    },
+
+    clear: function() { 
+      this.components = [] ;
+      this.state = { actions: {} } ;
+    },
+
+    getAncestorOfType: function(type) {
+      return UIUtil.getAncestorOfType(this, type) ;
     },
     
     setActionHidden: function(actionName, bool) {
@@ -28,11 +51,6 @@ define([
         this.state.actions[actionName] = {} ;
       }
       this.state.actions[actionName].hidden = bool ;
-    },
-    
-    clear: function() { 
-      this.components = [] ;
-      this.state = { actions: {} } ;
     },
     
     _template: _.template(UICollapsibleTmpl),

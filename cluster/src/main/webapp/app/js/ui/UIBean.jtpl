@@ -145,7 +145,7 @@
           <%}%>
           <a class="ui-action onEditMode">Edit</a>
         <%}%>
-        <%if(beanConfig.view != null && !beanConfig.view.disable) {%>
+        <%if(beanConfig.view != null && !beanState.disableViewAction) {%>
           <%for(var i = 0; i < beanConfig.view.actions.length; i++) {%>
           <%  var action =  beanConfig.view.actions[i];%> 
               <a class="ui-action onViewAction" action="<%=action.action%>"><%=action.label%></a> 

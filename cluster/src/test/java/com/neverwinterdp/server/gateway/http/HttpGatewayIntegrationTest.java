@@ -25,14 +25,14 @@ public class HttpGatewayIntegrationTest {
   @BeforeClass
   static public void setup() throws Exception {
     String[] args = {
-      "-Pserver.group=NeverwinterDP", "-Pserver.name=webserver", "-Pserver.roles=webserver"
+      "-Pserver.group=NeverwinterDP", "-Pserver.name=generic", "-Pserver.roles=generic"
     };
     instance = Server.create(args) ;
     gateway = new ClusterGateway() ;
     gateway.module.execute(
         "install", 
         new CommandParams().
-          field("member-name", "webserver").
+          field("member-name", "generic").
           field("autostart", true).
           field("module", new String[] { "cluster.gateway" }).
           field("-Phttp-www-dir", "src/main/webapp")
