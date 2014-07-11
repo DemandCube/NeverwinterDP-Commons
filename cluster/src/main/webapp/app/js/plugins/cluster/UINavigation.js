@@ -6,13 +6,19 @@ define([
   'ui/UIBreadcumbs',
   'site/UIWorkspace',
   'plugins/cluster/UIListServer',
-  'plugins/cluster/UIServerInfo',
+  'plugins/cluster/UIListModule',
+  'plugins/cluster/UIClusterRegistration',
+  'plugins/cluster/UIServerRegistration',
   'text!plugins/cluster/UINavigation.jtpl'
-], function($, _, Backbone, ClusterGateway, UIBreadcumbs, UIWorkspace, UIListServer, UIServerInfo, Template) {
+], function($, _, Backbone, ClusterGateway, UIBreadcumbs, UIWorkspace, UIListServer,
+            UIListModule, UIClusterRegistration, UIServerRegistration, Template) {
   var UINavigation = Backbone.View.extend({
 
     initialize: function () {
-      _.bindAll(this, 'render', 'onListServer', 'onServerInfo') ;
+      _.bindAll(
+        this, 'render', 'onListServer', 'onListModule',
+        'onServerRegistration', 'onClusterRegistration'
+      ) ;
     },
     
     _template: _.template(Template),
@@ -28,16 +34,26 @@ define([
 
     events: {
       'click .onListServer': 'onListServer',
-      'click .onServerInfo': 'onServerInfo'
+      'click .onListModule': 'onListModule',
+      'click .onClusterRegistration': 'onClusterRegistration',
+      'click .onServerRegistration': 'onServerRegistration'
     },
     
     onListServer: function(evt) {
       this._workspace(new UIListServer()) ;
     },
 
-    onServerInfo: function(evt) {
+    onListModule: function(evt) {
+      this._workspace(new UIListModule()) ;
+    },
+
+    onClusterRegistration: function(evt) {
+      this._workspace(new UIClusterRegistration()) ;
+    },
+
+    onServerRegistration: function(evt) {
       var memberName = $(evt.target).attr("memberName") ;
-      this._workspace(new UIServerInfo({memberName: memberName})) ;
+      this._workspace(new UIServerRegistration({memberName: memberName})) ;
     },
 
     _workspace: function(uicomp) {

@@ -4,10 +4,10 @@ define([
   'backbone',
   'service/ClusterGateway',
   'ui/UITable',
-  'plugins/cluster/UIServerInfo',
+  'plugins/cluster/UIServerRegistration',
   'plugins/cluster/UIJVMInfo',
   'plugins/cluster/UIMetric',
-], function($, _, Backbone, ClusterGateway, UITable, UIServerInfo, UIJVMInfo, UIMetric) {
+], function($, _, Backbone, ClusterGateway, UITable, UIServerRegistration, UIJVMInfo, UIMetric) {
   
   var UIListServer = UITable.extend({
     label: "List Server",
@@ -34,7 +34,7 @@ define([
             onClick: function(thisTable, row) {
               var bean = thisTable.getItemOnCurrentPage(row) ;
               var memberName = bean.fromMember.memberName ;
-              thisTable.UIParent.push(new UIServerInfo( {memberName: memberName})) ;
+              thisTable.UIParent.push(new UIServerRegistration( {memberName: memberName})) ;
             },
             custom: {
               getDisplay: function(bean) {

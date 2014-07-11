@@ -3,12 +3,12 @@ define([
   'underscore', 
   'backbone',
   'service/ClusterGateway',
-  'ui/UICollapsible',
+  'ui/UIContainer',
   'ui/UIBean',
   'ui/UITable',
   'plugins/cluster/UIJVMInfo',
   'plugins/cluster/UIMetric',
-], function($, _, Backbone, ClusterGateway, UICollabsible, UIBean, UITable, UIJVMInfo, UIMetric) {
+], function($, _, Backbone, ClusterGateway, UIContainer, UIBean, UITable, UIJVMInfo, UIMetric) {
   var UIMemberInfo = UIBean.extend({
     label: "Member Info",
 
@@ -116,15 +116,21 @@ define([
     }
   });
 
-  var UIServerInfo = UICollabsible.extend({
-    label: "Server Info", 
+  var UIServerRegistration = UIContainer.extend({
+    label: "Server Registration", 
     config: {
       actions: [ ]
     },
 
     onInit: function(options) {
-      var results = ClusterGateway.call('server', 'registration', {'member-name': options.memberName}) ;
-      var registration = results[0].result ;
+      var registration = null ;
+      if(options.serverRegistration != null) {
+        registration = options.serverRegistration ;
+      } else {
+        var results = ClusterGateway.call('server', 'registration', {'member-name': options.memberName}) ;
+        registration = results[0].result ;
+      }
+      this.label = "Server Registration For " + registration.clusterMember.memberName ;  
 
       this.add(new UIMemberInfo({registration: registration})) ;
 
@@ -134,5 +140,5 @@ define([
     }
   }) ;
 
-  return UIServerInfo ;
+  return UIServerRegistration ;
 });
