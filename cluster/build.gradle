@@ -29,12 +29,18 @@ dependencies {
 task jsJar(type:Jar) { 
   baseName = 'commons.cluster' 
   classifier = 'js'
-  //from sourceSets.main
   from "src/main/javascript"
   include '**/*'
 }
 
+task webappJar(type:Jar) { 
+  baseName = 'commons.cluster' 
+  classifier = 'webapp'
+  from "src/main/webapp"
+  include '**/*'
+}
+
 artifacts { 
-  //archives file: file('build/libs/commons.cluster-1.0-SNAPSHOT-js.jar')
   archives jsJar
+  archives webappJar
 } 

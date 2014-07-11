@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.neverwinterdp.server.gateway.http.HttpGatewayService;
 
-@ModuleConfig(name = "cluster.gateway", autoInstall = false, autostart = false) 
+@ModuleConfig(name = "HttpGateway", autoInstall = false, autostart = false) 
 public class GatewayModule extends ServiceModule {
   protected void configure(Map<String, String> properties) {  
     bindService(HttpGatewayService.class); 

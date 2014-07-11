@@ -1,10 +1,11 @@
 define([
+  'service/ClusterGateway',
   'ui/UIPopup',
   'ui/UITable',
   'ui/UIBean',
   'ui/UICollapsible',
   'ui/UIContent',
-], function(UIPopup, UITable, UIBean, UICollapsible, UIContent) {
+], function(ClusterGateway, UIPopup, UITable, UIBean, UICollapsible, UIContent) {
   
   var UIMemoryMonitor = UIBean.extend({
     label: 'Memory Info',
@@ -179,6 +180,8 @@ define([
         {
           action: 'back', label: 'Back',
           onClick: function (thisUI) {
+            var uiBreadcumbs = thisUI.getAncestorOfType('UIBreadcumbs') ;
+            uiBreadcumbs.back() ;
           }
         },
       ]
@@ -191,9 +194,15 @@ define([
   });
   
   var UIJVMInfo = UICollapsible.extend({
-    label: "JVM Monitor",
+    label: "JVM Info",
     config: {
       actions: [
+        {
+          action: 'refresh', label: 'Refresh',
+          onClick: function (thisUI) {
+            thisUI.onRefresh() ;
+          }
+        },
         {
           action: 'back', label: 'Back',
           onClick: function (thisUI) {
@@ -205,17 +214,22 @@ define([
     },
 
     onInit: function(options) {
-      if(options.server) {
-        this.label = "JVM Info(" + options.server + "')"; 
-      }
-      this.jvmInfo = options.jvmInfo ;
-      this.add(new UIMemoryMonitor({ jvmInfo: this.jvmInfo })) ;
-      this.add(new UIThreadMonitor({threadInfo: this.jvmInfo.threadInfo})) ;
+      this.memberName = options.memberName ;
+      this.label = "JVM Info(" + this.memberName + "')"; 
+      this.onRefresh() ;
     },
-    
-    back: function () {
-      this.UIParent.back() ;
+
+    onRefresh: function() {
+      this.clear() ;
+
+      var results = ClusterGateway.call('server', 'jvminfo', {'member-name': this.memberName}) ;
+      this.jvmInfo = results[0].result ;
+
+      this.add(new UIMemoryMonitor({ jvmInfo: this.jvmInfo })) ;
+      this.add(new UIThreadMonitor({ threadInfo: this.jvmInfo.threadInfo })) ;
+      this.render() ;
     }
+    
   });
   
   return UIJVMInfo;

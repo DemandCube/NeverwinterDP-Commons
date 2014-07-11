@@ -93,9 +93,14 @@ public class BuiltinCommandGroup extends CommandGroup {
     public void execute(ShellContext context) throws Exception {
       HashMap<String, Object> ctx = new HashMap<String, Object>() ;
       ctx.put("JAVA_CLUSTER_GATEWAY", context.getClusterGateway()) ;
-      ScriptRunner runner = new ScriptRunner(".", ctx) ;
+      String jsDir = "." ;
+      String appDir = System.getProperty("app.dir", null) ; 
+      if(appDir != null) {
+        jsDir = appDir + "/jscript" ;
+      }
+      ScriptRunner runner = new ScriptRunner(jsDir, ctx) ;
       for(String selFile :files) {
-        runner.require(selFile);
+        runner.runScript(selFile);
       }
     }
   }

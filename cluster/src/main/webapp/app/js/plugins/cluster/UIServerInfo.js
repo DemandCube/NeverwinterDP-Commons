@@ -62,9 +62,7 @@ define([
                 action:'jvm', label: "JVM", icon: "gear",
                 onClick: function(thisUI, beanConfig, beanState) { 
                   var memberName = beanState.bean.clusterMember.memberName ;
-                  var results = ClusterGateway.call('server', 'jvminfo', {'member-name': memberName}) ;
-                  var jvmInfo = results[0].result ;
-                  var uiJVMInfo = new UIJVMInfo({server: memberName, jvmInfo: jvmInfo}) ;
+                  var uiJVMInfo = new UIJVMInfo({memberName: memberName}) ;
                   var uiBreadcumbs = thisUI.getAncestorOfType('UIBreadcumbs') ;
                   uiBreadcumbs.push(uiJVMInfo) ;
                 }
@@ -125,7 +123,7 @@ define([
     },
 
     onInit: function(options) {
-      var results = ClusterGateway.call('server', 'registration', {'member-name': 'generic'}) ;
+      var results = ClusterGateway.call('server', 'registration', {'member-name': options.memberName}) ;
       var registration = results[0].result ;
 
       this.add(new UIMemberInfo({registration: registration})) ;

@@ -36,7 +36,8 @@ define([
     },
 
     onServerInfo: function(evt) {
-      this._workspace(new UIServerInfo()) ;
+      var memberName = $(evt.target).attr("memberName") ;
+      this._workspace(new UIServerInfo({memberName: memberName})) ;
     },
 
     _workspace: function(uicomp) {

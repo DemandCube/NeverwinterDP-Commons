@@ -8,7 +8,7 @@
       <ul>
         <%var members = clusterRegistration.getMembers() %>
         <%for(var i = 0; i < members.length; i++) { %>
-          <li><a class="ui-action onServerInfo"><%=members[i].memberName%></a></li>
+          <li><a class="ui-action onServerInfo" memberName="<%members[i].memberName%>"><%=members[i].memberName%></a></li>
         <%}%>
       </ul>
     </li>
@@ -23,7 +23,7 @@
             <ul>
               <%var members = clusterRegistration.getMemberByRole(roleSet[i]) ; %>
               <%for(var j = 0; j < members.length; j++) { %>
-                <li><a class="ui-action onServerInfo"><%=members[j].memberName%></a></li>
+                <li><a class="ui-action onServerInfo" memberName="<%members[j].memberName%>"><%=members[j].memberName%></a></li>
               <%}%>
             </ul>
           </li>

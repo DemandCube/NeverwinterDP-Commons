@@ -12,14 +12,7 @@ define([
     config: {
       toolbar: {
         dflt: {
-          actions: [
-            {
-              action: "onRefresh", icon: "refresh", label: "Refresh", 
-              onClick: function(thisTable) { 
-                console.log("on refresh");
-              } 
-            }
-          ]
+          actions: [ ]
         }
       },
       
@@ -42,14 +35,7 @@ define([
     config: {
       toolbar: {
         dflt: {
-          actions: [
-            {
-              action: "onRefresh", icon: "refresh", label: "Refresh", 
-              onClick: function(thisTable) { 
-                console.log("on refresh");
-              } 
-            }
-          ]
+          actions: [ ]
         }
       },
       
@@ -148,11 +134,25 @@ define([
   var UIMetric = UICollapsible.extend({
     label: "Metric", 
     config: {
-      actions: [ ]
+      actions: [
+        {
+          action: 'refresh', label: 'Refresh',
+          onClick: function (thisUI) {
+            thisUI.onRefresh() ;
+          }
+        },
+      ]
     },
 
     onInit: function(options) {
-      var results = ClusterGateway.call('server', 'metric', {'member-name': options.memberName}) ;
+      this.memberName = options.memberName ;
+      this.onRefresh() ;
+    } ,
+
+    onRefresh: function() {
+      this.clear() ;
+
+      var results = ClusterGateway.call('server', 'metric', {'member-name': this.memberName}) ;
       var metricRegistry = results[0].result.registry ;
 
       var asArray = function(map) {
@@ -167,7 +167,8 @@ define([
 
       this.add(new UITimerMetric({ timers: asArray(metricRegistry.timers) })) ;
       this.add(new UICounterMetric({ counters: asArray(metricRegistry.counters) }), true) ;
-    },
+      this.render() ;
+    }
   }) ;
   
   return UIMetric ;

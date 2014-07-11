@@ -9,13 +9,13 @@ import javax.script.ScriptEngineManager;
 import com.neverwinterdp.util.IOUtil;
 
 public class ScriptRunner {
-  private String baseDir ;
+  private String libDir ;
   private HashSet<String> loadedFiles = new HashSet<String> () ;
   private ScriptEngine engine ;
   
   
   public ScriptRunner(String baseDir, Map<String, Object> ctx) {
-    this.baseDir = baseDir ;
+    this.libDir = baseDir ;
     ScriptEngineManager factory = new ScriptEngineManager();
     engine = factory.getEngineByName("JavaScript");
     engine.put("ScriptRunner", this) ;
@@ -38,9 +38,20 @@ public class ScriptRunner {
       if(scriptFile.startsWith("classpath:") || scriptFile.startsWith("file:")) {
         script = IOUtil.getStreamContentAsString(IOUtil.loadRes(scriptFile), "UTF-8") ;
       } else {
-        script = IOUtil.getFileContentAsString(baseDir + "/" + scriptFile, "UTF-8") ;
+        script = IOUtil.getFileContentAsString(libDir + "/" + scriptFile, "UTF-8") ;
       }
       loadedFiles.add(scriptFile) ;
+      engine.put(ScriptEngine.FILENAME, scriptFile);
+      engine.eval(script);
+    } catch(Exception ex) {
+      ex.printStackTrace() ;
+      throw new RuntimeException(ex) ;
+    }
+  }
+  
+  public void runScript(String scriptFile) {
+    try {
+      String script = IOUtil.getFileContentAsString(scriptFile, "UTF-8") ;
       engine.put(ScriptEngine.FILENAME, scriptFile);
       engine.eval(script);
     } catch(Exception ex) {

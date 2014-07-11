@@ -33,7 +33,8 @@ define([
             toggled: true, filterable: true,
             onClick: function(thisTable, row) {
               var bean = thisTable.getItemOnCurrentPage(row) ;
-              thisTable.UIParent.push(new UIServerInfo()) ;
+              var memberName = bean.fromMember.memberName ;
+              thisTable.UIParent.push(new UIServerInfo( {memberName: memberName})) ;
             },
             custom: {
               getDisplay: function(bean) {
@@ -68,9 +69,8 @@ define([
             icon: "gear", label: "JVM",
             onClick: function(thisTable, row) { 
               var bean = thisTable.getItemOnCurrentPage(row) ;
-              var results = ClusterGateway.call('server', 'jvminfo', {'member-name': 'generic'}) ;
-              var jvmInfo = results[0].result ;
-              var uiJVMInfo = new UIJVMInfo({server: bean.fromMember.memberName, jvmInfo: jvmInfo}) ;
+              var memberName = bean.fromMember.memberName ;
+              var uiJVMInfo = new UIJVMInfo( {memberName: memberName} ) ;
               var uiBreadcumbs = thisTable.getAncestorOfType('UIBreadcumbs') ;
               uiBreadcumbs.push(uiJVMInfo) ;
             }
@@ -80,7 +80,7 @@ define([
             onClick: function(thisTable, row) { 
               var bean = thisTable.getItemOnCurrentPage(row) ;
               var memberName = bean.fromMember.memberName ;
-              var uiMetric = new UIMetric({memberName: bean.fromMember.memberName}) ;
+              var uiMetric = new UIMetric({memberName: memberName}) ;
               var uiBreadcumbs = thisTable.getAncestorOfType('UIBreadcumbs') ;
               uiBreadcumbs.push(uiMetric) ;
             }

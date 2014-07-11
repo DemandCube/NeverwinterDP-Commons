@@ -211,19 +211,23 @@ public class Server {
     runtimeEnvironment.dumpInfo(out);
   }
   
-  static public class Options {
+  static public class ServerOptions {
     @DynamicParameter(names = "-P", description = "Module properties")
     Map<String, String> properties = new HashMap<String, String>();
   }
   
   static public Server create(String ... args) {
-    Options options = new Options() ;
+    ServerOptions options = new ServerOptions() ;
     new JCommander(options, args) ;
     String serverName = options.properties.get("server.name") ;
     if(serverName != null) {
       System.setProperty("server.name", serverName);
     }
-    Injector container = Guice.createInjector(new ServerModule(options.properties));
+    return create(options.properties) ;
+  }
+  
+  static public Server create(Map<String, String> properties) {
+    Injector container = Guice.createInjector(new ServerModule(properties));
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();

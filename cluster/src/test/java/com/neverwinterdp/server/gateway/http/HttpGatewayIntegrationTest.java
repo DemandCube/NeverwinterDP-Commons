@@ -34,7 +34,7 @@ public class HttpGatewayIntegrationTest {
         new CommandParams().
           field("member-name", "generic").
           field("autostart", true).
-          field("module", new String[] { "cluster.gateway" }).
+          field("module", new String[] { "HttpGateway" }).
           field("-Phttp-www-dir", "src/main/webapp")
     ) ;
   }
