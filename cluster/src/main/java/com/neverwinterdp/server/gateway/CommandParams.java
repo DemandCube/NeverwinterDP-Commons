@@ -66,14 +66,21 @@ public class CommandParams extends HashMap<String, Object> {
     List<String> holder = new ArrayList<String>();
     for(Map.Entry<String, Object> entry : entrySet()) {
       String key = entry.getKey() ;
-      if(key.startsWith("-P")) {
-        holder.add(key + "=" + entry.getValue()) ;
-      } else if(key.startsWith("-")) {
-        holder.add(key) ;
-        holder.add(entry.getValue().toString()) ;
+      int colon = key.indexOf(':') ;
+      if(key.startsWith("-")) {
+        if(colon > 0) {
+          holder.add(key + "=" + entry.getValue()) ;
+        } else {
+          holder.add(key) ;
+          holder.add(entry.getValue().toString()) ;
+        }
       } else {
-        holder.add("--" + key) ;
-        holder.add(entry.getValue().toString()) ;
+        if(colon > 0) {
+          holder.add("--" + key + "=" + entry.getValue()) ;
+        } else {
+          holder.add("--" + key) ;
+          holder.add(entry.getValue().toString()) ;
+        }
       }
     }
     return holder.toArray(new String[holder.size()]) ;
