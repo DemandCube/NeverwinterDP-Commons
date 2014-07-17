@@ -237,7 +237,6 @@ public class TimerSnapshot  implements Serializable  {
 		this.values = values;
 	}
 
-	// TODO: to implement
     public void merge(TimerSnapshot other, MergeFormula minutesRateFormula, MergeFormula meanRateFormula,
     		MergeFormula stddevFormula, MergeFormula meanFormula, MergeFormula percentageFormula) {
     	List<TimerSnapshot> timers = new ArrayList<TimerSnapshot>();

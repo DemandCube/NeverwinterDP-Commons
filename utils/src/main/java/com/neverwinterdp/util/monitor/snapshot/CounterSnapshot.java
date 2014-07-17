@@ -26,8 +26,7 @@ public class CounterSnapshot implements Serializable {
 	this.count = count;
     }
 
-    // TODO: to implement
     public void merge(CounterSnapshot other) {
-
+    	count += other.getCount();
     }
 }
