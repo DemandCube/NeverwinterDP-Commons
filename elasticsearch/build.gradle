@@ -1,4 +1,4 @@
-archivesBaseName = 'commons.netty'
+archivesBaseName = 'commons.elasticsearch'
 
 eclipse {
   project {

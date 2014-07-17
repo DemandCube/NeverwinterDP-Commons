@@ -12,13 +12,14 @@ import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 
 public class MemberSelector implements Serializable {
-  @Parameter(names = {"--member"}, description = "Select the member by host:port")
-  public String member ;
+  @Parameter(names = {"--member-uuid"}, description = "Select the member by uuid")
+  public String memberUuid ;
+  
   
   @Parameter(names = {"--member-role"}, description = "Select the member by role")
   public String memberRole ;
   
-  @Parameter(names = {"--member-name"}, description = "Select the member by host:port")
+  @Parameter(names = {"--member-name"}, description = "Select the member by name")
   public String memberName ;
   
   @Parameter(names = {"--timeout"}, description = "Command timeout")
@@ -28,15 +29,15 @@ public class MemberSelector implements Serializable {
   public MemberSelector() {} 
   
   public MemberSelector(CommandParams params) {
-    this.member = params.getString("member") ;
     this.memberRole = params.getString("member-role") ;
     this.memberName = params.getString("member-name") ;
+    this.memberUuid = params.getString("member-uuid") ;
     this.timeout = params.getLong("timeout", 10000l) ;
   }
   
   public ClusterMember[] getMembers(ClusterClient clusterClient) {
-    if(member != null) {
-      return new ClusterMember[] { clusterClient.getClusterMember(member)} ;
+    if(memberUuid != null) {
+      return clusterClient.getClusterRegistration().findClusterMemberByUuid(memberUuid) ;
     } else if(memberName != null) {
       return clusterClient.getClusterRegistration().findClusterMemberByName(memberName) ;
     } else if(memberRole != null) {

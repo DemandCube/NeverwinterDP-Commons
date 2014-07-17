@@ -38,7 +38,7 @@ public class ElasticSearchClusterBuilder {
         "module install " + 
         " -Pmodule.data.drop=true" +
         " -Pes:cluster.name=neverwinterdp " +
-        " --member-role elasticsearch --autostart --module ElasticSearch" ;
+        " --member-role elasticsearch --timeout 30000 --autostart --module ElasticSearch" ;
       shell.executeScript(installScript);
       Thread.sleep(1000);
   }

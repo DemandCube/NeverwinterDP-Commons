@@ -70,6 +70,16 @@ abstract public class ClusterRegistration {
     return holder.toArray(new ClusterMember[holder.size()]);
   }
   
+  public ClusterMember[] findClusterMemberByUuid(String uuid) {
+    for(ServerRegistration sel : getServerRegistration()) {
+      ClusterMember cmember = sel.getClusterMember() ;
+      if(cmember.getUuid().equals(uuid)) {
+        return new ClusterMember[] {cmember} ;
+      }
+    }
+    return new ClusterMember[0] ;
+  }
+  
   public ClusterMember getClusterMemberByName(String name) {
     for(ServerRegistration sel : getServerRegistration()) {
       String serverName = sel.getServerName() ;
