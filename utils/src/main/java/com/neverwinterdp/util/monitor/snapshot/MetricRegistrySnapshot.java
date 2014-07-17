@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -51,7 +52,7 @@ public class MetricRegistrySnapshot implements Serializable {
 	}
     }
 
-    public String getVersion() {
+	public String getVersion() {
 	return version;
     }
 
@@ -102,7 +103,7 @@ public class MetricRegistrySnapshot implements Serializable {
     public static Map<String, MetricRegistrySnapshot> getRegistriesMap() {
 
 	if (registriesMap == null) {
-	    registriesMap = new HashMap<String, MetricRegistrySnapshot>();
+	    registriesMap = new LinkedHashMap<String, MetricRegistrySnapshot>();
 	}
 	
 	return registriesMap;

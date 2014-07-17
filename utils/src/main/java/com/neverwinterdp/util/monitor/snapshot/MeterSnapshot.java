@@ -1,6 +1,10 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.neverwinterdp.util.monitor.mergestrategy.MergeFormula;
 
 public class MeterSnapshot implements Serializable {
     long count;
@@ -12,6 +16,15 @@ public class MeterSnapshot implements Serializable {
 
     public MeterSnapshot(){
 	
+    }
+    public MeterSnapshot(MeterSnapshot clone){
+    	this.count = clone.count;
+    	this.m15_rate = clone.m15_rate;
+    	this.m1_rate = clone.m1_rate;
+    	this.m5_rate = clone.m5_rate;
+    	this.mean_rate = clone.mean_rate;
+    	this.units = clone.units;
+    	
     }
 
     public long getCount() {
@@ -61,7 +74,14 @@ public class MeterSnapshot implements Serializable {
     public void setUnits(String units) {
 	this.units = units;
     }
-
-    
-
+   
+    public void merge(MeterSnapshot other,  MergeFormula minutesRateFormula, MergeFormula meanRateFormula) {
+    	List<MeterSnapshot> meters = new ArrayList<MeterSnapshot>();
+    	meters.add(this);
+    	meters.add(other);
+    	minutesRateFormula.mergeMinutesRate(meters, this);
+    	meanRateFormula.mergeMeanRate(meters, this);
+    	setCount(count + other.getCount());
+    }
+ 
 }

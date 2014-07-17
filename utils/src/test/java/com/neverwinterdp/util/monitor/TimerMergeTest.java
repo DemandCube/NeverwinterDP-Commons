@@ -42,6 +42,7 @@ public class TimerMergeTest {
 	    ctx2.stop();
 	    Thread.sleep(500);
 	}
+	double delta = 0.001d;
 	MetricRegistrySnapshot regSnapshot2 = MetricRegistrySnapshot.convert(registry2);
 	MetricRegistrySnapshot.updateRemoteMap("producer2",regSnapshot2);
 	TimerSnapshot timer2Snapshot = regSnapshot2.timer("timerSample");
@@ -50,8 +51,7 @@ public class TimerMergeTest {
 	MergeFormula af = new AverageFormula();
 	TimerSnapshot globalSnapshot = MetricRegistrySnapshot.mergeTimers("timerSample",af,af,af,af,af);
 	assertEquals(timer1Snapshot.getCount() + timer2Snapshot.getCount(), globalSnapshot.getCount());
-	assertEquals(""+(timer1Snapshot.getMeanRate() + timer2Snapshot.getMeanRate())/2,globalSnapshot.getMeanRate()+"");
-
+	assertEquals("",(timer1Snapshot.getMeanRate() + timer2Snapshot.getMeanRate())/2,globalSnapshot.getMeanRate(),delta);
 	
 	// weighted average formula
 
@@ -69,7 +69,7 @@ public class TimerMergeTest {
 
 	MergeFormula waf = new WeightedAverageFormula(weights) ;
 	TimerSnapshot globalSnapshotWeightedAverage = MetricRegistrySnapshot.mergeTimers("timerSample",waf, af,waf,waf,waf);
-	double delta = 0.001d;
+	
 	assertEquals(timer1Snapshot.getCount() + timer2Snapshot.getCount(), globalSnapshot.getCount());
 	assertEquals("",(timer1Snapshot.getMeanRate() + timer2Snapshot.getMeanRate())/2,globalSnapshot.getMeanRate(),delta);
 	assertEquals("" ,(timer1Snapshot.getM15Rate() * weights[0] + timer1Snapshot.getM15Rate() * weights[1] ) / (weights[0]+ weights[1]), timer1Snapshot.getM15Rate(),delta );

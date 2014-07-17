@@ -1,11 +1,13 @@
 package com.neverwinterdp.util.monitor.snapshot;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.Snapshot;
-
 import com.codahale.metrics.Timer;
+import com.neverwinterdp.util.monitor.mergestrategy.MergeFormula;
 
 /**
  * @author Tuan Nguyen
@@ -58,7 +60,27 @@ public class TimerSnapshot  implements Serializable  {
 
     }
 
-    public long getCount() {
+    public TimerSnapshot(TimerSnapshot timer1Snapshot) {
+    	count = timer1Snapshot.getCount();
+    	values = timer1Snapshot.getValues();
+    	max = timer1Snapshot.getMax();
+    	mean = timer1Snapshot.getMean();
+    	min = timer1Snapshot.getMin();
+    	p50 = timer1Snapshot.getP50();
+    	p75 = timer1Snapshot.getP75();
+    	p95 = timer1Snapshot.getP95();
+    	p98 = timer1Snapshot.getP98();
+    	p99 = timer1Snapshot.getP99();
+    	p999 = timer1Snapshot.getP999();
+    	stddev = timer1Snapshot.getStddev();
+    	m15_rate = timer1Snapshot.getM15Rate();
+    	m1_rate = timer1Snapshot.getM1Rate();
+    	m5_rate = timer1Snapshot.getM5Rate();
+    	mean_rate = timer1Snapshot.getMeanRate();
+    	duration_units = TimeUnit.NANOSECONDS.name();
+	}
+
+	public long getCount() {
 	return count;
     }
 
@@ -216,8 +238,17 @@ public class TimerSnapshot  implements Serializable  {
 	}
 
 	// TODO: to implement
-    public void merge(TimerSnapshot other) {
-
+    public void merge(TimerSnapshot other, MergeFormula minutesRateFormula, MergeFormula meanRateFormula,
+    		MergeFormula stddevFormula, MergeFormula meanFormula, MergeFormula percentageFormula) {
+    	List<TimerSnapshot> timers = new ArrayList<TimerSnapshot>();
+    	timers.add(this);
+    	timers.add(other);
+    	minutesRateFormula.mergeMinutesRate(timers, this);
+    	meanRateFormula.mergeMeanRate(timers, this);
+    	stddevFormula.mergeStdDev(timers, this);
+    	meanFormula.mergeMean(timers, this);
+    	percentageFormula.mergePercentages(timers, this);
+    	setCount(count + other.getCount());
     }
 
 }
