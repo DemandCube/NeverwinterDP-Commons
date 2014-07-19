@@ -33,14 +33,6 @@ task jsJar(type:Jar) {
   include '**/*'
 }
 
-task webappJar(type:Jar) { 
-  baseName = 'commons.cluster' 
-  classifier = 'webapp'
-  from "src/main/webapp"
-  include '**/*'
-}
-
 artifacts { 
   archives jsJar
-  archives webappJar
 } 

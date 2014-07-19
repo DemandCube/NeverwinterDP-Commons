@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
@@ -44,7 +43,7 @@ public class HazelcastMemberSelector {
     return members ;
   }
   
-  public ClusterMember selectClusterMemOber(String connect) {
+  public ClusterMember selectClusterMember(String connect) {
     int    port = 5700 ;
     String host = connect ;
     if(connect.indexOf(':') > 0) {
@@ -56,6 +55,15 @@ public class HazelcastMemberSelector {
       ClusterMember cmember = new ClusterMemberImpl(sel) ;
       if(host.equals(cmember.getHost()) || host.equals(cmember.getIpAddress())) {
         if(port == cmember.getPort()) return cmember ;
+      }
+    }
+    return null ;
+  }
+  
+  public ClusterMember selectClusterMemberByUuid(String uuid) {
+    for(Member sel : this.memberMap.values()) {
+      if(uuid.equals(sel.getUuid())) {
+        return new ClusterMemberImpl(sel) ;
       }
     }
     return null ;

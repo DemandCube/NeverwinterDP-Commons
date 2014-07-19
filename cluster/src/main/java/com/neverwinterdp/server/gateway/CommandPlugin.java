@@ -9,39 +9,26 @@ import org.reflections.Reflections;
 import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.util.JSONSerializer;
 
-abstract public class Plugin {
+abstract public class CommandPlugin {
   protected ClusterClient clusterClient ;
+  private Map<String, SubCommandExecutor> subCommandExecutors = new HashMap<String, SubCommandExecutor>() ;
   
   public void init(ClusterClient clusterClient) {
     this.clusterClient = clusterClient;
   }
   
-  public <T> T execute(String command, String jsonParams) throws Exception {
-    CommandParams params = JSONSerializer.INSTANCE.fromString(jsonParams, CommandParams.class) ;
-    return (T) doCall(command, params) ;
+  public void add(String subCommand, SubCommandExecutor executor) {
+    subCommandExecutors.put(subCommand, executor) ;
   }
   
-  public <T> T execute(String command, CommandParams params) throws Exception {
-    return (T) doCall(command, params) ;
-  }
-
-  public String call(String json) {
+  public String call(Command command) {
     try {
-      CommandParams params = JSONSerializer.INSTANCE.fromString(json, CommandParams.class) ;
-      String commandName = params.getString("_commandName") ;
-      return call(commandName, params) ;
-    } catch(Throwable t) {
-      Map<String, Object> result = new HashMap<String, Object>() ;
-      result.put("success", false) ;
-      result.put("message", t.getMessage()) ;
-      return JSONSerializer.INSTANCE.toString(result) ;
-    }
-  }
-  
-  public String call(String command, CommandParams params) {
-    try {
-      Object result = doCall(command, params) ;
-      if(result != null) return JSONSerializer.INSTANCE.toString(result) ;
+      String subcommand = command.getSubCommand() ;
+      SubCommandExecutor executor = this.subCommandExecutors.get(subcommand) ;
+      if(executor != null) {
+        Object result = executor.execute(clusterClient, command) ;
+        return JSONSerializer.INSTANCE.toString(result) ;
+      }
       return "{ 'success': false, 'message': 'unknown command'}" ;
     } catch(Throwable t) {
       Map<String, Object> result = new HashMap<String, Object>() ;
@@ -51,18 +38,33 @@ abstract public class Plugin {
     }
   }
   
-  abstract protected Object doCall(String command, CommandParams parans) throws Exception ;
+  public String call(String commandLine) {
+    return call(new Command(commandLine)) ;
+  }
+  
+  public <T> T execute(Command command) throws Exception {
+    String subcommand = command.getSubCommand() ;
+    SubCommandExecutor executor = this.subCommandExecutors.get(subcommand) ;
+    if(executor != null) {
+      return (T) executor.execute(clusterClient, command) ;
+    }
+    throw new Exception("Unknown: " + command.getCommandLine()) ;
+  }
+  
+  static public interface SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception ;
+  }
   
   static public class Util {
-    static public Map<String, Plugin> loadByAnnotation(String ... packages) {
-      Map<String, Plugin> holder = new HashMap<String, Plugin>() ;
+    static public Map<String, CommandPlugin> loadByAnnotation(String ... packages) {
+      Map<String, CommandPlugin> holder = new HashMap<String, CommandPlugin>() ;
       for(String pkg : packages) {
         Reflections reflections = new Reflections(pkg);
-        Set<Class<?>> annotateds = reflections.getTypesAnnotatedWith(PluginConfig.class);
+        Set<Class<?>> annotateds = reflections.getTypesAnnotatedWith(CommandPluginConfig.class);
         for(Class<?> clazz : annotateds) {
           try {
-            Plugin plugin  = (Plugin) clazz.newInstance();
-            PluginConfig config = clazz.getAnnotation(PluginConfig.class) ;
+            CommandPlugin plugin  = (CommandPlugin) clazz.newInstance();
+            CommandPluginConfig config = clazz.getAnnotation(CommandPluginConfig.class) ;
             holder.put(config.name(), plugin) ;
           } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();

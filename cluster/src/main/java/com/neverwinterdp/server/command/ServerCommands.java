@@ -1,5 +1,6 @@
 package com.neverwinterdp.server.command;
 
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
@@ -53,6 +54,7 @@ public class ServerCommands {
   }
   
   static public class GetMonitorSnapshot extends ServerCommand<ApplicationMonitorSnapshot> {
+    @Parameter(names = {"--filter"}, description = "Filter by the pattern expression")
     private String filter ;
     
     public GetMonitorSnapshot() { }
@@ -70,6 +72,7 @@ public class ServerCommands {
   }
   
   static public class ClearMonitor extends ServerCommand<Integer> {
+    @Parameter(names = {"--expression"}, description = "Clear the metric with the name pattern")
     private String nameExp ;
     
     public ClearMonitor() { }

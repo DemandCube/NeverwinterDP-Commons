@@ -42,7 +42,7 @@ public class ShellUnitTest {
     Server[] instance = create(2) ;
     System.out.println("\n\n\n");
     Shell shell = new Shell() ;
-    shell.execute(":connect --member 127.0.0.1:5701");
+    shell.execute(":connect 127.0.0.1:5701");
     
     shell.execute(":set shell=test");
     shell.execute(":set host=127.0.0.1");
@@ -73,7 +73,7 @@ public class ShellUnitTest {
   public void testInstall() throws Exception {
     FileUtil.removeIfExist("build/cluster", false);
     Server[] instance = create(2) ;
-    String firstMember = instance[0].getClusterService().getMember().toString() ;
+    String firstMember = instance[0].getClusterService().getMember().getMemberName() ;
     Shell shell = new Shell() ;
     String SCRIPT = 
         ":echo \"===================START TEST=====================\"" + "\n" +
@@ -81,11 +81,13 @@ public class ShellUnitTest {
         ":connect --member $firstMember" + "\n" +
         "module list --type available" + "\n" +
         "server registration" + "\n" +
+        ":echo \"Start Install HelloModuleDisable\"" + "\n" +
         "module install " +
-        "  --member $firstMember --autostart " +
+        "  --member-name $firstMember --autostart " +
         "  -Phello:install=from-install " +
         "  --module  HelloModuleDisable" + "\n" +
         "module list --type installed" +"\n" +
+        ":echo \"Finish Install HelloModuleDisable\"" + "\n" +
         ":sleep 2000" +"\n" + 
         "server registration" + "\n" +
         "module uninstall --module HelloModuleDisable" + "\n" +

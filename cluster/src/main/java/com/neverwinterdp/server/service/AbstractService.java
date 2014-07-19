@@ -8,4 +8,9 @@ abstract public class AbstractService implements Service {
   private ServiceRegistration registration = new ServiceRegistration();
   
   public ServiceRegistration getServiceRegistration() { return this.registration; }
+  
+  public void restart() throws Exception {
+    stop() ;
+    start() ;
+  }
 }

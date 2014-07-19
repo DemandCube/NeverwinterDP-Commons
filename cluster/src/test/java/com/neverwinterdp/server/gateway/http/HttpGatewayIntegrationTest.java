@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.gateway.ClusterGateway;
-import com.neverwinterdp.server.gateway.CommandParams;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -29,14 +28,7 @@ public class HttpGatewayIntegrationTest {
     };
     instance = Server.create(args) ;
     gateway = new ClusterGateway() ;
-    gateway.module.execute(
-        "install", 
-        new CommandParams().
-          field("member-name", "generic").
-          field("autostart", true).
-          field("module", new String[] { "HttpGateway" }).
-          field("-Phttp-www-dir", "src/main/webapp")
-    ) ;
+    gateway.execute("module install --member-name webserver --autostart --module HttpGateway") ;
   }
 
   @AfterClass

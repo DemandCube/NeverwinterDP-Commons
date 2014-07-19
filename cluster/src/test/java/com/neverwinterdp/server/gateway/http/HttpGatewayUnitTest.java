@@ -11,7 +11,6 @@ import com.neverwinterdp.netty.http.client.DumpResponseHandler;
 import com.neverwinterdp.netty.http.client.HttpClient;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.gateway.ClusterGateway;
-import com.neverwinterdp.server.gateway.CommandParams;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -33,13 +32,7 @@ public class HttpGatewayUnitTest {
     };
     instance = Server.create(args) ;
     gateway = new ClusterGateway() ;
-    gateway.module.execute(
-        "install", 
-        new CommandParams().
-          field("member-name", "webserver").
-          field("autostart", true).
-          field("module", new String[] { "cluster.gateway" }) 
-    ) ;
+    gateway.execute("module install --member-name webserver --autostart --module HttpGateway") ;
   }
 
   @AfterClass
@@ -50,10 +43,10 @@ public class HttpGatewayUnitTest {
   
   @Test
   public void testPing() throws Exception {
-    HttpGatewayRequest req = new HttpGatewayRequest("server", "ping") ;
+    HttpGatewayRequest req = new HttpGatewayRequest("server ping") ;
     DumpResponseHandler handler = new DumpResponseHandler() ;
     HttpClient client = new HttpClient ("127.0.0.1", 8080, handler) ;
-    client.post("/cluster", req);
+    client.post("/cluster/rest", req);
     Thread.sleep(1000);
     client.close();
     assertEquals(1, handler.getCount()) ;

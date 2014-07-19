@@ -4,23 +4,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class Shell {
   private ShellContext context = new ShellContext() ;
-  private CommandGroup builtin = new BuiltinCommandGroup();
-  private Map<String, CommandGroup> commandGroups = new HashMap<String, CommandGroup>() ;
+  private ShellCommand builtin = new ShellBuiltinCommand();
+  private Map<String, ShellCommand> commands = new HashMap<String, ShellCommand>() ;
   
   public Shell() {
-    CommandGroup[] groups = CommandGroup.loadByAnnotation("com.neverwinterdp.server.shell") ;
-    for(CommandGroup sel : groups) {
-      commandGroups.put(sel.getName(), sel) ;
+    ShellCommand[] groups = ShellCommand.loadByAnnotation("com.neverwinterdp.server.shell") ;
+    for(ShellCommand sel : groups) {
+      commands.put(sel.getName(), sel) ;
     }
   }
   
@@ -28,24 +27,27 @@ public class Shell {
   
   public void execute(String line) {
     line = processVariables(line) ;
-    String[] args = parseArgs(line);
-    String command = args[0] ;
-    if("help".equalsIgnoreCase(command)) {
+    Command command = null; 
+    if(line.startsWith(":")) command = new Command(line,false) ;
+    else command = new Command(line) ;
+    
+    if("help".equalsIgnoreCase(command.getCommand())) {
       builtin.help();
       return ;
     }
     
     try {
-      if(command.startsWith(":")) {
-        args[0] = command.substring(1) ;
-        builtin.execute(context, args);
+      String cmdName = command.getCommand() ;
+      if(cmdName.startsWith(":")) {
+        command.setCommand("default");
+        command.setSubCommand(cmdName.substring(1));
+        builtin.execute(context, command);
       } else {
-        String[] newargs = new String[args.length - 1] ;
-        System.arraycopy(args, 1, newargs, 0, newargs.length);
-        CommandGroup group = commandGroups.get(command) ;
-        if(group != null) {
-          group.execute(context, newargs);
+        ShellCommand shellCommand = commands.get(cmdName) ;
+        if(shellCommand != null) {
+          shellCommand.execute(context, command);
         } else {
+          throw new Exception("Unknown: " + command.getCommandLine()) ;
         }
       }
     } catch(Exception ex) {
@@ -76,21 +78,6 @@ public class Shell {
     return line ;
   }
   
-  private String[] parseArgs(String line) {
-    List<String> holder = new ArrayList<String>();
-    Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
-    while (m.find()) {
-      String arg = m.group(1).trim() ;
-      if(arg.length() == 0) continue ;
-      //Add .replace("\"", "") to remove surrounding quotes.
-      if(arg.startsWith("\"") && arg.endsWith("\"")) {
-        arg = arg.substring(1, arg.length() - 1) ;
-      }
-      holder.add(arg); 
-    }
-    return holder.toArray(new String[holder.size()]) ;
-  }
-
   public String[] parseScript(String script) {
     List<String> holder = new ArrayList<String>() ;
     String[] line = StringUtil.splitAsArray(script, '\n');

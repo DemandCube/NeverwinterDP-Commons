@@ -12,10 +12,11 @@ function testCluster() {
 
 function testServer() {
   var member = cluster.ClusterGateway.members()[0] ;
-  var ipPort = member.ipAddress + ":" +  member.port ;
+  var memberIpPort = member.ipAddress + ":" +  member.port ;
+  var memberUuid  = member.uuid ;
 
-  cluster.ClusterGateway.server.ping({
-    params: { "member-role": "master" },
+  cluster.ClusterGateway.execute({
+    command: "server ping --member-role master" ,
 
     onResponse: function(resp) {
       new cluster.ResponsePrinter(console, resp).print();
@@ -24,8 +25,8 @@ function testServer() {
     }
   }) ;
 
-  cluster.ClusterGateway.server.metric({
-    params: { "member-role": "master" },
+  cluster.ClusterGateway.execute({
+    command: "server metric --member-role master" ,
 
     onResponse: function(resp) {
       //console.printJSON(resp) ;
@@ -37,8 +38,8 @@ function testServer() {
     }
   }) ;
 
-  cluster.ClusterGateway.server.clearMetric({
-    params: { "member-role": "master", "expression": "*Hello*" },
+  cluster.ClusterGateway.execute({
+    command: "server metric-clear --member-role master --expression *Hello*" ,
 
     onResponse: function(resp) {
       console.h1("Remove *Hello* metric monitor") ;
@@ -47,8 +48,8 @@ function testServer() {
     }
   }) ;
 
-  cluster.ClusterGateway.server.shutdown({
-    params: { "member-role": "master" },
+  cluster.ClusterGateway.execute({
+    command: "server shutdown --member-role master",
 
     onResponse: function(resp) {
       console.printJSON(resp) ;
@@ -57,8 +58,8 @@ function testServer() {
     }
   }) ;
 
-  cluster.ClusterGateway.server.start({
-    params: { "member": ipPort },
+  cluster.ClusterGateway.execute({
+    command: "server start --member-uuid " + memberUuid,
 
     onResponse: function(resp) {
       console.printJSON(resp) ;
@@ -72,8 +73,8 @@ function testModule() {
   var member = cluster.ClusterGateway.members()[0] ;
   var memberIpPort = member.ipAddress + ":" +  member.port ;
 
-  cluster.ClusterGateway.module.list({
-    params: { "member-role": "master", "type": "available" },
+  cluster.ClusterGateway.execute({
+    command: "module list --member-role master --type available" ,
 
     onResponse: function(resp) {
       console.println("List the available modules") ;
@@ -87,13 +88,11 @@ function testModule() {
     }
   }) ;
 
-  cluster.ClusterGateway.module.install({
-    params: { 
-      "member": memberIpPort,  
-      "autostart": true,
-      "module": ["HelloModuleDisable"],
-      "-Phello:install": "from-install" 
-    },
+  cluster.ClusterGateway.execute({
+    command: "module install " +
+             "  --member-role master " +
+             "  -Phello:install=from-install" +
+             "  --autostart --module HelloModuleDisable",
 
     onResponse: function(resp) {
       console.println("Install module HelloModuleDisable") ;
@@ -102,11 +101,8 @@ function testModule() {
     }
   }) ;
 
-  cluster.ClusterGateway.module.uninstall({
-    params: { 
-      "member": memberIpPort,  
-      "module": ["HelloModuleDisable"]
-    },
+  cluster.ClusterGateway.execute({
+    command: "module uninstall --member-role master --module HelloModuleDisable",
 
     onResponse: function(resp) {
       console.println("Uninstall module HelloModuleDisable") ;

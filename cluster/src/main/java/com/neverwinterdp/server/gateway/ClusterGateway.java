@@ -6,12 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.server.ServerRegistration;
-import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterMember;
 import com.neverwinterdp.server.cluster.ClusterRegistration;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
-import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.util.JSONSerializer;
 
 
@@ -19,9 +17,9 @@ public class ClusterGateway {
   private ClusterClient clusterClient ;
   
   public ClusterPlugin cluster ;
-  public ServerPlugin server ;
-  public ModulePlugin module ;
-  private Map<String, Plugin> plugins ;
+  public ServerCommandPlugin server ;
+  public ModuleCommandPlugin module ;
+  private Map<String, CommandPlugin> plugins ;
   
   public ClusterGateway() {
     connect() ;
@@ -35,28 +33,27 @@ public class ClusterGateway {
     if(clusterClient != null) clusterClient.shutdown(); 
     clusterClient = new HazelcastClusterClient(connect) ;
     cluster = new ClusterPlugin() ;
-    server  = new ServerPlugin() ;
-    module  = new ModulePlugin() ;
-    plugins = Plugin.Util.loadByAnnotation("com.neverwinterdp.server.gateway") ;
+    server  = new ServerCommandPlugin() ;
+    module  = new ModuleCommandPlugin() ;
+    plugins = CommandPlugin.Util.loadByAnnotation("com.neverwinterdp.server.gateway") ;
     plugins.put("cluster", cluster) ;
     plugins.put("server", server) ;
     plugins.put("module", module) ;
-    for(Plugin plugin : plugins.values()) {
+    for(CommandPlugin plugin : plugins.values()) {
       plugin.init(clusterClient);
     }
   }
   
-  public <T extends Plugin> T plugin(String name) { return (T) plugins.get(name) ; }
+  public <T extends CommandPlugin> T plugin(String name) { return (T) plugins.get(name) ; }
   
-  public String call(String group, String command, String jsonParams) {
-    CommandParams params = JSONSerializer.INSTANCE.fromString(jsonParams, CommandParams.class) ;
-    return call(group, command, params) ;
+  public String call(String argLine) {
+    return call(new Command(argLine)) ;
   }
   
-  public String call(String group, String command, CommandParams params) {
+  public String call(Command cmd) {
     try {
-      Plugin plugin = plugin(group) ;
-      return plugin.call(command, params) ;
+      CommandPlugin plugin = plugin(cmd.getCommand()) ;
+      return plugin.call(cmd) ;
     } catch(Throwable t) {
       Map<String, Object> result = new HashMap<String, Object>() ;
       result.put("success", false) ;
@@ -67,18 +64,13 @@ public class ClusterGateway {
     }
   }
   
-  public Object execute(String group, String command, CommandParams params) {
-    try {
-      Plugin plugin = plugin(group) ;
-      return plugin.execute(command, params) ;
-    } catch(Throwable t) {
-      Map<String, Object> result = new HashMap<String, Object>() ;
-      result.put("success", false) ;
-      StringWriter w = new StringWriter() ;
-      t.printStackTrace(new PrintWriter(w));; 
-      result.put("message", w.toString()) ;
-      return JSONSerializer.INSTANCE.toString(result) ;
-    }
+  public <T> T execute(Command cmd) throws Exception {
+    CommandPlugin plugin = plugin(cmd.getCommand()) ;
+    return plugin.execute(cmd) ;
+  }
+  
+  public <T> T execute(String commandLine) throws Exception {
+    return execute(new Command(commandLine)) ;
   }
   
   public String getMembers() {
@@ -98,25 +90,6 @@ public class ClusterGateway {
   }
   
   public ClusterClient getClusterClient() { return this.clusterClient ; }
-  
-  public boolean waitForRunningMembers(MemberSelector selector, int numberOfMembers, long timeout) {
-    ServerCommandResult<ServerState>[] results  = server.ping(selector) ;
-    long stopTime = System.currentTimeMillis() + timeout ;
-    while(System.currentTimeMillis() < stopTime) {
-      boolean ok = true ;
-      for(ServerCommandResult<ServerState> sel : results) {
-        if(ServerState.RUNNING.equals(sel.getResult())) continue ;
-        ok = false ;
-        break ;
-      }
-      if(ok) return true ;
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-      }
-    }
-    return false ;
-  }
   
   public void close() {
     if(clusterClient != null) clusterClient.shutdown(); 

@@ -9,6 +9,7 @@ import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.server.command.ServerCommandResult;
+import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.server.gateway.MemberSelector;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
@@ -17,9 +18,9 @@ import com.neverwinterdp.util.monitor.snapshot.MetricFormater;
 import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-@CommandGroupConfig(name = "server")
-public class ServerCommandGroup extends CommandGroup {
-  public ServerCommandGroup() {
+@ShellCommandConfig(name = "server")
+public class ShellServerCommand extends ShellCommand {
+  public ShellServerCommand() {
     super("cluster") ;
     add("ping", Ping.class);
     add("shutdown", Shutdown.class);
@@ -29,21 +30,16 @@ public class ServerCommandGroup extends CommandGroup {
     add("metric-clear", MetricClear.class);
   }
   
-  static public class Ping extends Command {
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getClusterGateway().server.ping(memberSelector)) ;
+  static public class Ping extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
+      printServerStateResults(ctx, results) ;
     }
   }
   
   @Parameters(commandDescription = "List the server registration and service registration of each member")
-  static public class Registration extends Command {
-    @Parameter(names = {"-f", "--filter"}, description = "filter expression to match host or ip")
-    String filter;
-    
-    public void execute(ShellContext ctx) {
+  static public class Registration extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) {
       ServerRegistration[] registration = ctx.getClusterGateway().getClusterRegistration().getServerRegistration() ;
       Console console = ctx.console() ;
       String indent = "  " ;
@@ -73,38 +69,26 @@ public class ServerCommandGroup extends CommandGroup {
     }
   }
   
-  static public class Shutdown extends Command {
+  static public class Shutdown extends ShellSubCommand {
     @ParametersDelegate
     MemberSelector memberSelector = new MemberSelector();
     
-    public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getClusterGateway().server.shutdown(memberSelector)) ;
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
+      printServerStateResults(ctx, results) ;
     }
   }
 
-  static public class Exit extends Command {
-    @Parameter(names = {"-t","--wait-time"}, description = "Wait time before shutdown")
-    long waitTime = 3000 ;
-    
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    public void execute(ShellContext ctx) {
-      printServerStateResults(ctx, ctx.getClusterGateway().server.exit(memberSelector)) ;
+  static public class Exit extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
+      printServerStateResults(ctx, results) ;
     }
   }
   
-  static public class Metric extends Command {
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    @Parameter(names = {"-f","--filter"}, description = "filter by regrex syntax")
-    String filter = "*" ;
-    
-    
-    public void execute(ShellContext ctx) {
-      ServerCommandResult<ApplicationMonitorSnapshot>[] results = 
-          ctx.getClusterGateway().server.metric(memberSelector, filter) ;
+  static public class Metric extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ApplicationMonitorSnapshot>[] results = ctx.getClusterGateway().execute(command) ;
       MetricFormater formater = new MetricFormater("  ") ;
       for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {
         ApplicationMonitorSnapshot snapshot = sel.getResult() ;
@@ -115,16 +99,9 @@ public class ServerCommandGroup extends CommandGroup {
     }
   }
   
-  static public class MetricClear extends Command {
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    @Parameter(names = {"--name-exp"}, description = "filter by regrex syntax")
-    String nameExp = "*" ;
-    
-    public void execute(ShellContext ctx) {
-      ServerCommandResult<Integer>[] results = 
-          ctx.getClusterGateway().server.clearMetric(memberSelector, nameExp) ;
+  static public class MetricClear extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<Integer>[] results = ctx.getClusterGateway().execute(command) ;
       for(ServerCommandResult<Integer> sel : results) {
         Integer match = sel.getResult() ;
         ctx.console().println("Clear " + match + " on " + sel.getFromMember()) ;

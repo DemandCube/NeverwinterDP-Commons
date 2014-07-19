@@ -31,13 +31,13 @@ public class ShellContext {
     else cluster.connect(members);
   }
   
-  public void onStartCommand(CommandGroup group, Command command, String[] args) {
+  public void onStartCommand(ShellCommand shellCommand, ShellSubCommand shellSubCommand) {
     lastExecuteContext = currentExecuteContext ;
     currentExecuteContext = new ExecuteContext() ;
     console.newConsoleOutput() ;
   }
   
-  public void onFinishCommand(CommandGroup group, Command command) {
+  public void onFinishCommand(ShellCommand group, ShellSubCommand command) {
     currentExecuteContext.setConsoleOutput(console.getTextOutput()) ;
   }
   

@@ -11,67 +11,63 @@ import java.util.Set;
 import org.reflections.Reflections;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.util.text.StringUtil;
 
-public class CommandGroup {
+public class ShellCommand {
   private String name ;
-  private Map<String, Class<? extends Command>> commands = new HashMap<String, Class<? extends Command>>() ;
+  private Map<String, Class<? extends ShellSubCommand>> subCommands = new HashMap<String, Class<? extends ShellSubCommand>>() ;
   
-  public CommandGroup() {
+  public ShellCommand() {
   }
   
-  public CommandGroup(String name) {
+  public ShellCommand(String name) {
     this.name = name ;
   }
   
   public String getName() { return this.name ; }
   public void setName(String name) { this.name = name ; }
   
-  public <T extends Command> void add(String name, Class<T> type) {
-    commands.put(name, type) ;
+  public <T extends ShellSubCommand> void add(String name, Class<T> type) {
+    subCommands.put(name, type) ;
   }
   
-  public boolean hasCommand(String name) {
-    return commands.containsKey(name) ;
-  }
-  public void execute(ShellContext ctx, String[] args) throws Exception {
-    String commandName = args[0] ;
-    if("help".equalsIgnoreCase(commandName)) {
+  public boolean hasCommand(String name) { return subCommands.containsKey(name) ; }
+  
+  public void execute(ShellContext ctx, Command command) throws Exception {
+    if("help".equalsIgnoreCase(command.getSubCommand())) {
       help() ;
       return ;
     }
-    Class<Command> clazz = (Class<Command>) commands.get(commandName) ;
+    Class<ShellSubCommand> clazz = (Class<ShellSubCommand>) subCommands.get(command.getSubCommand()) ;
     if(clazz != null) {
-      Command command = clazz.newInstance() ;
-      ctx.onStartCommand(this, command, args);
-      String[] newargs = new String[args.length - 1] ;
-      System.arraycopy(args, 1, newargs, 0, newargs.length);
+      ShellSubCommand subCommand = clazz.newInstance() ;
+      ctx.onStartCommand(this, subCommand);
       try {
-        new JCommander(command, newargs) ;
-        command.execute(ctx);
+        subCommand.execute(ctx, command);
       } catch(Throwable t) {
         ctx.getExecuteContext().setError(t);
         StringWriter writer = new StringWriter() ;
-        writer.append(StringUtil.join(args, " ")).append("\n") ;
+        writer.append(command.getCommandLine()).append("\n") ;
         t.printStackTrace(new PrintWriter(writer));
         ctx.console().println(writer.getBuffer().toString());
       }
-      ctx.onFinishCommand(this, command);
+      ctx.onFinishCommand(this, subCommand);
     }
   }
   
   public void help() {
   }
   
-  static public CommandGroup[] loadByAnnotation(String ... packages) {
-    List<CommandGroup> holder = new ArrayList<CommandGroup>() ;
+  static public ShellCommand[] loadByAnnotation(String ... packages) {
+    List<ShellCommand> holder = new ArrayList<ShellCommand>() ;
     for(String pkg : packages) {
       Reflections reflections = new Reflections(pkg);
-      Set<Class<?>> annotateds = reflections.getTypesAnnotatedWith(CommandGroupConfig.class);
+      Set<Class<?>> annotateds = reflections.getTypesAnnotatedWith(ShellCommandConfig.class);
       for(Class<?> clazz : annotateds) {
         try {
-          CommandGroup cgroup  = (CommandGroup) clazz.newInstance();
-          CommandGroupConfig config = clazz.getAnnotation(CommandGroupConfig.class) ;
+          ShellCommand cgroup  = (ShellCommand) clazz.newInstance();
+          ShellCommandConfig config = clazz.getAnnotation(ShellCommandConfig.class) ;
           cgroup.setName(config.name());
           holder.add(cgroup) ;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -79,6 +75,6 @@ public class CommandGroup {
         }
       }
     }
-    return holder.toArray(new CommandGroup[holder.size()]) ;
+    return holder.toArray(new ShellCommand[holder.size()]) ;
   }
 }

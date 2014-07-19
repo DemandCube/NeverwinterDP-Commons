@@ -1,19 +1,24 @@
 package com.neverwinterdp.server.gateway;
 
-import com.neverwinterdp.server.cluster.ClusterMember;
+import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.cluster.ClusterRegistration;
 
-public class ClusterPlugin extends Plugin {
-  protected Object doCall(String commandName, CommandParams params) throws Exception {
-    if("registration".equals(commandName)) return registration() ;
-    else if("member".equals(commandName)) return members() ;
-    return null ;
-  }
-
-  public ClusterMember[] members() {
-    ClusterRegistration registration = clusterClient.getClusterRegistration() ;
-    return registration.getMembers() ;
+public class ClusterPlugin extends CommandPlugin {
+  public ClusterPlugin() {
+    add("member", new member()) ;
+    add("registration", new registration()) ;
   }
   
-  public ClusterRegistration registration() { return clusterClient.getClusterRegistration()  ; }
+  static public class member implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ClusterRegistration registration = clusterClient.getClusterRegistration() ;
+      return registration.getMembers() ;
+    }
+  }
+  
+  static public class registration implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      return clusterClient.getClusterRegistration() ;
+    }
+  }
 }

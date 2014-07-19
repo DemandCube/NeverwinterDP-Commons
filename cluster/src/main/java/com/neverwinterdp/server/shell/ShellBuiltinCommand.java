@@ -7,12 +7,13 @@ import java.util.regex.Pattern;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.server.shell.js.ScriptRunner;
 import com.neverwinterdp.util.text.StringUtil;
 
-public class BuiltinCommandGroup extends CommandGroup {
+public class ShellBuiltinCommand extends ShellCommand {
 
-  public BuiltinCommandGroup() {
+  public ShellBuiltinCommand() {
     super(":");
     add("assert", Assert.class) ;
     add("exit", Exit.class) ;
@@ -24,18 +25,19 @@ public class BuiltinCommandGroup extends CommandGroup {
   }
 
   @Parameters(commandDescription = "Exit the shell")
-  static public class Exit extends Command {
-    public void execute(ShellContext context) {
+  static public class Exit extends ShellSubCommand {
+    public void execute(ShellContext context, Command command) {
       System.exit(0);
     }
   }
   
   @Parameters(commandDescription = "Sleep for an amount of milli seconds")
-  static public class Sleep extends Command {
+  static public class Sleep extends ShellSubCommand {
     @Parameter(description = "An amount of time in milli second")
     List<Long> times = new ArrayList<Long>()  ;
 
-    public void execute(ShellContext context) throws Exception {
+    public void execute(ShellContext context, Command command) throws Exception {
+      command.mapAll(this);
       if(times.size() > 0) {
         long time = times.get(0) ;
         if(time > 0) Thread.sleep(time) ;
@@ -44,16 +46,15 @@ public class BuiltinCommandGroup extends CommandGroup {
   }
   
   @Parameters(commandDescription = "Set a variable in the shell context")
-  static public class Set extends Command {
+  static public class Set extends ShellSubCommand {
     @Parameter( names = {"-t", "--type"},  description = "Variable type")
     String type = "string" ;
     
     @Parameter(description = "Set name=value ")
     private List<String> pairs = new ArrayList<String>() ;
-     
-
     
-    public void execute(ShellContext context) {
+    public void execute(ShellContext context, Command command) {
+      command.mapAll(this);
       String[] pair = StringUtil.toStringArray(pairs.get(0), "=") ;
       String name = pair[0] ;
       String valueString = pair[1] ;
@@ -70,11 +71,12 @@ public class BuiltinCommandGroup extends CommandGroup {
   }
   
   @Parameters(commandDescription = "Print a text on the console")
-  static public class Echo extends Command {
-    @Parameter(description = "Set of tokens to print")
-    private List<String> tokens ;
+  static public class Echo extends ShellSubCommand {
+    @Parameter(description = "The tokens to print")
+    private List<String> tokens = new ArrayList<String>() ;
     
-    public void execute(ShellContext ctx) {
+    public void execute(ShellContext ctx, Command command) {
+      command.mapAll(this);
       String[] array = tokens.toArray(new String[tokens.size()]) ;
       for(int i = 0; i < array.length; i++) {
         if(array[i].startsWith("\"") && array[i].endsWith("\"")) {
@@ -86,11 +88,12 @@ public class BuiltinCommandGroup extends CommandGroup {
   }
   
   @Parameters(commandDescription = "Run a javascript file")
-  static public class JSRun extends Command {
+  static public class JSRun extends ShellSubCommand {
     @Parameter(description = "list of the js file")
     List<String> files = new ArrayList<String>()  ;
 
-    public void execute(ShellContext context) throws Exception {
+    public void execute(ShellContext context, Command command) throws Exception {
+      command.mapAll(this);
       HashMap<String, Object> ctx = new HashMap<String, Object>() ;
       ctx.put("JAVA_CLUSTER_GATEWAY", context.getClusterGateway()) ;
       String jsDir = "." ;
@@ -105,7 +108,7 @@ public class BuiltinCommandGroup extends CommandGroup {
     }
   }
   
-  static public class Assert extends Command {
+  static public class Assert extends ShellSubCommand {
     @Parameter(
       names = {"-last", "--last-command-output"}, 
       description = "Select last output result"
@@ -120,7 +123,8 @@ public class BuiltinCommandGroup extends CommandGroup {
     @Parameter(names = {"-l", "--line"}, variableArity = true, description = "the member list in host:port format")
     List<String> lineExp  = new ArrayList<String>();
     
-    public void execute(ShellContext ctx) throws Exception {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      command.mapAll(this);
       LineMatcher lmatcher = new LineMatcher() ;
       List<LineMatcher> lineMatchers = new ArrayList<LineMatcher>() ;
       for(int i = 0; i < lineExp.size(); i++) {
@@ -194,13 +198,13 @@ public class BuiltinCommandGroup extends CommandGroup {
   }
   
   @Parameters(commandDescription = "Connect to a cluster")
-  static public class Connect extends Command {
-    @Parameter(names = {"--member"}, description = "Select the member by host:port")
-    String member ;
+  static public class Connect extends ShellSubCommand {
+    @Parameter(description = "Select the member by host:port")
+    List<String> connects = new ArrayList<String>();
     
-    public void execute(ShellContext ctx) {
-      ctx.connect(member) ;
-      ctx.console().println("Connect Successfully to " + member);
+    public void execute(ShellContext ctx, Command command) {
+      ctx.connect(connects.toArray(new String[connects.size()])) ;
+      ctx.console().println("Connect Successfully to " + connects);
     }
   }
 }

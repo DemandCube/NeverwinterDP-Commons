@@ -15,6 +15,8 @@ public class MemberSelector implements Serializable {
   @Parameter(names = {"--member-uuid"}, description = "Select the member by uuid")
   public String memberUuid ;
   
+  @Parameter(names = {"--member-ip-port"}, description = "Select the member by ip port")
+  public String ipPort ;
   
   @Parameter(names = {"--member-role"}, description = "Select the member by role")
   public String memberRole ;
@@ -22,7 +24,7 @@ public class MemberSelector implements Serializable {
   @Parameter(names = {"--member-name"}, description = "Select the member by name")
   public String memberName ;
   
-  @Parameter(names = {"--timeout"}, description = "Command timeout")
+  @Parameter(names = {"--timeout", "--member-wait"}, description = "Command timeout")
   public long timeout = 10000 ;
   
   
@@ -37,7 +39,13 @@ public class MemberSelector implements Serializable {
   
   public ClusterMember[] getMembers(ClusterClient clusterClient) {
     if(memberUuid != null) {
-      return clusterClient.getClusterRegistration().findClusterMemberByUuid(memberUuid) ;
+      ClusterMember member = clusterClient.getClusterMemberByUuid(memberUuid) ;
+      if(member == null) return new ClusterMember[0] ;
+      return new ClusterMember[] { member } ;
+    } else if(ipPort != null) {
+      ClusterMember member = clusterClient.getClusterMember(ipPort) ;
+      if(member == null) return new ClusterMember[0] ;
+      return new ClusterMember[] { member } ;
     } else if(memberName != null) {
       return clusterClient.getClusterRegistration().findClusterMemberByName(memberName) ;
     } else if(memberRole != null) {

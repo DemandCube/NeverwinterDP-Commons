@@ -5,21 +5,21 @@ import java.util.Map;
 
 
 public class ExecuteContext {
-  private CommandGroup        group;
-  private Command             command;
+  private ShellCommand        group;
+  private ShellSubCommand             command;
   private String[]            args;
   private String              consoleOutput;
   private Throwable           error ;
   private Map<String, Object> data = new HashMap<String, Object>();
   
-  public CommandGroup getGroup() { return group; }
-  public void setGroup(CommandGroup group) { this.group = group ; }
+  public ShellCommand getGroup() { return group; }
+  public void setGroup(ShellCommand group) { this.group = group ; }
 
-  public Command getCommand() {
+  public ShellSubCommand getCommand() {
     return command;
   }
 
-  public void setCommand(Command command) {
+  public void setCommand(ShellSubCommand command) {
     this.command = command;
   }
 

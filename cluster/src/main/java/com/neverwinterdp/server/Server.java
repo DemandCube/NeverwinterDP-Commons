@@ -21,6 +21,7 @@ import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.SysStreamLogger;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 /**
  * @author Tuan Nguyen
@@ -231,16 +232,22 @@ public class Server {
     Server server = container.getInstance(Server.class) ;
     server.onInit() ;
     server.start();
-    server.dumpInfo(System.out);
+    StringBuilder b = new StringBuilder("\n") ;
+    server.dumpInfo(b);
+    b.append("\n") ;
+    System.out.println(b);
     return server ;
   }
   
   static public void main(String[] args) throws InterruptedException {
-    for(String sel : args) {
-      System.out.println("arg = " + sel);
+    ServerOptions options = new ServerOptions() ;
+    new JCommander(options, args) ;
+    String serverName = options.properties.get("server.name") ;
+    if(serverName != null) {
+      System.setProperty("server.name", serverName);
+      SysStreamLogger.bindSystemStreams();
     }
-    final Server server = create(args) ;
+    Server server = create(options.properties) ;
     Thread.currentThread().join() ;
-    System.out.println("exit Server(Update++--++--++) !!!!");
   }
 }

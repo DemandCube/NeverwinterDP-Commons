@@ -162,56 +162,11 @@ cluster.ClusterGateway = {
     return JSON.parse(json) ;
   },
 
-  server : {
-    call: function(command, config) {
-      var json = JAVA_CLUSTER_GATEWAY.call('server', command, JSON.stringify(config.params)) ;
-      var results = JSON.parse(json) ;
-      if(config.onResponse) {
-        config.onResponse(new cluster.Response(results));
-      }
-    },
-
-    ping: function(config) { this.call('ping', config) ; },
-
-    metric: function(config) { this.call('metric', config); },
-
-    clearMetric: function(config) { this.call('clearMetric', config); },
-
-    start: function(config) { this.call('start', config); },
-
-    shutdown: function(config) { this.call('shutdown', config); },
-
-    exit: function(config) { this.call('exit', config); }
-  },
-
-  module : {
-    call: function(command, config) {
-      var json = JAVA_CLUSTER_GATEWAY.call('module', command, JSON.stringify(config.params)) ;
-      var results = JSON.parse(json) ;
-      if(config.onResponse) {
-        config.onResponse(new cluster.Response(results));
-      }
-    },
-
-    list: function(config) { this.call('list', config) ; },
-
-    install: function(config) { this.call('install', config) ; },
-
-    uninstall: function(config) { this.call('uninstall', config); }
-  },
-
-  plugin: function(pluginName, command, config) {
-    var plugin = JAVA_CLUSTER_GATEWAY.plugin(pluginName) ;
-    if(config.params == null)  config.params = {} ; 
-    config.params._commandName = command ;
-    var json = plugin.call(JSON.stringify(config.params)) ;
+  execute: function(config) {
+    var json = JAVA_CLUSTER_GATEWAY.call(config.command) ;
     var results = JSON.parse(json) ;
     if(config.onResponse) {
       config.onResponse(new cluster.Response(results));
     }
-  },
-
-  call: function(pluginName, command, config) {
-    return this.plugin(pluginName, command, config) ;
   }
 }

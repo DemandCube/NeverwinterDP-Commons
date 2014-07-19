@@ -60,7 +60,12 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
   
   public ClusterMember getClusterMember(String connect) {
     HazelcastMemberSelector selector = new HazelcastMemberSelector(hzclient) ;
-    return selector.selectClusterMemOber(connect) ;
+    return selector.selectClusterMember(connect) ;
+  }
+  
+  public ClusterMember getClusterMemberByUuid(String uuid) {
+    HazelcastMemberSelector selector = new HazelcastMemberSelector(hzclient) ;
+    return selector.selectClusterMemberByUuid(uuid) ;
   }
   
   public void addListener(ClusterListener<ClusterClient> listener) {

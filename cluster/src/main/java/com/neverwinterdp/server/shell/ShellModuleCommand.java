@@ -1,77 +1,42 @@
 package com.neverwinterdp.server.shell;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.beust.jcommander.DynamicParameter;
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.command.ServerCommandResult;
-import com.neverwinterdp.server.gateway.MemberSelector;
+import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ModuleRegistration.InstallStatus;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-@CommandGroupConfig(name = "module")
-public class ModuleCommandGroup extends CommandGroup {
-  public ModuleCommandGroup() {
+@ShellCommandConfig(name = "module")
+public class ShellModuleCommand extends ShellCommand {
+  public ShellModuleCommand() {
     add("list", ModuleList.class);
     add("install", Install.class);
     add("uninstall", Uninstall.class);
   }
   
   @Parameters(commandDescription = "execute various module list option such available, installed")
-  static public class ModuleList extends Command {
-    @Parameter(names = {"--type"}, description = "List the available modules")
-    String type ;
-    
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    public void execute(ShellContext ctx) {
-      list(ctx, ctx.getClusterGateway().module.list(memberSelector, type), "List installed") ;
+  static public class ModuleList extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ModuleRegistration[]>[] results =  ctx.getClusterGateway().execute(command) ;
+      list(ctx, results, "List installed") ;
     }
   }
   
   @Parameters(commandDescription = "execute module install options")
-  static public class Install extends Command {
-    @Parameter(names = {"--autostart"}, description = "Autostart after install")
-    boolean autostart = false ;
-    
-    @DynamicParameter(names = "-P", description = "Module properties")
-    Map<String, String> properties = new HashMap<String, String>();
-
-    @Parameter(
-        names = { "--module" }, variableArity = true, 
-        description = "List of module to install"
-    )
-    List<String> modules = new ArrayList<String>() ;
-
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    public void execute(ShellContext ctx) {
-      list(ctx, ctx.getClusterGateway().module.install(memberSelector, modules, autostart, properties), "Install") ;
+  static public class Install extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ModuleRegistration[]>[] results = ctx.getClusterGateway().execute(command) ;
+      list(ctx, results, "Install") ;
     }
   }
   
   @Parameters(commandDescription = "execute various module uninstall options")
-  static public class Uninstall extends Command {
-    @Parameter(
-        names = { "--module" }, variableArity = true,
-        description = "List of module to uninstall"
-    )
-    List<String> modules = new ArrayList<String>() ;
-    
-    @ParametersDelegate
-    MemberSelector memberSelector = new MemberSelector();
-    
-    public void execute(ShellContext ctx) {
-      list(ctx, ctx.getClusterGateway().module.uninstall(memberSelector, modules), "Uninstall") ;
+  static public class Uninstall extends ShellSubCommand {
+    public void execute(ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ModuleRegistration[]>[] results = ctx.getClusterGateway().execute(command) ;
+      list(ctx, results, "Uninstall") ;
     }
   }
   

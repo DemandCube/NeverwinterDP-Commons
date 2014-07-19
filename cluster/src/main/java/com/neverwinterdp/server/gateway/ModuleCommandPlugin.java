@@ -1,62 +1,47 @@
 package com.neverwinterdp.server.gateway;
 
-import java.util.List;
-import java.util.Map;
-
+import com.beust.jcommander.Parameter;
+import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.command.ServerCommand;
-import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerModuleCommands;
 import com.neverwinterdp.server.module.ModuleRegistration;
 
-public class ModulePlugin extends Plugin {
-  protected Object doCall(String commandName, CommandParams params) throws Exception {
-    ServerCommandResult<?>[] results = null ;
-    if("list".equals(commandName)) results = list(params) ;
-    else if("install".equals(commandName)) results = install(params) ;
-    else if("uninstall".equals(commandName)) results = uninstall(params) ;
-    if(results != null) return results ;
-    return "{ 'success': false, 'message': 'unknown command'}" ;
+public class ModuleCommandPlugin extends CommandPlugin {
+  public ModuleCommandPlugin() {
+    add("list", new List()) ;
+    add("install", new Install()) ;
+    add("uninstall", new Uninstall()) ;
   }
   
-  public ServerCommandResult<ModuleRegistration[]>[] list(CommandParams params) {
-    MemberSelector memberSelector = new MemberSelector(params) ;
-    String type = params.getString("type") ;
-    return list(memberSelector, type) ;
-  }
-  
-  public ServerCommandResult<ModuleRegistration[]>[] list(MemberSelector memberSelector, String type) {
-    ServerCommand<ModuleRegistration[]> cmd = null ;
-    if("installed".equals(type)) {
-      cmd = new ServerModuleCommands.GetInstallModule() ;
-    } else {
-      cmd = new ServerModuleCommands.GetAvailableModule() ;
+  static public class List implements SubCommandExecutor {
+    @Parameter(names = {"--type"}, description = "Module type : available , installed")
+    private String type ;
+    
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      MemberSelector memberSelector = command.getMemberSelector() ;
+      ServerCommand<ModuleRegistration[]> serverCmd = null ;
+      if("installed".equals(type)) {
+        serverCmd = new ServerModuleCommands.GetInstallModule() ;
+      } else {
+        serverCmd = new ServerModuleCommands.GetAvailableModule() ;
+      }
+      return memberSelector.execute(clusterClient, serverCmd) ;
     }
-    return memberSelector.execute(clusterClient, cmd) ;
   }
   
-  public ServerCommandResult<ModuleRegistration[]>[] install(CommandParams params) {
-    MemberSelector memberSelector = new MemberSelector(params) ;
-    boolean autostart = params.getBoolean("autostart", false) ;
-    List<String> modules = params.getStringList("module") ;
-    Map<String, String> properties = params.getProperties() ;
-    return install(memberSelector, modules, autostart, properties) ;
+  static public class Install implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ServerCommand<ModuleRegistration[]> serverCmd = new ServerModuleCommands.InstallModule() ;
+      command.mapAll(serverCmd);
+      return command.getMemberSelector().execute(clusterClient, serverCmd) ;
+    }
   }
   
-  public ServerCommandResult<ModuleRegistration[]>[] install(MemberSelector memberSelector, List<String> modules, 
-                                                             boolean autostart, Map<String, String> properties) {
-    ServerCommand<ModuleRegistration[]> cmd = 
-        new ServerModuleCommands.InstallModule(modules, autostart, properties) ;
-    return memberSelector.execute(clusterClient, cmd) ;
-  }
-  
-  public ServerCommandResult<ModuleRegistration[]>[] uninstall(CommandParams params) {
-    MemberSelector memberSelector = new MemberSelector(params) ;
-    List<String> modules = params.getStringList("module") ;
-    return uninstall(memberSelector, modules) ;
-  }
-  
-  public ServerCommandResult<ModuleRegistration[]>[] uninstall(MemberSelector memberSelector, List<String> modules) {
-    ServerCommand<ModuleRegistration[]> cmd = new ServerModuleCommands.UninstallModule(modules) ;
-    return memberSelector.execute(clusterClient, cmd) ;
+  static public class Uninstall implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ServerCommand<ModuleRegistration[]> serverCmd = new ServerModuleCommands.UninstallModule() ;
+      command.mapPartial(serverCmd);
+      return command.getMemberSelector().execute(clusterClient, serverCmd) ;
+    }
   }
 }

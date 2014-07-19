@@ -21,14 +21,20 @@ public class HttpGatewayRouteHandler extends RouteHandlerGeneric {
   }
   
   protected void doPost(ChannelHandlerContext ctx, HttpRequest request) {
-    FullHttpRequest req = (FullHttpRequest) request ;
-    ByteBuf byteBuf = req.content() ;
-    byte[] bytes = new byte[byteBuf.readableBytes()] ;
-    byteBuf.readBytes(bytes) ;
-    HttpGatewayRequest grequest = JSONSerializer.INSTANCE.fromBytes(bytes, HttpGatewayRequest.class) ;
-    HttpGatewayResponse gresponse = new HttpGatewayResponse(grequest) ;
-    gresponse.setData(cluster.execute(grequest.getGroup(), grequest.getCommand(), grequest.getParams())) ;
-    System.out.println("Response data = " + gresponse.getData()) ;
-    writeJSON(ctx, request, gresponse);
+    try {
+      FullHttpRequest req = (FullHttpRequest) request ;
+      ByteBuf byteBuf = req.content() ;
+      byte[] bytes = new byte[byteBuf.readableBytes()] ;
+      byteBuf.readBytes(bytes) ;
+      HttpGatewayRequest grequest = JSONSerializer.INSTANCE.fromBytes(bytes, HttpGatewayRequest.class) ;
+      HttpGatewayResponse gresponse = new HttpGatewayResponse(grequest) ;
+      gresponse.setData(cluster.execute(grequest.getCommand())) ;
+      writeJSON(ctx, request, gresponse);
+    } catch(Throwable t) {
+      HttpGatewayResponse gresponse = new HttpGatewayResponse() ;
+      gresponse.setData(t.getMessage());
+      writeJSON(ctx, request, gresponse);
+      t.printStackTrace(); 
+    }
   }
 }

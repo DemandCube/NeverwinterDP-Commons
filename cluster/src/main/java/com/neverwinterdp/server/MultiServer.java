@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.util.SysStreamLogger;
 
 public class MultiServer {
   static public class MultiServerOptions {
@@ -43,6 +44,7 @@ public class MultiServer {
   }
   
   static public void main(String[] args) throws Exception {
+    SysStreamLogger.bindSystemStreams();
     create(args) ;
     Thread.currentThread().join();
   }

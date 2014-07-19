@@ -1,5 +1,7 @@
 package com.neverwinterdp.server.shell;
 
-abstract public class Command {
-  abstract public void execute(ShellContext context) throws Exception ;
+import com.neverwinterdp.server.gateway.Command;
+
+abstract public class ShellSubCommand {
+  abstract public void execute(ShellContext context, Command command) throws Exception ;
 }

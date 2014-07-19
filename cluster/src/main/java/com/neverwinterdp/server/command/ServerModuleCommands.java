@@ -1,8 +1,11 @@
 package com.neverwinterdp.server.command;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.beust.jcommander.DynamicParameter;
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.util.text.StringUtil;
@@ -21,9 +24,14 @@ public class ServerModuleCommands {
   }
   
   static public class InstallModule extends ServerCommand<ModuleRegistration[]> {
+    @Parameter(names = {"--autostart"}, description = "autostart the services in the module after the installation")
+    private boolean autostart = false ;
+    
+    @Parameter(names = {"--module"}, variableArity = true, description = "The modules to be installed")
     private List<String> modules ;
-    private boolean autostart =false ;
-    private Map<String, String> properties ;
+    
+    @DynamicParameter(names = "-P", description = "Module properties")
+    private Map<String, String> properties = new HashMap<String, String>();
     
     public InstallModule() {} 
     
@@ -44,6 +52,7 @@ public class ServerModuleCommands {
   }
   
   static public class UninstallModule extends ServerCommand<ModuleRegistration[]> {
+    @Parameter(names = {"--module"}, variableArity = true, description = "The modules to be uninstalled")
     private List<String> modules ;
     
     public UninstallModule() {} 
