@@ -1,5 +1,8 @@
 package com.neverwinterdp.server.command;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import com.neverwinterdp.server.cluster.ClusterMember;
 
 /**
@@ -8,7 +11,7 @@ import com.neverwinterdp.server.cluster.ClusterMember;
  */
 public class ServerCommandResult <T> {
   private T result ;
-  private Exception error ;
+  private String error ;
   private ClusterMember fromMember ;
   
   public T getResult() {
@@ -21,12 +24,14 @@ public class ServerCommandResult <T> {
   
   public boolean hasError() { return error != null ; }
   
-  public Exception getError() {
+  public String getError() {
     return error;
   }
   
   public void setError(Exception error) {
-    this.error = error;
+    StringWriter swriter = new StringWriter() ;
+    error.printStackTrace(new PrintWriter(swriter));
+    this.error = swriter.toString();
   }
 
   public ClusterMember getFromMember() {

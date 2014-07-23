@@ -11,6 +11,7 @@ public class ScriptRunnerUnitTest {
     HashMap<String, Object> ctx = new HashMap<String, Object>() ;
     ctx.put("hello", "Hello") ;
     ScriptRunner runner = new ScriptRunner(".", ctx) ;
+    runner.require("src/main/javascript/util/io.js");
     runner.eval("print('ctx hello = ' +  hello + '\\n')") ;
     runner.eval("print('ctx hello = ' +  JSON.stringify({name: 'Tuan'}))") ;
   }

@@ -30,13 +30,6 @@ public class MemberSelector implements Serializable {
   
   public MemberSelector() {} 
   
-  public MemberSelector(CommandParams params) {
-    this.memberRole = params.getString("member-role") ;
-    this.memberName = params.getString("member-name") ;
-    this.memberUuid = params.getString("member-uuid") ;
-    this.timeout = params.getLong("timeout", 10000l) ;
-  }
-  
   public ClusterMember[] getMembers(ClusterClient clusterClient) {
     if(memberUuid != null) {
       ClusterMember member = clusterClient.getClusterMemberByUuid(memberUuid) ;
@@ -74,10 +67,5 @@ public class MemberSelector implements Serializable {
     command.setTimeout(timeout) ;
     if(members == null) return client.execute(command) ; 
     else return client.execute(command, members) ;
-  }
-  
-  public MemberSelector setMemberRole(String role) {
-    this.memberRole = role ;
-    return this ;
   }
 }

@@ -25,6 +25,15 @@ public class ServiceCommands {
       return service.getServiceRegistration() ;
     }
   }
+  
+  static public class Restart extends ServiceCommand<ServiceRegistration> {
+    public ServiceRegistration execute(Server server, Service service) throws Exception {
+      ServiceRegistration registration = service.getServiceRegistration() ;
+      server.getModuleContainer().stop(registration);
+      server.getModuleContainer().start(registration);
+      return service.getServiceRegistration() ;
+    }
+  }
 
   static public class Stop extends ServiceCommand<ServiceRegistration> {
     public ServiceRegistration execute(Server server, Service service) throws Exception {

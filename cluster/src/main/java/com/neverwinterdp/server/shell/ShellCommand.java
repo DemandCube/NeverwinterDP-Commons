@@ -10,9 +10,7 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 
-import com.beust.jcommander.JCommander;
 import com.neverwinterdp.server.gateway.Command;
-import com.neverwinterdp.util.text.StringUtil;
 
 public class ShellCommand {
   private String name ;

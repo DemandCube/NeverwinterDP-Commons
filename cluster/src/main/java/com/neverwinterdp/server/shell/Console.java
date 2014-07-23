@@ -18,6 +18,10 @@ public class Console {
     consoleOutput = new ConsoleAppendable(out) ;
   }
   
+  public void setPrintStream(PrintStream out) {
+    this.out = out ;
+  }
+  
   public String getTextOutput() { return consoleOutput.getTextOutput() ; }
   
   public TabularPrinter tabularPrinter(int ... colWidth) {
