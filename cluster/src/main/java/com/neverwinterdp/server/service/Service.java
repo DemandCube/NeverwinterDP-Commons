@@ -17,6 +17,8 @@ public interface Service {
    */
   public ServiceRegistration getServiceRegistration();
 
+  public <T extends ServiceInfo> T getServiceInfo() ;
+  
   /**
    * This method is designed to start the service and change the service state
    * to START. If the service is a wrapper to another service such zookeeper,

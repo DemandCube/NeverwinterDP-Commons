@@ -2,7 +2,7 @@ package com.neverwinterdp.server.module;
 
 import java.util.Map;
 
-import com.neverwinterdp.server.service.HelloService;
+import com.neverwinterdp.server.service.hello.HelloService;
 
 @ModuleConfig(name = "HelloModule", autoInstall = true, autostart = true) 
 public class HelloModule extends ServiceModule {

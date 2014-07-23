@@ -14,7 +14,6 @@ public class ServiceRegistration implements Serializable {
   private float        version;
   private String       description;
   private ServiceState state = ServiceState.INIT;
-  private Object       serviceInfo ;
   
   public ServiceRegistration() {
   }
@@ -60,10 +59,5 @@ public class ServiceRegistration implements Serializable {
 
   public void setState(ServiceState state) {
     this.state = state;
-  }
-
-  public <T> T getServiceInfo() { return (T) serviceInfo ; }
-  public void setServiceInfo(Object serviceInfo) {
-    this.serviceInfo = serviceInfo ;
   }
 }

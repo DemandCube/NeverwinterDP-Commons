@@ -78,6 +78,13 @@ public class Command {
   
   static public String[] parseArgs(String line) {
     List<String> holder = new ArrayList<String>();
+    //parse data format in  #data{ }#
+    String data = null ;
+    if(line.indexOf("#{data") > 0 && line.endsWith("}#")) {
+      int idx = line.indexOf("#{data") ;
+      data = line.substring(idx + 6 , line.length() - 2) ;
+      line = line.substring(0, idx) ;
+    }
     Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
     while (m.find()) {
       String arg = m.group(1).trim() ;
@@ -88,6 +95,7 @@ public class Command {
       }
       holder.add(arg); 
     }
+    if(data != null) holder.add(data) ;
     return holder.toArray(new String[holder.size()]) ;
   }
   

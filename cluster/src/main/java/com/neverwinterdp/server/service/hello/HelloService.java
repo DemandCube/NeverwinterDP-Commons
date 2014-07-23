@@ -1,4 +1,4 @@
-package com.neverwinterdp.server.service;
+package com.neverwinterdp.server.service.hello;
 
 import java.util.Map;
 
@@ -10,6 +10,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.neverwinterdp.server.service.AbstractService;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.monitor.ApplicationMonitor;
 import com.neverwinterdp.util.monitor.ComponentMonitor;

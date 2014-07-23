@@ -13,7 +13,7 @@ import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterClient;
 import com.neverwinterdp.server.module.HelloModule;
 import com.neverwinterdp.server.module.ModuleContainer;
-import com.neverwinterdp.server.service.HelloService;
+import com.neverwinterdp.server.service.hello.HelloService;
 
 public class ServerBuilderUnitTest {
   @Test
