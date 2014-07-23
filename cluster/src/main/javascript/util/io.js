@@ -1,3 +1,8 @@
+if(typeof JSON === "undefined") {
+  ScriptRunner.require("classpath:util/json2.js");
+  //ScriptRunner.require("src/main/javascript/util/json2.js");
+}
+
 function TextPrinter() {
   this.text = "" ;
   

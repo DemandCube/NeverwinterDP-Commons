@@ -24,6 +24,8 @@ dependencies {
   compile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
 
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
+
+  testRuntime files("src/main/javascript")
 }
 
 task jsJar(type:Jar) { 
