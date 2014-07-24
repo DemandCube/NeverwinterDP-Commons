@@ -204,12 +204,14 @@ Cluster  is composed of a set of  the servers and smart client
 3.  A server has many other subcomponents such the server state, logger, cluster communication
      implementation, service container...
 
-##Service Concept##
-1.  The service life cycle and access  are managed by the service container .
-2.  A service can be dynamically added, removed,  started, stopped 
-3.  A service can be a simple java component  or  embbeded complex java project such kafka, jetty...
-3.  A service  can be wrapper to other  program such kafka, mysql, nginx. Actually you can lauch the other
-     program via java Process, if the program is java , it will be launched in another jvm environment.
+##Module And Service Concept##
+
+1. A server can have several modules. The module can be installed and uninstalled dynamically at the runtime.
+2. A module is a service container.
+3. The service life cycle and access  are managed by the service container .
+4. A service can be dynamically added, removed,  started, stopped 
+5. A service can be a simple java component  or  embbeded complex java project such kafka, jetty...
+6. A service  can be wrapper to other  program such kafka, mysql, nginx. Actually you can lauch the other program via java Process, if the program is java , it will be launched in another jvm environment.
 
 ##Smart Client Concept##
 1.  A Smart Client is a part of the cluster and it has to be in the same cluster network.
