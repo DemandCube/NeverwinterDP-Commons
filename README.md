@@ -292,6 +292,6 @@ To import the project into the  eclipse
 
 1. Choose File > Import
 2. Choose General > Existing Projects into Workspace
-3. Check Select root directory and browse to path/NeverwinterDP/code
-4. Select all the projects except the code project, then click Finish
+3. Check Select root directory and browse to path/NeverwinterDP-Commons
+4. Select all the projects  then click Finish
 
