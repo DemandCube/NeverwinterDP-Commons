@@ -213,16 +213,64 @@ Cluster  is composed of a set of  the servers and smart client
 
 ##Smart Client Concept##
 1.  A Smart Client is a part of the cluster and it has to be in the same cluster network.
-2.  A smart client can directly communicate with the other server, broadcast or listen to the cluster  event
-      as a normal server
+2.  A smart client can directly communicate with the other server, broadcast or listen to the cluster  event as a normal server
 3.  A smart client does not provide any services.
 
 ##Client concept##
 1.  The client is designed to communicate from outside.
-2.   The client cannot communicate directly or  broadcast/listen to the cluster event.
+2.  The client cannot communicate directly or  broadcast/listen to the cluster event.
 3.  The cluster has to support the client and it need a master server to handle the client request.
-4.  The client is usually communicate with the master server in sync mode ,  the server will handle the
-      request  or forward the request to ther other servers in the cluster.
+4.  The client is usually communicate with the master server in sync mode ,  the server will handle the request  or forward the request to ther other servers in the cluster.
+
+##Cluster Gateway##
+
+The cluster gateway is a low level smart client lib. it allows the developer connect to a cluster, listen to the cluster event or send a command to a server or a group of servers.
+
+##Cluster Shell##
+
+The cluster shell is a command line tool develop on top of of the cluster gateway. The cluster shell is composed of several command and each command itself have several subcommand. 
+
+The command syntax is:
+
+```
+command subcommand [--param value]*
+```
+
+Each command has a common set of parameters
+
+Member selector:
+
+```
+--member-name: use this parameter to send the command to a specific server identify by the server name
+--member-uuid: use this parameter to send the command to a specific server identify by the uuid
+--member-role: use this parameter to send the command to a group of servers
+``` 
+
+
+###cluster command###
+
+1. clsuter registration: Return and print the list of servers with the installed modules and services
+
+###server command###
+
+1. server ping: Return and print the state of the running server
+2. server registration: Return and print the installed module , service status of a server or a group of server
+3. server metric: Return and print the metric in the table format
+4. server metric-clear: Clear the metric
+5. server shutdown: This command will stop all the services and uninstall all the module , services of a server. But the server is still running and communicate with the client.
+3. server exit: Completely shutdown and exit the jvm. The client is no more able to communicate with the server.
+
+###module command###
+
+1. module list: This command list the available module and status on each server.
+2. module install: This command will install a module on a server or a group of server with the given properties for each module.
+3. module uninstall: This command stop the services that belong to a module and uninstall the module.
+
+###service comand###
+
+TODO: Implement command start, stop service....
+
+
 
 #Build And Develop#
 
