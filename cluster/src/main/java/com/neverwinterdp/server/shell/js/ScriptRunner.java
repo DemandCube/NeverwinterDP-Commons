@@ -36,6 +36,7 @@ public class ScriptRunner {
     try {
       String script = null ;
       if(scriptFile.startsWith("classpath:") || scriptFile.startsWith("file:")) {
+        System.err.println("Script File: " + scriptFile) ;
         script = IOUtil.getStreamContentAsString(IOUtil.loadRes(scriptFile), "UTF-8") ;
       } else {
         script = IOUtil.getFileContentAsString(libDir + "/" + scriptFile, "UTF-8") ;

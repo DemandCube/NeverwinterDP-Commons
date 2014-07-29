@@ -32,7 +32,7 @@ public class ShellCommand {
   
   public boolean hasCommand(String name) { return subCommands.containsKey(name) ; }
   
-  public void execute(ShellContext ctx, Command command) throws Exception {
+  public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
     if("help".equalsIgnoreCase(command.getSubCommand())) {
       help() ;
       return ;
@@ -42,7 +42,7 @@ public class ShellCommand {
       ShellSubCommand subCommand = clazz.newInstance() ;
       ctx.onStartCommand(this, subCommand);
       try {
-        subCommand.execute(ctx, command);
+        subCommand.execute(shell, ctx, command);
       } catch(Throwable t) {
         ctx.getExecuteContext().setError(t);
         StringWriter writer = new StringWriter() ;

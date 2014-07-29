@@ -3,7 +3,6 @@ package com.neverwinterdp.server.shell;
 import java.util.List;
 import java.util.Map;
 
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
 import com.neverwinterdp.server.ServerRegistration;
@@ -31,15 +30,16 @@ public class ShellServerCommand extends ShellCommand {
   }
   
   static public class Ping extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      printServerStateResults(ctx, results) ;
+      ctx.console().header(command.getCommandLine());
+      printPrimitiveResults(ctx, results) ;
     }
   }
   
   @Parameters(commandDescription = "List the server registration and service registration of each member")
   static public class Registration extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) {
+    public void execute(Shell shell, ShellContext ctx, Command command) {
       ServerRegistration[] registration = ctx.getClusterGateway().getClusterRegistration().getServerRegistration() ;
       Console console = ctx.console() ;
       String indent = "  " ;
@@ -73,26 +73,29 @@ public class ShellServerCommand extends ShellCommand {
     @ParametersDelegate
     MemberSelector memberSelector = new MemberSelector();
     
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      printServerStateResults(ctx, results) ;
+      ctx.console().header(command.getCommandLine());
+      printPrimitiveResults(ctx, results) ;
     }
   }
 
   static public class Exit extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      printServerStateResults(ctx, results) ;
+      ctx.console().header(command.getCommandLine());
+      printPrimitiveResults(ctx, results) ;
     }
   }
   
   static public class Metric extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ApplicationMonitorSnapshot>[] results = ctx.getClusterGateway().execute(command) ;
       MetricFormater formater = new MetricFormater("  ") ;
+      ctx.console().header(command.getCommandLine());
       for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {
         ApplicationMonitorSnapshot snapshot = sel.getResult() ;
-        ctx.console().header(sel.getFromMember().toString() + " - member name " + sel.getFromMember().getMemberName());
+        ctx.console().println(sel.getFromMember().toString() + " - member name " + sel.getFromMember().getMemberName());
         Map<String, TimerSnapshot> timers = snapshot.getRegistry().getTimers() ;
         ctx.console().println(formater.format(timers));
       }
@@ -100,28 +103,25 @@ public class ShellServerCommand extends ShellCommand {
   }
   
   static public class MetricClear extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<Integer>[] results = ctx.getClusterGateway().execute(command) ;
-      for(ServerCommandResult<Integer> sel : results) {
-        Integer match = sel.getResult() ;
-        ctx.console().println("Clear " + match + " on " + sel.getFromMember()) ;
-      }
+      ctx.console().header("Metric Clear");
+      printPrimitiveResults(ctx, results);
     }
   }
   
-  static void printServerStateResults(ShellContext ctx, ServerCommandResult<ServerState>[] results) {
+  static void printPrimitiveResults(ShellContext ctx, ServerCommandResult<?>[] results) {
     TabularPrinter tprinter = ctx.console().tabularPrinter(30, 10, 10) ;
-    tprinter.header("Host IP", "Port", "State");
+    tprinter.header("Host IP", "Port", "Result");
     for(int i = 0; i < results.length; i++) {
-      ServerCommandResult<ServerState> sel = results[i] ;
+      ServerCommandResult<?> sel = results[i] ;
       String host = sel.getFromMember().getIpAddress() ;
       int    port = sel.getFromMember().getPort() ;
-      ServerState state = sel.getResult() ;
-      tprinter.row(host, port, state);
+      tprinter.row(host, port, sel.getResult());
     }
     
     for(int i = 0; i < results.length; i++) {
-      ServerCommandResult<ServerState> sel = results[i] ;
+      ServerCommandResult<?> sel = results[i] ;
       if(sel.hasError()) {
         ctx.console().println(sel.getError());
       }

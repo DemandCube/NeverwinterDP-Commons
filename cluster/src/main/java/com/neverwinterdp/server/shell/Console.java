@@ -7,10 +7,10 @@ import java.io.StringWriter;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 public class Console {
-  private PrintStream out ;
+  private PrintStream[] out ;
   private ConsoleAppendable consoleOutput ;
   
-  public Console(PrintStream out) {
+  public Console(PrintStream ... out) {
     this.out = out ;
   }
   
@@ -18,7 +18,7 @@ public class Console {
     consoleOutput = new ConsoleAppendable(out) ;
   }
   
-  public void setPrintStream(PrintStream out) {
+  public void setPrintStream(PrintStream ... out) {
     this.out = out ;
   }
   

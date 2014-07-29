@@ -46,7 +46,7 @@ class ServiceCommandWrapper<T> implements Callable<T>, HazelcastInstanceAware, S
     Service service = server.getModuleContainer().getService(module, serviceId) ;
     
     if(service == null) {
-      throw new Exception("Service " + serviceId + " is not found on " + server.getServerRegistration().getServerName()) ;
+      throw new Exception("Service " + serviceId + " is not found on server " + server.getServerRegistration().getServerName()) ;
     }
     
     T result = command.execute(server, service) ;

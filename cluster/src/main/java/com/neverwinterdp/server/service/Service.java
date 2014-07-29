@@ -1,5 +1,7 @@
 package com.neverwinterdp.server.service;
 
+import java.util.Map;
+
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -18,6 +20,10 @@ public interface Service {
   public ServiceRegistration getServiceRegistration();
 
   public <T extends ServiceInfo> T getServiceInfo() ;
+  
+  public boolean configure(Map<String, String> properties) throws Exception;
+  
+  public boolean cleanup() throws Exception;
   
   /**
    * This method is designed to start the service and change the service state

@@ -8,6 +8,7 @@ import java.util.Map;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.neverwinterdp.server.gateway.Command;
+import com.neverwinterdp.server.shell.js.ScriptRunner;
 import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.text.StringUtil;
 
@@ -41,11 +42,11 @@ public class Shell {
       if(cmdName.startsWith(":")) {
         command.setCommand("default");
         command.setSubCommand(cmdName.substring(1));
-        builtin.execute(context, command);
+        builtin.execute(this, context, command);
       } else {
         ShellCommand shellCommand = commands.get(cmdName) ;
         if(shellCommand != null) {
-          shellCommand.execute(context, command);
+          shellCommand.execute(this, context, command);
         } else {
           throw new Exception("Unknown: " + command.getCommandLine()) ;
         }
@@ -55,6 +56,8 @@ public class Shell {
     }
   }
   
+  public void exec(String line) { execute(line); }
+  
   public void executeScript(String script) {
     String[] line = parseScript(script) ;
     for(String selLine : line) {
@@ -62,7 +65,16 @@ public class Shell {
     }
   }
   
-  public void executeJSScript(String script) {
+  public void evalJScript(String script, Map<String, Object> properties) throws Exception {
+    HashMap<String, Object> ctx = new HashMap<String, Object>() ;
+    ctx.put("JAVA_CLUSTER_GATEWAY", context.getClusterGateway());
+    ctx.put("SHELL", this);
+    ctx.putAll(properties);
+    String jsDir = ".";
+    String appDir = System.getProperty("app.dir", null);
+    if (appDir != null) jsDir = appDir + "/jscript";
+    ScriptRunner runner = new ScriptRunner(jsDir, ctx);
+    runner.eval(script) ;
   }
   
   public void close() {

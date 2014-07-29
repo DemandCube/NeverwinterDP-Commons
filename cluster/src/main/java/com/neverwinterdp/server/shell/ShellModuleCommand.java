@@ -18,7 +18,7 @@ public class ShellModuleCommand extends ShellCommand {
   
   @Parameters(commandDescription = "execute various module list option such available, installed")
   static public class ModuleList extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ModuleRegistration[]>[] results =  ctx.getClusterGateway().execute(command) ;
       list(ctx, results, "List installed") ;
     }
@@ -26,7 +26,7 @@ public class ShellModuleCommand extends ShellCommand {
   
   @Parameters(commandDescription = "execute module install options")
   static public class Install extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ModuleRegistration[]>[] results = ctx.getClusterGateway().execute(command) ;
       list(ctx, results, "Install") ;
     }
@@ -34,7 +34,7 @@ public class ShellModuleCommand extends ShellCommand {
   
   @Parameters(commandDescription = "execute various module uninstall options")
   static public class Uninstall extends ShellSubCommand {
-    public void execute(ShellContext ctx, Command command) throws Exception {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ModuleRegistration[]>[] results = ctx.getClusterGateway().execute(command) ;
       list(ctx, results, "Uninstall") ;
     }

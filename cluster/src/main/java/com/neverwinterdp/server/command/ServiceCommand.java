@@ -2,6 +2,7 @@ package com.neverwinterdp.server.command;
 
 import java.io.Serializable;
 
+import com.beust.jcommander.Parameter;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
@@ -13,7 +14,9 @@ import com.neverwinterdp.server.service.ServiceRegistration;
 abstract public class ServiceCommand<T> implements Serializable {
   private long    timeout = 5000l ; 
   private boolean logEnable ;
+  @Parameter(names = {"--module"}, description = "Target the module")
   private String  targetModule ;
+  @Parameter(names = {"--service-id"}, description = "Target the service id")
   private String  targetServiceId ;
   
   public ServiceCommand() {
