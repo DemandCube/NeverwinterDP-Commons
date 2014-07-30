@@ -14,11 +14,6 @@ public class ShellContext {
   private ExecuteContext currentExecuteContext ;
   private ExecuteContext lastExecuteContext ;
   
-  public ShellContext() {
-    console = new Console(System.out) ;
-    timer = new Timer() ;
-  }
-
   public Map<String, Object> getVariables() { return this.variables ; }
   
   public Console console() { return this.console ; }
@@ -32,8 +27,10 @@ public class ShellContext {
   public ExecuteContext getLastExecuteContext() { return this.lastExecuteContext ; }
   
   public void connect(String ... members) {
+    console = new Console(System.out) ;
     if(cluster == null) cluster = new ClusterGateway(members) ;
     else cluster.connect(members);
+    timer = new Timer() ;
   }
   
   public void onStartCommand(ShellCommand shellCommand, ShellSubCommand shellSubCommand) {
@@ -46,9 +43,16 @@ public class ShellContext {
     currentExecuteContext.setConsoleOutput(console.getTextOutput()) ;
   }
   
+  public boolean isClose() { return cluster == null ; }
+  
   public void close() {
     timer.purge() ;
     timer.cancel() ; 
-    if(cluster != null) cluster.close(); 
+    timer = null ;
+    if(cluster != null) {
+      cluster.close(); 
+      cluster = null ;
+    }
+    console = null ;
   }
 } 

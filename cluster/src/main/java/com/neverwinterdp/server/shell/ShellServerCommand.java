@@ -32,8 +32,10 @@ public class ShellServerCommand extends ShellCommand {
   static public class Ping extends ShellSubCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      ctx.console().header(command.getCommandLine());
-      printPrimitiveResults(ctx, results) ;
+      String[] explaination = {
+        "The result is the running state of the server."
+      };
+      CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
     }
   }
   
@@ -75,16 +77,20 @@ public class ShellServerCommand extends ShellCommand {
     
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      ctx.console().header(command.getCommandLine());
-      printPrimitiveResults(ctx, results) ;
+      String[] explaination = {
+        "The result is the running state of the server."
+      };
+      CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
     }
   }
 
   static public class Exit extends ShellSubCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
-      ctx.console().header(command.getCommandLine());
-      printPrimitiveResults(ctx, results) ;
+      String[] explaination = {
+        "The result is the running state of the server."
+      };
+      CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
     }
   }
   
@@ -105,26 +111,11 @@ public class ShellServerCommand extends ShellCommand {
   static public class MetricClear extends ShellSubCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<Integer>[] results = ctx.getClusterGateway().execute(command) ;
-      ctx.console().header("Metric Clear");
-      printPrimitiveResults(ctx, results);
-    }
-  }
-  
-  static void printPrimitiveResults(ShellContext ctx, ServerCommandResult<?>[] results) {
-    TabularPrinter tprinter = ctx.console().tabularPrinter(30, 10, 10) ;
-    tprinter.header("Host IP", "Port", "Result");
-    for(int i = 0; i < results.length; i++) {
-      ServerCommandResult<?> sel = results[i] ;
-      String host = sel.getFromMember().getIpAddress() ;
-      int    port = sel.getFromMember().getPort() ;
-      tprinter.row(host, port, sel.getResult());
-    }
-    
-    for(int i = 0; i < results.length; i++) {
-      ServerCommandResult<?> sel = results[i] ;
-      if(sel.hasError()) {
-        ctx.console().println(sel.getError());
-      }
+      String[] explaination = {
+        "The result is the number of the removed metric."
+      };
+      CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
+        
     }
   }
 }

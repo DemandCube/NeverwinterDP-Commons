@@ -25,7 +25,8 @@ public class ServiceCommands {
   
   static public class Start extends ServiceCommand<ServiceRegistration> {
     public ServiceRegistration execute(Server server, Service service) throws Exception {
-      service.start(); 
+      ServiceRegistration registration = service.getServiceRegistration() ;
+      server.getModuleContainer().start(registration);
       return service.getServiceRegistration() ;
     }
   }
@@ -35,23 +36,23 @@ public class ServiceCommands {
     private boolean cleanup ;
     
     public ServiceRegistration execute(Server server, Service service) throws Exception {
-      service.stop();
+      server.getModuleContainer().stop(service.getServiceRegistration());
       if(cleanup) service.cleanup();
-      service.start(); 
+      server.getModuleContainer().stop(service.getServiceRegistration());
       return service.getServiceRegistration() ;
     }
   }
 
   static public class Stop extends ServiceCommand<ServiceRegistration> {
     public ServiceRegistration execute(Server server, Service service) throws Exception {
-      service.stop(); 
+      ServiceRegistration registration = service.getServiceRegistration() ;
+      server.getModuleContainer().stop(registration);
       return service.getServiceRegistration() ;
     }
   }
 
   static public class Cleanup extends ServiceCommand<Boolean> {
     public Boolean execute(Server server, Service service) throws Exception {
-      ServiceRegistration registration = service.getServiceRegistration() ;
       return service.cleanup();
     }
   }

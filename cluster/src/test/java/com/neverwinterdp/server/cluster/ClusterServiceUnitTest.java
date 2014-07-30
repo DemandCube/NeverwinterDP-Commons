@@ -91,8 +91,10 @@ public class ClusterServiceUnitTest {
     stop.setTargetService(helloService);
     ServiceCommandResult<ServiceRegistration> stopResult = client.execute(stop, member) ;
     assertEquals(ServiceState.STOP, stopResult.getResult().getState()) ;
+    
     //wait to make sure the client get a cluster service stop event notification
     Thread.sleep(100l);
+    
     assertEquals(1, listener.events.size()) ;
     
     ServiceCommand<ServiceRegistration> start = new ServiceCommands.Start().setLogEnable(true) ;

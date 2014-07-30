@@ -111,7 +111,7 @@ public class StaticFileHandler implements RouteHandler {
     }
 
     final String uri = request.getUri();
-    System.out.println("handle uri " + uri);
+    //System.out.println("handle uri " + uri);
     final String path = sanitizeUri(uri);
     if (path == null) {
       sendError(ctx, FORBIDDEN);
@@ -190,15 +190,15 @@ public class StaticFileHandler implements RouteHandler {
       @Override
       public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
         if (total < 0) { // total unknown
-          System.err.println(future.channel() + " Transfer progress: " + progress);
+          //System.err.println(future.channel() + " Transfer progress: " + progress);
         } else {
-          System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
+          //System.err.println(future.channel() + " Transfer progress: " + progress + " / " + total);
         }
       }
 
       @Override
       public void operationComplete(ChannelProgressiveFuture future) {
-        System.err.println(future.channel() + " Transfer complete.");
+        //System.err.println(future.channel() + " Transfer complete.");
       }
     });
 
@@ -372,7 +372,7 @@ public class StaticFileHandler implements RouteHandler {
    */
   private void setContentTypeHeader(HttpResponse response, File file) {
     String mimeType = mimeTypesMap.getContentType(file.getPath()) ;
-    System.out.println("Mime Type " + mimeType) ;
+    //System.out.println("Mime Type " + mimeType) ;
     response.headers().set(CONTENT_TYPE, mimeType);
   }
 }
