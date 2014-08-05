@@ -13,11 +13,12 @@ public class AppClientIntegrationTest  {
         "--app-home", "/tmp/app/hadoop-framework",
         "--upload-app", "build/libs" ,
         "--app-name", "Hello Yarn",
+        
         "--container-manager", "com.neverwinterdp.hadoop.yarn.hello.HelloAppContainerManger",
-        "--conf:fs.default.name=hdfs://hadoop:9000",
-        "--conf:dfs.replication=1",
-        "--conf:yarn.resourcemanager.scheduler.address=hadoop:8030",
-        "--conf:yarn.resourcemanager.address=hadoop:8032"
+        "--yarnConf:fs.default.name=hdfs://hadoop:9000",
+        "--yarnConf:dfs.replication=1",
+        "--yarnConf:yarn.resourcemanager.scheduler.address=hadoop:8030",
+        "--yarnConf:yarn.resourcemanager.address=hadoop:8032"
       } ;
       
       AppClient appClient = new AppClient() ;

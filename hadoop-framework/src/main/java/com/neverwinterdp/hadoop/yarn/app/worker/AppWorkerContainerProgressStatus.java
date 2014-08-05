@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app;
+package com.neverwinterdp.hadoop.yarn.app.worker;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -8,17 +8,17 @@ import java.io.Serializable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
-public class ContainerProgressStatus implements Serializable, Writable {
+public class AppWorkerContainerProgressStatus implements Serializable, Writable {
   
-  private ContainerState containerState = ContainerState.ALLOCATED ;
+  private AppWorkerContainerState containerState = AppWorkerContainerState.ALLOCATED ;
   private float          progress = 0f;
   private String         statusMessage ;
   private Throwable      error ;
   
-  public ContainerProgressStatus() {
+  public AppWorkerContainerProgressStatus() {
   }
 
-  public ContainerProgressStatus(ContainerState containerState) {
+  public AppWorkerContainerProgressStatus(AppWorkerContainerState containerState) {
     this.containerState = containerState ;
   }
   
@@ -36,11 +36,11 @@ public class ContainerProgressStatus implements Serializable, Writable {
     this.statusMessage = statusMessage;
   }
 
-  public ContainerState getContainerState() {
+  public AppWorkerContainerState getContainerState() {
     return containerState;
   }
 
-  public void setContainerState(ContainerState containerState) {
+  public void setContainerState(AppWorkerContainerState containerState) {
     this.containerState = containerState;
   }
 
@@ -61,7 +61,7 @@ public class ContainerProgressStatus implements Serializable, Writable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    containerState = ContainerState.valueOf(in.readUTF()) ;
+    containerState = AppWorkerContainerState.valueOf(in.readUTF()) ;
     progress = in.readFloat() ;
     statusMessage = WritableUtils.readString(in) ;
   }

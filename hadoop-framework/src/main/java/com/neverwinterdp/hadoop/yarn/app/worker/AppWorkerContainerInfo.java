@@ -1,5 +1,6 @@
-package com.neverwinterdp.hadoop.yarn.app;
+package com.neverwinterdp.hadoop.yarn.app.worker;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -7,41 +8,35 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.api.records.NodeId;
 
-public class ContainerInfo {
-  private ContainerId  containerId ;
-  private NodeId nodeId ;
+public class AppWorkerContainerInfo implements Serializable {
+  private int    containerId ;
+  private String nodeId ;
   private int    memory ;
   private int    cores ;
   private List<String> commands ;
-  private ContainerProgressStatus progressStatus ;
+  private AppWorkerContainerProgressStatus progressStatus ;
   private InetSocketAddress rpcAddress ;
   
-  public ContainerInfo() {}
+  public AppWorkerContainerInfo() {}
       
-  public ContainerInfo(Container container, List<String> commands) {
-    nodeId = container.getNodeId() ;
-    this.containerId = container.getId() ;
+  public AppWorkerContainerInfo(Container container, List<String> commands) {
+    nodeId = container.getNodeId().toString() ;
+    this.containerId = container.getId().getId() ;
     this.memory = container.getResource().getMemory() ;
     this.cores = container.getResource().getVirtualCores() ;
     this.commands = commands ;
-    this.progressStatus = new ContainerProgressStatus(ContainerState.ALLOCATED) ;
+    this.progressStatus = new AppWorkerContainerProgressStatus(AppWorkerContainerState.ALLOCATED) ;
   }
 
-  public ContainerId getContainerId() {
-    return containerId;
-  }
+  public int getContainerId() { return containerId; }
 
   public void setContainerId(ContainerId containerId) {
-    this.containerId = containerId;
+    this.containerId = containerId.getId() ;
   }
 
-  public NodeId getNodeId() {
-    return nodeId;
-  }
+  public String getNodeId() { return nodeId; }
 
-  public void setNodeId(NodeId nodeId) {
-    this.nodeId = nodeId;
-  }
+  public void setNodeId(NodeId nodeId) { this.nodeId = nodeId.toString() ; }
 
   public int getMemory() {
     return memory;
@@ -67,11 +62,11 @@ public class ContainerInfo {
     this.commands = commands;
   }
 
-  public ContainerProgressStatus getProgressStatus() {
+  public AppWorkerContainerProgressStatus getProgressStatus() {
     return progressStatus;
   }
 
-  public void setProgressStatus(ContainerProgressStatus progressStatus) {
+  public void setProgressStatus(AppWorkerContainerProgressStatus progressStatus) {
     this.progressStatus = progressStatus;
   }
   

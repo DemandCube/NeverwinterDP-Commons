@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app;
+package com.neverwinterdp.hadoop.yarn.app.worker;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,26 +13,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterRPC;
 
-public class AppContainer {
+public class AppWorkerContainer {
   static {
     System.setProperty("java.net.preferIPv4Stack", "true") ;
   }
   
-  protected static final Logger LOGGER = LoggerFactory.getLogger(AppContainer.class.getName());
+  protected static final Logger LOGGER = LoggerFactory.getLogger(AppWorkerContainer.class.getName());
   
-  private AppContainerConfig config ;
+  private AppConfig config ;
   private RPC.Server containerRPCServer ;
   private AppMasterRPC appMasterRPC ;
   private AppWorker worker ;
-  private ContainerProgressStatus progressStatus ;
+  private AppWorkerContainerProgressStatus progressStatus ;
   
-  public AppContainer(AppContainerConfig config) {
+  public AppWorkerContainer(AppConfig config) {
     this.config = config ;
     try {
       Configuration rpcConf = new Configuration() ;
       //RPC.setProtocolEngine(rpcConf, AppMasterRPC.class, ProtobufRpcEngine.class);
-      //RPC.setProtocolEngine(rpcConf, AppContainerRPC.class, ProtobufRpcEngine.class);
+      //RPC.setProtocolEngine(rpcConf, AppWorkerContainerRPC.class, ProtobufRpcEngine.class);
       rpcConf.set(
           CommonConfigurationKeys.IO_SERIALIZATIONS_KEY, 
           JavaSerialization.class.getName() + "," + 
@@ -41,19 +43,19 @@ public class AppContainer {
           ) ;
       containerRPCServer = 
           new RPC.Builder(rpcConf).
-          setInstance(new AppContainerRPCImpl()).
-          setProtocol(AppContainerRPC.class).
+          setInstance(new AppWorkerContainerRPCImpl()).
+          setProtocol(AppWorkerContainerRPC.class).
           setBindAddress(InetAddress.getLocalHost().getHostAddress()).
           build();
       containerRPCServer.start();
 
-      InetSocketAddress rpcAddr = new InetSocketAddress(config.appMasterRpcIpAddress, config.appMasterRpcPort) ;
+      InetSocketAddress rpcAddr = new InetSocketAddress(config.appHostName, config.appRpcPort) ;
 
       appMasterRPC = 
           RPC.getProxy(AppMasterRPC.class, RPC.getProtocolVersion(AppMasterRPC.class), rpcAddr, rpcConf);
       appMasterRPC.ping("hello") ;
       InetSocketAddress addr = containerRPCServer.getListenerAddress() ;
-      appMasterRPC.setRpcAddress(config.containerId, addr.getAddress().getHostAddress(), addr.getPort());
+      appMasterRPC.setRpcAddress(config.getAppWorkerContainerId(), addr.getAddress().getHostAddress(), addr.getPort());
 
       Class<AppWorker> appWorkerClass = (Class<AppWorker>) Class.forName(config.worker) ;
       worker = appWorkerClass.newInstance() ;
@@ -63,29 +65,30 @@ public class AppContainer {
     }
   }
   
-  public AppContainerConfig getConfig() { return this.config ; }
+  public AppConfig getConfig() { return this.config ; }
   
   public AppMasterRPC getAppMasterRPC() { return this.appMasterRPC ; }
 
   public void reportProgress(float progress) {
     progressStatus.setProgress(progress);
-    appMasterRPC.progress(config.containerId, progressStatus);
+    appMasterRPC.progress(config.getAppWorkerContainerId(), progressStatus);
   }
   
   public void run() {
-    progressStatus = new ContainerProgressStatus(ContainerState.RUNNING) ;
+    progressStatus = new AppWorkerContainerProgressStatus(AppWorkerContainerState.RUNNING) ;
+    int workerContainerId = config.getAppWorkerContainerId() ;
     try {
-      appMasterRPC.progress(config.containerId, progressStatus) ;
+      appMasterRPC.progress(workerContainerId, progressStatus) ;
       
       worker.run(this) ;
       
       progressStatus.setProgress(1);
-      progressStatus.setContainerState(ContainerState.FINISHED);
-      appMasterRPC.progress(config.containerId, progressStatus) ;
+      progressStatus.setContainerState(AppWorkerContainerState.FINISHED);
+      appMasterRPC.progress(workerContainerId, progressStatus) ;
     } catch(Throwable error) {
       LOGGER.error("Error", error);
       progressStatus.setError(error);
-      appMasterRPC.progress(config.containerId, progressStatus);
+      appMasterRPC.progress(workerContainerId, progressStatus);
     } finally {
       onDestroy() ;
     }
@@ -105,8 +108,8 @@ public class AppContainer {
   }
   
   static public void main(String[] args) throws Exception {
-    AppContainerConfig options = new AppContainerConfig() ;
+    AppConfig options = new AppConfig() ;
     new JCommander(options, args) ;
-    new AppContainer(options).run() ;
+    new AppWorkerContainer(options).run() ;
   }
 }

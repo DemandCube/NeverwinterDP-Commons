@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app;
+package com.neverwinterdp.hadoop.yarn.app.master;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -35,6 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.Util;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 
 public class AppMaster {
   static {
@@ -43,24 +46,24 @@ public class AppMaster {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppMaster.class.getName());
   
-  private AppMasterConfig config ;
+  private AppConfig config ;
   private RPC.Server rpcServer ;
   private AMRMClient<ContainerRequest> amrmClient ;
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private Configuration conf;
   
-  private AppMonitor appMonitor = new AppMonitor() ;
-  private ContainerManager containerManager ;
+  private AppMasterMonitor appMonitor = new AppMasterMonitor() ;
+  private AppMasterContainerManager containerManager ;
   
   public AppMaster() {
   }
   
-  public AppMasterConfig getConfig() { return this.config ; }
+  public AppConfig getConfig() { return this.config ; }
   
   public Configuration getConfiguration() { return this.conf ; }
   
-  public AppMonitor getAppMonitor() { return this.appMonitor ; }
+  public AppMasterMonitor getAppMonitor() { return this.appMonitor ; }
 
   public AMRMClient<ContainerRequest> getAMRMClient() { return this.amrmClient ; }
   
@@ -69,7 +72,7 @@ public class AppMaster {
   public RPC.Server getRPCServer()  { return this.rpcServer ; }
   
   public boolean run(String[] args) throws Exception {
-    this.config = new AppMasterConfig() ;
+    this.config = new AppConfig() ;
     new JCommander(config, args) ;
     
     conf = new YarnConfiguration() ;
@@ -83,17 +86,20 @@ public class AppMaster {
       AvroSerialization.class.getName()
     );
     //RPC.setProtocolEngine(rpcConf, AppMasterRPC.class, ProtobufRpcEngine.class);
-    //RPC.setProtocolEngine(rpcConf, AppContainerRPC.class, ProtobufRpcEngine.class);
+    //RPC.setProtocolEngine(rpcConf, AppWorkerContainerRPC.class, ProtobufRpcEngine.class);
     rpcServer = 
         new RPC.Builder(rpcConf).
         setInstance(new AppMasterRPCImpl(appMonitor)).
         setProtocol(AppMasterRPC.class).
         setBindAddress(InetAddress.getLocalHost().getHostAddress()).
+        setPort(config.appRpcPort).
         build();
-    rpcServer.start();
+    rpcServer.start() ;
+    this.config.appHostName = rpcServer.getListenerAddress().getAddress().getHostAddress() ;
+    this.config.appRpcPort = rpcServer.getListenerAddress().getPort() ;
     
-    Class<?> containerClass = Class.forName(config.containerManager) ;
-    containerManager = (ContainerManager)containerClass.newInstance() ;
+    Class<?> containerClass = Class.forName(config.appContainerManager) ;
+    containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
     
     amrmClient = AMRMClient.createAMRMClient();
     amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
@@ -157,16 +163,17 @@ public class AppMaster {
     return response.getAllocatedContainers() ;
   }
   
-  public void startContainer(Container container, String command) throws YarnException, IOException {
+  public void startContainer(Container container) throws YarnException, IOException {
     ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
     System.out.println("Setup the classpath for the container " + container.getId()) ;
     Map<String, String> appMasterEnv = new HashMap<String, String>();
     Util.setupAppMasterEnv(true, conf, appMasterEnv);
     ctx.setEnvironment(appMasterEnv);
     
+    config.setAppWorkerContainerId(container.getId().getId());
     StringBuilder sb = new StringBuilder();
     List<String> commands = Collections.singletonList(
-        sb.append(command).
+        sb.append(config.buildWorkerCommand()).
         append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
         append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr")
         .toString()
@@ -182,7 +189,7 @@ public class AppMaster {
       for (ContainerStatus status: statuses) {
         assert (status.getState() == ContainerState.COMPLETE);
         int exitStatus = status.getExitStatus();
-        ContainerInfo containerInfo = appMonitor.getContainerInfo(status.getContainerId().getId()) ;
+        AppWorkerContainerInfo containerInfo = appMonitor.getContainerInfo(status.getContainerId().getId()) ;
         if (exitStatus != ContainerExitStatus.SUCCESS) {
           appMonitor.onFailedContainer(status);
           containerManager.onFailedContainer(AppMaster.this, status, containerInfo);

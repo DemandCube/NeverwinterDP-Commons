@@ -9,14 +9,14 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.app.AppContainerConfig;
-import com.neverwinterdp.hadoop.yarn.app.ContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.AppMonitor;
-import com.neverwinterdp.hadoop.yarn.app.ContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 import com.neverwinterdp.util.text.TabularPrinter;
 
-public class HelloAppContainerManger implements ContainerManager {
+public class HelloAppContainerManger implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(HelloAppContainerManger.class);
   
   public void onInit(AppMaster appMaster) {
@@ -30,10 +30,10 @@ public class HelloAppContainerManger implements ContainerManager {
 
   public void onAllocatedContainer(AppMaster master, Container container) {
     try {
-      AppContainerConfig config = new AppContainerConfig(master, container) ;
+      AppConfig config = master.getConfig() ;
       config.setWorker(HelloWorker.class) ;
-      master.startContainer(container, config.toCommand()) ;
-      LOGGER.info("Start container with command: " + config.toCommand());
+      master.startContainer(container) ;
+      LOGGER.info("Start container with command: " + config.buildWorkerCommand());
     } catch (YarnException e) {
       LOGGER.error("Error on start a container", e);
     } catch (IOException e) {
@@ -41,10 +41,10 @@ public class HelloAppContainerManger implements ContainerManager {
     }
   }
 
-  public void onCompleteContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onCompleteContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
   }
 
-  public void onFailedContainer(AppMaster master, ContainerStatus status, ContainerInfo containerInfo) {
+  public void onFailedContainer(AppMaster master, ContainerStatus status, AppWorkerContainerInfo containerInfo) {
   }
 
   public void waitForComplete(AppMaster appMaster) {
@@ -60,14 +60,14 @@ public class HelloAppContainerManger implements ContainerManager {
   
   public void onExit(AppMaster appMaster) {
     LOGGER.info("Start onExit(AppMaster appMaster)");
-    AppMonitor appMonitor = appMaster.getAppMonitor() ;
-    ContainerInfo[] info = appMonitor.getContainerInfos() ;
+    AppMasterMonitor appMonitor = appMaster.getAppMonitor() ;
+    AppWorkerContainerInfo[] info = appMonitor.getContainerInfos() ;
     int[] colWidth = {20, 20, 20, 20} ;
     TabularPrinter printer = new TabularPrinter(System.out, colWidth) ;
     printer.header("Id", "Progress", "Error", "State");
-    for(ContainerInfo sel : info) {
+    for(AppWorkerContainerInfo sel : info) {
       printer.row(
-        sel.getContainerId().getId(), 
+        sel.getContainerId(), 
         sel.getProgressStatus().getProgress(),
         sel.getProgressStatus().getError() != null,
         sel.getProgressStatus().getContainerState());
