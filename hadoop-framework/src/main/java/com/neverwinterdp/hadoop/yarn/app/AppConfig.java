@@ -124,7 +124,7 @@ public class AppConfig {
     }
     
     b.append(" --worker-max-memory ").append(this.workerMaxMemory) ;
-    b.append(" --worker-num-of-core ").append(this.workerMaxMemory) ;
+    b.append(" --worker-num-of-core ").append(this.workerNumOfCore) ;
     
     for(Map.Entry<String, String> entry : yarnConf.entrySet()) {
       b.append(" --conf:").append(entry.getKey()).append("=").append(entry.getValue()) ;
