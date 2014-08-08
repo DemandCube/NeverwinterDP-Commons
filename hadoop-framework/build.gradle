@@ -39,3 +39,43 @@ clean.doLast {
   new File("target").deleteDir() ;
   println("Delete target......................................") ;
 }
+
+task createHelloAppHome(dependsOn: 'build') << {
+  def appHomeDir = "${buildDir}/hello"
+  createHelloAppHome(appHomeDir)
+}
+
+def createHelloAppHome(String appHomeDir) {
+  println "\n\n"
+  println "*************************************************"
+  println "Preparing the app home directory ${appHomeDir}"
+  println "*************************************************"
+
+  def jars = [ 
+    "commons.utils", 
+    "jcommander"
+  ] 
+
+  println "Copy the dependencies library"
+  configurations.compile.each { File file -> 
+    if(isIn(jars, file)) {
+      println "  Copy $file.name to $appHomeDir"
+      copy {
+        from file
+        into "${appHomeDir}/libs"
+      }
+    }
+  }
+
+  copy {
+    from "${buildDir}/libs"
+    into "${appHomeDir}/libs"
+  }
+}
+
+def isIn(set, File file) {
+  for(item in set) {
+    if(file.name.startsWith(item)) return true ;
+  }
+  return false ;
+}

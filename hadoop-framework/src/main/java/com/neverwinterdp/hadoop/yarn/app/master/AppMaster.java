@@ -15,6 +15,7 @@ import org.apache.hadoop.io.serializer.avro.AvroSerialization;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
+import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
@@ -110,10 +111,11 @@ public class AppMaster {
     nmClient.init(conf);
     nmClient.start();
 
-    // Register with RM
-    amrmClientAsync.registerApplicationMaster(config.appHostName, config.appRpcPort, config.appTrackingUrl);
-    
     containerManager.onInit(this);
+    // Register with RM
+    RegisterApplicationMasterResponse registerResponse = 
+      amrmClientAsync.registerApplicationMaster(config.appHostName, config.appRpcPort, containerManager.getTrackingURL());
+    containerManager.onRequestContainer(this);
     containerManager.waitForComplete(this);
     containerManager.onExit(this);
     amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");

@@ -14,14 +14,17 @@ public class AppConfig {
   @Parameter(names = "--mini-cluster-env", description = "Setup the mini cluster env for testing")
   public boolean miniClusterEnv = false ;
   
+  @Parameter(names = "--app-id", description = "The application id")
+  public String appId ;
+  
   @Parameter(names = "--app-home-local", description = "The shared location of the application directory")
   public String appHomeLocal ;
   
   @Parameter(
-    names = "--app-home-share", 
+    names = "--app-home", 
     description = "The local app home on the client, that should be copy and deploy to app home share"
   )
-  public String appHomeShare ;
+  public String appHome ;
   
   @Parameter(names = "--app-name", description = "The application name")
   public String appName = "Yarn Application"  ;
@@ -96,12 +99,16 @@ public class AppConfig {
       b.append(" --mini-cluster-env ") ;
     }
     
-    if(appHomeLocal != null) {
-      b.append(" --app-home-local ").append(this.appHomeLocal) ;
+    if(appId != null) {
+      b.append(" --app-id ").append(this.appId) ;
     }
     
-    if(appHomeShare != null) {
-      b.append(" --app-home-share ").append(this.appHomeShare) ;
+    if(appHomeLocal != null) {
+      b.append(" --app-home ").append(this.appHome) ;
+    }
+    
+    if(appHome != null) {
+      b.append(" --app-home-local ").append(this.appHomeLocal) ;
     }
     
     if(appName != null) {

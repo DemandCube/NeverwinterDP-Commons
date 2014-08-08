@@ -8,7 +8,7 @@ public class HelloWorker implements AppWorker {
     for(int i = 0; i < 10; i++) {
       System.out.println("Hello Worker!") ;
       appContainer.reportProgress((i + 1)/(float)10);
-      Thread.sleep(200);
+      Thread.sleep(5000);
     }
   }
 }

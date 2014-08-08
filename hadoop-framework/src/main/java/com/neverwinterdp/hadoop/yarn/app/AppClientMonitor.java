@@ -27,16 +27,22 @@ public class AppClientMonitor {
     this.config = config ;
     this.yarnClient = yarnClient;
     this.appId = appId;
+
     String appMasterHostname = null ;
-    while(appMasterHostname == null) {
-      Thread.sleep(100);
+    int count = 0 ;
+    while(count < 30 && appMasterHostname == null) {
+      Thread.sleep(1000);
       ApplicationReport appReport = yarnClient.getApplicationReport(appId);
       appMasterHostname = appReport.getHost() ;
       if("N/A".equals(appMasterHostname)) appMasterHostname = null ;
+      count++ ;
     }
-    InetSocketAddress rpcAddr = new InetSocketAddress(appMasterHostname, config.appRpcPort) ;
-    appMasterRPC = 
+    
+    if(appMasterHostname != null) {
+      InetSocketAddress rpcAddr = new InetSocketAddress(appMasterHostname, config.appRpcPort) ;
+      appMasterRPC = 
         RPC.getProxy(AppMasterRPC.class, RPC.getProtocolVersion(AppMasterRPC.class), rpcAddr, yarnClient.getConfig());
+    }
   }
 
   public AppConfig getAppConfig() {
@@ -81,7 +87,7 @@ public class AppClientMonitor {
 
   public void report(Appendable out) throws IOException, YarnException {
     ApplicationReport report = yarnClient.getApplicationReport(appId);
-    int[] colWidth = { 30, 30 };
+    int[] colWidth = { 30, 70 };
     TabularPrinter printer = new TabularPrinter(out, colWidth);
     printer.row("Application Id", report.getApplicationId());
     printer.row("Application Name", report.getName());
