@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import com.codahale.metrics.Timer;
 import com.google.inject.Singleton;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;

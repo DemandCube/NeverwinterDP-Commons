@@ -1,6 +1,8 @@
 package com.neverwinterdp.hadoop.yarn.app;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
@@ -11,6 +13,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
+import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
@@ -34,11 +37,11 @@ public class AppClient  {
   
   public AppClientMonitor run(String[] args, Configuration conf) throws Exception {
     try {
-      AppMasterConfig appOpts = new AppMasterConfig() ;
-      new JCommander(appOpts, args) ;
-      appOpts.overrideConfiguration(conf);
+      AppConfig appConfig = new AppConfig() ;
+      new JCommander(appConfig, args) ;
+      appConfig.overrideConfiguration(conf);
       
-      uploadApp(appOpts);
+      uploadApp(appConfig);
       
       System.out.println("Create YarnClient") ;
       YarnClient yarnClient = YarnClient.createYarnClient();
@@ -47,18 +50,27 @@ public class AppClient  {
 
       System.out.println("Create YarnClientApplication via YarnClient") ;
       YarnClientApplication app = yarnClient.createApplication();
-
+      System.out.println("Application Id = " + app.getApplicationSubmissionContext().getApplicationId()) ;
       System.out.println("Set up the container launch context for the application master") ;
       ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
-      amContainer.setCommands(appOpts.buildAppMasterCommands()) ;
+      StringBuilder sb = new StringBuilder();
+      List<String> commands = Collections.singletonList(
+          sb.append(appConfig.buildMasterCommand()).
+          append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
+          append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr")
+          .toString()
+      );
+      amContainer.setCommands(commands) ;
 
       System.out.println("Setup the app classpath and resources") ;
-      if(appOpts.appHome != null) {
-        amContainer.setLocalResources(this.createLocalResources(conf, appOpts));
+      if(appConfig.appHome != null) {
+        amContainer.setLocalResources(createLocalResources(conf, appConfig));
       }
+      
+      
       System.out.println("Setup the classpath for ApplicationMaster") ;
       Map<String, String> appMasterEnv = new HashMap<String, String>();
-      Util.setupAppMasterEnv(appOpts.miniClusterEnv, conf, appMasterEnv);
+      Util.setupAppMasterEnv(appConfig.miniClusterEnv, conf, appMasterEnv);
       amContainer.setEnvironment(appMasterEnv);
 
       System.out.println("Set up resource type requirements for ApplicationMaster") ;
@@ -68,7 +80,7 @@ public class AppClient  {
 
       System.out.println("Finally, set-up ApplicationSubmissionContext for the application");
       ApplicationSubmissionContext appContext = app.getApplicationSubmissionContext();
-      appContext.setApplicationName(appOpts.appName); // application name
+      appContext.setApplicationName(appConfig.appName); // application name
       appContext.setAMContainerSpec(amContainer);
       appContext.setResource(resource);
       appContext.setQueue("default"); // queue 
@@ -77,30 +89,31 @@ public class AppClient  {
       ApplicationId appId = appContext.getApplicationId();
       System.out.println("Submitting application " + appId);
       yarnClient.submitApplication(appContext);
-      return new AppClientMonitor(yarnClient, appId) ;
+      return new AppClientMonitor(appConfig, yarnClient, appId) ;
     } catch(Exception ex) {
       ex.printStackTrace(); 
       throw ex ;
     }
   }
   
-  public void uploadApp(AppMasterConfig appOpts) throws Exception {
-    if(appOpts.uploadApp == null) return ;
+  public void uploadApp(AppConfig appOpts) throws Exception {
+    if(appOpts.appHome == null) return ;
     HdfsConfiguration hdfsConf = new HdfsConfiguration() ;
     appOpts.overrideConfiguration(hdfsConf);
     FileSystem fs = FileSystem.get(hdfsConf);
     DistributedFileSystem dfs = (DistributedFileSystem)fs;
-    Path appHomePath = new Path(appOpts.appHome) ;
-    if(dfs.exists(appHomePath)) {
-      dfs.delete(appHomePath, true) ;
+    Path appHomePath = new Path(appOpts.appHomeLocal) ;
+    Path appHomeSharePath = new Path(appOpts.appHome) ;
+    if(dfs.exists(appHomeSharePath)) {
+      dfs.delete(appHomeSharePath, true) ;
     }
-    dfs.copyFromLocalFile(false, true, new Path(appOpts.uploadApp), appHomePath);
+    dfs.copyFromLocalFile(false, true, appHomePath, appHomeSharePath);
   }
   
-  Map<String, LocalResource> createLocalResources(Configuration conf, AppMasterConfig opts) throws Exception {
+  Map<String, LocalResource> createLocalResources(Configuration conf, AppConfig appConfig) throws Exception {
     Map<String, LocalResource> libs = new HashMap<String, LocalResource>() ;
     FileSystem fs = FileSystem.get(conf) ;
-    RemoteIterator<LocatedFileStatus> itr = fs.listFiles(new Path(opts.appHome), true) ;
+    RemoteIterator<LocatedFileStatus> itr = fs.listFiles(new Path(appConfig.appHome + "/libs"), true) ;
     while(itr.hasNext()) {
       FileStatus fstatus = itr.next() ;
       Path fpath = fstatus.getPath() ;

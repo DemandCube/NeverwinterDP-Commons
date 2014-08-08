@@ -63,8 +63,9 @@
       </aws>
     </join>
 
-    <interfaces enabled="false">
-      <interface>10.10.1.*</interface>
+    <interfaces enabled="true">
+      <interface>127.0.0.*</interface>
+      <interface>192.168.1.*</interface>
     </interfaces>
 
     <ssl enabled="false" />
