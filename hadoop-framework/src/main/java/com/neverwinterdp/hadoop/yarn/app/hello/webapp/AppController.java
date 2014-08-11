@@ -18,7 +18,7 @@ public class AppController extends Controller  {
   protected AppController(App app, Configuration conf, RequestContext ctx, String title) {
     super(ctx);
     this.app = app;
-    set(APP_ID, app.context.getApplicationId());
+    set(APP_ID, app.getApplicationId());
   }
   
   @Inject
@@ -29,8 +29,17 @@ public class AppController extends Controller  {
   /**
    * Render the default(index.html) page for the Application Controller
    */
-  @Override public void index() {
-    setTitle(join("Hello App Controller ", $(APP_ID)));
+  @Override 
+  public void index() {
+    //renderText("Hello world!"); 
+    //setTitle(join("Hello App Controller ", $(APP_ID)));
+    //new Exception().printStackTrace();
+    try {
+      render(IndexPage.class);
+    } catch(Throwable t) {
+      renderText("Error: " + t.getMessage()) ;
+      t.printStackTrace();
+    }
   }
   
   /**

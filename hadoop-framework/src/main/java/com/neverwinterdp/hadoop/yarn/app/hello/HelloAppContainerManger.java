@@ -15,16 +15,16 @@ import org.apache.hadoop.yarn.webapp.WebApps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
-import com.neverwinterdp.hadoop.yarn.app.hello.webapp.AMWebApp;
-import com.neverwinterdp.hadoop.yarn.app.hello.webapp.AppContext;
-import com.neverwinterdp.hadoop.yarn.app.hello.webapp.RunningAppContext;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
-import com.neverwinterdp.util.text.TabularPrinter;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig ;
+import com.neverwinterdp.hadoop.yarn.app.hello.webapp.AMWebApp ;
+import com.neverwinterdp.hadoop.yarn.app.hello.webapp.AppContext ;
+import com.neverwinterdp.hadoop.yarn.app.hello.webapp.RunningAppContext ;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMaster ;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager ;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor ;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo ;
+import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState ;
+import com.neverwinterdp.util.text.TabularPrinter ;
 
 public class HelloAppContainerManger implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(HelloAppContainerManger.class);
@@ -41,10 +41,13 @@ public class HelloAppContainerManger implements AppMasterContainerManager {
     
     Configuration conf = appMaster.getConfiguration() ;
     this.appContext = new RunningAppContext(config.appId) ;
-    System.out.println("BEFORE CREATE WebApp!!!!!!!!!!") ;
+    System.out.println("BEFORE CREATE WebApp, Application Id = " + this.appContext.getApplicationId()) ;
+    
     webApp =
-        WebApps.$for("hello", AppContext.class, appContext, "ws")
-          .withHttpPolicy(conf, Policy.HTTP_ONLY).start(new AMWebApp());
+        WebApps.
+          $for("hello", AppContext.class, appContext, "ws").
+          withHttpPolicy(conf, Policy.HTTP_ONLY).start(new AMWebApp(appContext));
+    
     InetSocketAddress listenAddr = NetUtils.getConnectAddress(webApp.getListenerAddress()) ;
     this.trackingURL = "http://" + listenAddr.getAddress().getHostAddress() + ":" + webApp.port() ;
     System.out.println("TRACKING URL = " + trackingURL) ;

@@ -7,7 +7,7 @@ import org.apache.hadoop.yarn.webapp.view.HtmlBlock;
 
 import com.google.inject.Inject;
 
-public class InfoPage extends AbstractHtmlPage {
+public class IndexPage extends AbstractHtmlPage {
 
   protected Class<? extends SubView> nav() {
     return NavBlock.class ;
@@ -26,7 +26,7 @@ public class InfoPage extends AbstractHtmlPage {
     }
 
     @Override protected void render(Block html) {
-      html.div()._("Info Page Content, app id = ", appContext.getApplicationId())._();
+      html.div()._("Index Page Content, app id = ", appContext.getApplicationId())._();
     }
   }
 }

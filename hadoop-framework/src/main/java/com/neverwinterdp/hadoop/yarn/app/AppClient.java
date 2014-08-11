@@ -50,7 +50,8 @@ public class AppClient  {
 
       System.out.println("Create YarnClientApplication via YarnClient") ;
       YarnClientApplication app = yarnClient.createApplication();
-      System.out.println("Application Id = " + app.getApplicationSubmissionContext().getApplicationId()) ;
+      appConfig.appId =  app.getApplicationSubmissionContext().getApplicationId().toString() ;
+      System.out.println("Application Id = " + appConfig.appId) ;
       System.out.println("Set up the container launch context for the application master") ;
       ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
       StringBuilder sb = new StringBuilder();
