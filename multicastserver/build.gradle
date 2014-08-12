@@ -1,0 +1,15 @@
+archivesBaseName = 'commons.multicastserver'
+
+eclipse {
+  project {
+    name = 'commons.multicastserver'
+  }
+}
+
+dependencies {
+  compile project(':zookeeper')
+  compile group: 'io.netty', name: 'netty-all', version: '4.0.20.Final'
+  compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
+  compile group: 'args4j', name: 'args4j', version: '2.0.16'
+  
+}
