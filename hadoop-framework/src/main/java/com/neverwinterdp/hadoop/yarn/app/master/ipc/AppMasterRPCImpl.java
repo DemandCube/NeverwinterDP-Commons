@@ -1,7 +1,8 @@
-package com.neverwinterdp.hadoop.yarn.app.master;
+package com.neverwinterdp.hadoop.yarn.app.master.ipc;
 
 import java.net.InetSocketAddress;
 
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerProgressStatus;
 import com.neverwinterdp.util.JSONSerializer;

@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
 import com.neverwinterdp.hadoop.yarn.app.AppClient;
 import com.neverwinterdp.hadoop.yarn.app.AppClientMonitor;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class AppClientUnitTest extends AbstractMiniClusterUnitTest {

@@ -13,7 +13,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularPrinter;
 

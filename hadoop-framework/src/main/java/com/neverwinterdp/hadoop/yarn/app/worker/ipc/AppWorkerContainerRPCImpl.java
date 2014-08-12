@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.worker;
+package com.neverwinterdp.hadoop.yarn.app.worker.ipc;
 
 public class AppWorkerContainerRPCImpl implements AppWorkerContainerRPC {
 

@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.hadoop.yarn.app.AppConfig;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.worker.ipc.AppWorkerContainerRPC;
+import com.neverwinterdp.hadoop.yarn.app.worker.ipc.AppWorkerContainerRPCImpl;
 
 public class AppWorkerContainer {
   static {

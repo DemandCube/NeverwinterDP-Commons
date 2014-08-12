@@ -38,6 +38,8 @@ import org.slf4j.LoggerFactory;
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.Util;
+import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPCImpl;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 
 public class AppMaster {
