@@ -18,7 +18,7 @@ import org.kohsuke.args4j.Option;
 /**
  * TODO:
  * broadcast the zookeeper location
- * using logs
+ * use logs
  * @author rcduar
  *
  */
