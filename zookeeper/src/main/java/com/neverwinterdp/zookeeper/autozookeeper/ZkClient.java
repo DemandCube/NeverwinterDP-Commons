@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * c.deleteData("/Test");
  * 
  * 
- * @author rcduar
+ * @author Richard Duarte
  *
  */
 public class ZkClient implements Watcher{
@@ -54,6 +54,14 @@ public class ZkClient implements Watcher{
      */
     void startZK() throws IOException {
         zk = new ZooKeeper(hostPort, 15000, this);
+    }
+    
+    /**
+     * Closes Zookeeper connection
+     * @throws InterruptedException
+     */
+    void stopZK() throws InterruptedException {
+    	zk.close();
     }
     
     /**
@@ -115,7 +123,7 @@ public class ZkClient implements Watcher{
 	 * Synchronous method
 	 * Get data from znode
 	 * @param znode Name of znode to get data from.  Must be valid - i.e. "/master", "/worker/worker-123", etc
-	 * @return String representation of data
+	 * @return String representation of data, returns null if znode is invalid
 	 */
 	public String getData(String znode){
 		Stat stat = new Stat();
@@ -124,6 +132,7 @@ public class ZkClient implements Watcher{
 			data = zk.getData(znode, false, stat);
 		} catch (KeeperException | InterruptedException e) {
 			e.printStackTrace();
+			return null;
 		}
 		return new String(data);
 	}

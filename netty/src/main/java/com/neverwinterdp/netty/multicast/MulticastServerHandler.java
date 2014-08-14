@@ -12,7 +12,7 @@ import io.netty.util.CharsetUtil;
 
 /**
  * Handler class for Multicast.  More in depth usage is found in MulticastServer.java
- * @author rcduar
+ * @author Richard Duarte
  * 
  */
 public class MulticastServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {

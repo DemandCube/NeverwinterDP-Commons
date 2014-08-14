@@ -53,7 +53,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * 
  * *****************************************************
  * 
- * @author rcduar
+ * @author Richard Duarte
  *
  */
 public class MulticastServer{

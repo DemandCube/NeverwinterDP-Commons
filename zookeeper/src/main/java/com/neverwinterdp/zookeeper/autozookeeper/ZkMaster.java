@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  *  //Close connection to zookeeper
  *  m.stopZK();
  * 
- * @author rcduar
+ * @author Richard Duarte
  *
  */
 public class ZkMaster implements Watcher{
@@ -135,6 +135,14 @@ public class ZkMaster implements Watcher{
      */
     public boolean isMaster(){
     	return isLeader;
+    }
+    
+    /**
+     * Get the UUID that is the server ID
+     * @return the server's ID
+     */
+    public String getServerId(){
+    	return this.serverId;
     }
     
     /**

@@ -21,7 +21,7 @@ import org.kohsuke.args4j.Option;
 /**
  * TODO:
  * use logs
- * @author rcduar
+ * @author Richard Duarte
  *
  */
 public class Broadcast {
@@ -111,7 +111,8 @@ public class Broadcast {
 				MulticastServer broadcaster = new MulticastServer(udpPort, zkConnectionMap);
 				broadcaster.run();
 		        
-				//We shouldn't ever hit this step - assuming nothing goes wrong...
+				//We shouldn't ever hit this step since run() blocks
+				//That's assuming nothing goes wrong though
 				broadcaster.stop();
 			}
 			else{
