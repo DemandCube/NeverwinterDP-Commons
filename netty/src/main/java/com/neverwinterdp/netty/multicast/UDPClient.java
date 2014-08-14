@@ -9,6 +9,7 @@ import java.net.InetAddress;
 
 /**
  * Super simple UDP Client to send UDP packets to a server and return the response
+ * Currently just being used for testing
  * 
  * Example usage:
  *
@@ -80,9 +81,5 @@ public final class UDPClient {
     	}
     	return retVal;
     }
-    
-    public static void main(String[] args) throws Exception {
-    	UDPClient x = new UDPClient("localhost",1111);
-    	System.out.println("Received: "+x.sendMessage("Hi UDP Server!"));
-    }
+
 }
