@@ -3,6 +3,9 @@ package com.neverwinterdp.netty.multicast;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -60,6 +63,7 @@ public class MulticastServer{
 	private int port;
 	private EventLoopGroup group=null;
 	String message="";
+	private Logger logger;
 	Map<String, String> messageMap = new HashMap<String, String>();
 	
 	/**
@@ -70,6 +74,8 @@ public class MulticastServer{
 	public MulticastServer(int port, String msg){
 		this.port = port;
 		this.message = msg;
+		this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
+	    logger.info("MulticastServer initialized.  Response string is: "+msg);
 	}
 	
 	/**
@@ -81,6 +87,8 @@ public class MulticastServer{
 		this.port = port;
 		//Have to do a deep copy here
 		this.messageMap = new HashMap<String,String>(msg);
+		this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
+		logger.info("MulticastServer initialized. Response hash is: "+msg.toString());
 	}
 	
 	
@@ -90,6 +98,7 @@ public class MulticastServer{
 	public void run(){
 		this.group = new NioEventLoopGroup();
 		try {
+			logger.info("Beginning bootstrap");
 			Bootstrap b = new Bootstrap();
 			
 			//If messageMap is empty, 
@@ -109,7 +118,7 @@ public class MulticastServer{
 				.option(ChannelOption.SO_BROADCAST, true)
 				.handler(new MulticastServerHandler(this.messageMap));
 			}
-
+			logger.info("Binding server");
 			//Bind server
 			b.bind(this.port).sync().channel().closeFuture().await();
 		}
@@ -117,11 +126,13 @@ public class MulticastServer{
 			e.printStackTrace();
 		}
 		finally {
+			logger.info("Shutting down gracefully");
 			group.shutdownGracefully();
 		}
 	}
 	
 	public void stop(){
+		logger.info("Stopping server");
 		this.group.shutdownGracefully();
 	}
 }

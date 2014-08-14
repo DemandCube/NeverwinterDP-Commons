@@ -39,12 +39,16 @@ public class ZkClient implements Watcher{
     volatile boolean connected = false;
     volatile boolean expired = false;
     
+    private Logger logger;
+    
     /**
      * Constructor
      * @param hostPort - format is "[ip/hostname]:[port],[ip/hostname]:[port]..."
      */
     ZkClient(String hostPort) { 
         this.hostPort = hostPort;
+        this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
+	    logger.info("ZkClient initialized");
     }
     
     /**
@@ -53,7 +57,8 @@ public class ZkClient implements Watcher{
      * @throws IOException
      */
     void startZK() throws IOException {
-        zk = new ZooKeeper(hostPort, 15000, this);
+    	logger.info("Connecting to: "+this.hostPort);
+        zk = new ZooKeeper(this.hostPort, 15000, this);
     }
     
     /**
@@ -61,6 +66,7 @@ public class ZkClient implements Watcher{
      * @throws InterruptedException
      */
     void stopZK() throws InterruptedException {
+    	logger.info("Closing connection to zookeeper");
     	zk.close();
     }
     
@@ -69,7 +75,8 @@ public class ZkClient implements Watcher{
      * @return True if connected, false otherwise
      */
     public boolean isConnected(){
-    	return connected;
+    	logger.info("Returning isConnected status: "+this.connected);
+    	return this.connected;
     }
     
     /**
@@ -77,7 +84,8 @@ public class ZkClient implements Watcher{
      * @return true if session is expired, false otherwise
      */
     public boolean isExpired(){
-    	return expired;
+    	logger.info("Returning isExpired status: "+this.expired);
+    	return this.expired;
     }
     
     /**
@@ -111,9 +119,11 @@ public class ZkClient implements Watcher{
 	 * @return Returns true if function completes successfully
 	 */
 	public boolean create(String znode,String data){
+		logger.info("Creating znode: "+znode+":"+data);
 		try {
 			zk.create(znode, data.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 		} catch (KeeperException | InterruptedException e) {
+			logger.error("Exception caught:"+e.getMessage());
 			e.printStackTrace();
 		} 
 		return true;
@@ -126,11 +136,13 @@ public class ZkClient implements Watcher{
 	 * @return String representation of data, returns null if znode is invalid
 	 */
 	public String getData(String znode){
+		logger.info("Getting data from znode: "+znode);
 		Stat stat = new Stat();
 		byte data[] = null;
 		try {
 			data = zk.getData(znode, false, stat);
 		} catch (KeeperException | InterruptedException e) {
+			logger.error("Exception caught: "+e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
@@ -144,9 +156,11 @@ public class ZkClient implements Watcher{
 	 * @return true if deletion was successful, false if failure
 	 */
 	public boolean deleteData(String znode){
+		logger.info("Deleting znode: "+znode);
 		try {
 			zk.delete(znode, -1);
 		} catch (InterruptedException | KeeperException e) {
+			logger.error("Exception caught: "+e.getMessage());
 			e.printStackTrace();
 			return false;
 		}

@@ -16,7 +16,8 @@ import static org.kohsuke.args4j.ExampleMode.ALL;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * TODO:
@@ -41,6 +42,7 @@ public class Broadcast {
 	public static boolean help = false;
 	//////////////////////////////////////////////////////////////////////////////////////
 	
+	private static Logger logger;
 	
 	/**
 	 * Main method
@@ -48,58 +50,71 @@ public class Broadcast {
 	 * @throws Exception
 	 */
 	public static void main(String args[]) throws Exception {
+
+		logger = LoggerFactory.getLogger("Broadcast");
+	    logger.info("Starting broadcast server");
+	    
+	    logger.info("Parsing command line arguments");
 		//Parse command line args
 		new Broadcast().parseCommandLine(args);
 		
 		//The map of data to pass into the broadcast server
 		Map<String,String> zkConnectionMap = new HashMap<String,String>();
 		
+		logger.info("Reading in propery file: "+propFile);
 		//Get list of zookeepers IP:port from properties file
 		zkConnectionMap = readPropertiesFile(propFile);
 		
 		//If "broadcast" key doesn't exist and no zookeeper IP:Port was passed via the command line, exit out
 		if(broadcastZookeeper == null && !zkConnectionMap.containsKey("broadcast")){
-			System.err.println(propFile+": Does not contain \"broadcast\" key!\nThis is required if the -broadcastZookeeper option is omitted.\nThis is the zookeeper instance upon which Broadcast will connect to");
+			logger.error(propFile+": Does not contain \"broadcast\" key!\nThis is required if the -broadcastZookeeper option is omitted.\nThis is the zookeeper instance upon which Broadcast will connect to");
 			System.exit(-1);
 		}
 		
 		//Ensure all of them match [IP/Hostname]:[Port] format
 		for (String zk : zkConnectionMap.values()) {
 			if(!verifyHostPortFormat(zk)){
-				System.err.println("Bad formatting: "+ zk);
+				logger.error("Bad formatting: "+ zk);
 				System.exit(-1);
 			}
 		}
 		//If zookeeper to connect to is on the command line, verify its ok
 		if(broadcastZookeeper != null && !verifyHostPortFormat(broadcastZookeeper)){
-			System.err.println("Bad formatting: "+ broadcastZookeeper);
+			logger.error("Bad formatting: "+ broadcastZookeeper);
 			System.exit(-1);
 		}
 		
+		logger.info("Entering infinite loop");
 		//RUN FOREVER
 		while(true){
+			
+			
 			//Connect to zookeeper either by -broadcastZookeeper command line argument
 			// or by "broadcast" key in broadcast.properties file
 			ZkMaster m=null;
 			if(broadcastZookeeper != null){
+				logger.info("Zookeeper will connect to :"+broadcastZookeeper);
 				m = new ZkMaster(broadcastZookeeper);
 			}
 			else{
+				logger.info("Zookeeper will connect to :"+zkConnectionMap.get("broadcast"));
 				 m = new ZkMaster(zkConnectionMap.get("broadcast"));
 			}
 			
+			logger.info("Setting master name to /masterBroadcaster");
 			//Set the /master keyword and connect to ZooKeeper
 			m.setMasterName("/masterBroadcaster");
+			logger.info("Connecting to zookeeper");
 			m.startZK();
 			
 			//Loop until connected
 			while(!m.isConnected()){
-				System.out.println("Not connected...");
+				logger.info("Not connected...");
 	            Thread.sleep(1000);
 	        }
 			
 			//Try to become master
-			System.out.println("Connected!");
+			logger.info("Connected! Will now attempt to run for master");
 			m.runForMaster();
 			
 			//runForMaster is asynchronous, so go ahead and take a break
@@ -107,7 +122,7 @@ public class Broadcast {
 			
 			//If we're master, go ahead and start the broadcast server
 			if(m.isMaster()){
-				System.out.println("We are master! Starting broadcast server");
+				logger.info("We are master! Starting broadcast server");
 				MulticastServer broadcaster = new MulticastServer(udpPort, zkConnectionMap);
 				broadcaster.run();
 		        
@@ -116,7 +131,7 @@ public class Broadcast {
 				broadcaster.stop();
 			}
 			else{
-				System.out.println("We ain't master!");
+				logger.info("We ain't master!");
 				Thread.sleep(10000);
 			}
 			
@@ -124,9 +139,9 @@ public class Broadcast {
 	            Thread.sleep(1000);
 	        }
 			
-			System.out.println("Expired");
+			logger.info("Expired");
+			logger.info("Disconnecting zookeeper");
 	        m.stopZK();
-	        System.out.println("Exited");
 		}
 	}
 	
@@ -137,11 +152,12 @@ public class Broadcast {
 	 * @return True if the format is acceptable, false otherwise
 	 */
 	public static boolean verifyHostPortFormat(String hostlist){
+		logger.info("Verifying HostPort format");
 		String[] zks = hostlist.split(",");
 		boolean retVal = true;
 		for(int i=0; i<zks.length; i++){
 			if(!zks[i].matches("(([\\d]+\\.){3}[\\d]+|\\S+):[\\d]+")){
-				System.err.println(zks[i]+" is invalid.  Must be [IP/hostname]:[port]");
+				logger.error(zks[i]+" is invalid.  Must be [IP/hostname]:[port]");
 				retVal=false;
 			}
 		}
@@ -156,6 +172,7 @@ public class Broadcast {
 	 * @return String of list of [hostnames/IPs]:[Port].  Format is "[ip/hostname]:[port],[ip/hostname]:[port]..." 
 	 */
 	public static Map<String,String> readPropertiesFile(String filename){
+		logger.info("Reading in property file");
 		Properties prop = new Properties();
 		InputStream input = null;
 		Map<String, String> map = new HashMap<String, String>();
@@ -173,7 +190,7 @@ public class Broadcast {
 		} 
 		//Likely we can't read the properties file or something
 		catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error(ex.getMessage());
 			System.exit(-1);
 		}
 		//Close the file
@@ -182,7 +199,7 @@ public class Broadcast {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			}
 		}
@@ -223,7 +240,6 @@ public class Broadcast {
 	 * @param parser the CmdLineParser object
 	 */
 	public void printUsage(PrintStream output, CmdLineParser parser){
-		// print option sample. This is useful some time
 		output.println("Example: java Broadcast "+parser.printExample(ALL));
 		parser.printUsage(output);
 	}
