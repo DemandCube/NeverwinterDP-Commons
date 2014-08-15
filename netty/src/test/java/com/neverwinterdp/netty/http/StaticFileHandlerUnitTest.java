@@ -1,6 +1,7 @@
 package com.neverwinterdp.netty.http;
 
-import static org.junit.Assert.assertEquals;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,23 +13,18 @@ import com.neverwinterdp.netty.http.client.HttpClient;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class HttpServerUnitTest {
+public class StaticFileHandlerUnitTest {
   private HttpServer server ;
   
   @Before
   public void setup() throws Exception {
-    server = new HttpServer();
-    server.add("/ping", new PingRouteHandler());
-    new Thread() {
-      public void run() {
-        try {
-          server.start() ;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }.start() ;
-    Thread.sleep(1000);
+    Map<String, String> props = new HashMap<String, String>() ;
+    props.put("port","8080") ;
+    props.put("www-dir", ".") ;
+    server = new HttpServer() ;
+    server.configure(props);
+    server.startAsDeamon() ;
+    Thread.sleep(2000) ;
   }
   
   @After
@@ -37,14 +33,10 @@ public class HttpServerUnitTest {
   }
   
   @Test
-  public void testGet() throws Exception {
+  public void testStaticFileHandler() throws Exception {
     DumpResponseHandler handler = new DumpResponseHandler() ;
     HttpClient client = new HttpClient ("127.0.0.1", 8080, handler) ;
-    for(int i = 0; i < 10; i++) {
-      if(i % 2 == 0) client.get("/ping");
-      else client.post("/ping", "Hello");
-    }
-    Thread.sleep(1000);
-    assertEquals(10, handler.getCount()) ;
+    client.get("/build.gradle");
+    Thread.sleep(100) ;
   }
 }

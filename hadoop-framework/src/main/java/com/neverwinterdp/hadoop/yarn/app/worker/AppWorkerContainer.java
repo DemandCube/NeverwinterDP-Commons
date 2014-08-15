@@ -1,6 +1,5 @@
 package com.neverwinterdp.hadoop.yarn.app.worker;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.apache.hadoop.conf.Configuration;
@@ -14,9 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.neverwinterdp.hadoop.yarn.app.AppConfig;
-import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
-import com.neverwinterdp.hadoop.yarn.app.worker.ipc.AppWorkerContainerRPC;
-import com.neverwinterdp.hadoop.yarn.app.worker.ipc.AppWorkerContainerRPCImpl;
+import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
 
 public class AppWorkerContainer {
   static {
@@ -26,8 +23,7 @@ public class AppWorkerContainer {
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppWorkerContainer.class.getName());
   
   private AppConfig config ;
-  private RPC.Server containerRPCServer ;
-  private AppMasterRPC appMasterRPC ;
+  private IPCService ipcService ;
   private AppWorker worker ;
   private AppWorkerContainerProgressStatus progressStatus ;
   
@@ -35,29 +31,16 @@ public class AppWorkerContainer {
     this.config = config ;
     try {
       Configuration rpcConf = new Configuration() ;
-      //RPC.setProtocolEngine(rpcConf, AppMasterRPC.class, ProtobufRpcEngine.class);
-      //RPC.setProtocolEngine(rpcConf, AppWorkerContainerRPC.class, ProtobufRpcEngine.class);
       rpcConf.set(
           CommonConfigurationKeys.IO_SERIALIZATIONS_KEY, 
           JavaSerialization.class.getName() + "," + 
               WritableSerialization.class.getName() + "," +
               AvroSerialization.class.getName()
           ) ;
-      containerRPCServer = 
-          new RPC.Builder(rpcConf).
-          setInstance(new AppWorkerContainerRPCImpl()).
-          setProtocol(AppWorkerContainerRPC.class).
-          setBindAddress(InetAddress.getLocalHost().getHostAddress()).
-          build();
-      containerRPCServer.start();
-
       InetSocketAddress rpcAddr = new InetSocketAddress(config.appHostName, config.appRpcPort) ;
-
-      appMasterRPC = 
-          RPC.getProxy(AppMasterRPC.class, RPC.getProtocolVersion(AppMasterRPC.class), rpcAddr, rpcConf);
-      appMasterRPC.ping("hello") ;
-      InetSocketAddress addr = containerRPCServer.getListenerAddress() ;
-      appMasterRPC.setRpcAddress(config.getAppWorkerContainerId(), addr.getAddress().getHostAddress(), addr.getPort());
+      ipcService = 
+          RPC.getProxy(IPCService.class, RPC.getProtocolVersion(IPCService.class), rpcAddr, rpcConf);
+      ipcService.ping("hello") ;
 
       Class<AppWorker> appWorkerClass = (Class<AppWorker>) Class.forName(config.worker) ;
       worker = appWorkerClass.newInstance() ;
@@ -69,38 +52,35 @@ public class AppWorkerContainer {
   
   public AppConfig getConfig() { return this.config ; }
   
-  public AppMasterRPC getAppMasterRPC() { return this.appMasterRPC ; }
+  public IPCService getAppMasterRPC() { return this.ipcService ; }
 
   public void reportProgress(float progress) {
     progressStatus.setProgress(progress);
-    appMasterRPC.progress(config.getAppWorkerContainerId(), progressStatus);
+    ipcService.report(config.getAppWorkerContainerId(), progressStatus);
   }
   
   public void run() {
     progressStatus = new AppWorkerContainerProgressStatus(AppWorkerContainerState.RUNNING) ;
     int workerContainerId = config.getAppWorkerContainerId() ;
     try {
-      appMasterRPC.progress(workerContainerId, progressStatus) ;
+      ipcService.report(workerContainerId, progressStatus) ;
       
       worker.run(this) ;
       
       progressStatus.setProgress(1);
       progressStatus.setContainerState(AppWorkerContainerState.FINISHED);
-      appMasterRPC.progress(workerContainerId, progressStatus) ;
+      ipcService.report(workerContainerId, progressStatus) ;
     } catch(Throwable error) {
       LOGGER.error("Error", error);
       progressStatus.setError(error);
-      appMasterRPC.progress(workerContainerId, progressStatus);
+      ipcService.report(workerContainerId, progressStatus);
     } finally {
       onDestroy() ;
     }
   }
   
   public void onDestroy() {
-    LOGGER.info("Start onDestroy()");
-    if(this.containerRPCServer != null) {
-      this.containerRPCServer.stop() ; 
-    }
+    LOGGER.info("Start  onDestroy()");
     LOGGER.info("Finish onDestroy()");
   }
   

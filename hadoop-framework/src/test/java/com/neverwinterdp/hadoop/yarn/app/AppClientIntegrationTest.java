@@ -14,7 +14,7 @@ public class AppClientIntegrationTest  {
         "--app-home-local", "./build/hello"  ,
         "--app-name", "Hello_Yarn",
         
-        "--app-container-manager", "com.neverwinterdp.hadoop.yarn.app.hello.HelloAppContainerManger",
+        "--app-container-manager", "com.neverwinterdp.hadoop.yarn.sample.HelloAppContainerManger",
         "--conf:fs.default.name=hdfs://hadoop:9000",
         "--conf:dfs.replication=1",
         "--conf:yarn.resourcemanager.scheduler.address=hadoop:8030",

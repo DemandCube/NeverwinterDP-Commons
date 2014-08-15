@@ -9,19 +9,15 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
+
+import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.netty.http.route.NotFoundRouteHandler;
-import com.neverwinterdp.netty.http.route.RouteHandler;
-import com.neverwinterdp.netty.http.route.RouteMatcher;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.MapUtil;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -35,6 +31,25 @@ public class HttpServer {
   private LoggerFactory loggerFactory = new LoggerFactory() ;
   private Thread deamonThread ;
   
+  public void configure(Map<String, String> props) throws Exception {
+    port = MapUtil.getInteger(props, "port", 8080) ;
+    String wwwDir = props.get("www-dir") ; 
+    if(wwwDir != null) {
+      setDefault(new StaticFileHandler(wwwDir)) ;
+    }
+    String[] routeNames = MapUtil.getStringArray(props, "route.names", new String[] {});
+    for(String routeName : routeNames) {
+      String prefix = "route." + routeName + ".";
+      Map<String, String> routeHandlerProps = MapUtil.getSubMap(props, prefix) ;
+      String handlerType = routeHandlerProps.get("handler") ;
+      String routePath   = routeHandlerProps.get("path") ;
+      Class<RouteHandler> clazz = (Class<RouteHandler>) Class.forName(handlerType) ;
+      RouteHandler handler = clazz.newInstance() ;
+      handler.configure(routeHandlerProps);
+      add(routePath, handler) ;
+    }
+  }
+  
   public int getPort() {
     return this.port;
   }
@@ -44,7 +59,9 @@ public class HttpServer {
     return this ;
   }
   
-  public LoggerFactory getLoggerFactory() { return this.loggerFactory ; }
+  public LoggerFactory getLoggerFactory() { 
+    return this.loggerFactory ; 
+  }
 
   public HttpServer setLoggerFactory(LoggerFactory factory) {
     this.loggerFactory = factory ;

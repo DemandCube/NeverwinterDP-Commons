@@ -13,7 +13,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
-import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
+import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularPrinter;
 
@@ -21,7 +21,7 @@ public class AppClientMonitor {
   private AppConfig     config ;
   private YarnClient    yarnClient;
   private ApplicationId appId;
-  private AppMasterRPC appMasterRPC ;
+  private IPCService    ipcService ;
 
   public AppClientMonitor(AppConfig config, YarnClient yarnClient, ApplicationId appId) throws Exception {
     this.config = config ;
@@ -40,14 +40,12 @@ public class AppClientMonitor {
     
     if(appMasterHostname != null) {
       InetSocketAddress rpcAddr = new InetSocketAddress(appMasterHostname, config.appRpcPort) ;
-      appMasterRPC = 
-        RPC.getProxy(AppMasterRPC.class, RPC.getProtocolVersion(AppMasterRPC.class), rpcAddr, yarnClient.getConfig());
+      ipcService = 
+        RPC.getProxy(IPCService.class, RPC.getProtocolVersion(IPCService.class), rpcAddr, yarnClient.getConfig());
     }
   }
 
-  public AppConfig getAppConfig() {
-    return this.config ; 
-  }
+  public AppConfig getAppConfig() { return this.config ; }
   
   public YarnClient getYarnClient() {
     return this.yarnClient;
@@ -57,7 +55,7 @@ public class AppClientMonitor {
     return this.appId;
   }
 
-  public AppMasterRPC getAppMasterRPC() { return this.appMasterRPC ; }
+  public IPCService getIPCService() { return this.ipcService ; }
   
   public ApplicationReport getApplicationReport() throws YarnException, IOException {
     return yarnClient.getApplicationReport(appId);

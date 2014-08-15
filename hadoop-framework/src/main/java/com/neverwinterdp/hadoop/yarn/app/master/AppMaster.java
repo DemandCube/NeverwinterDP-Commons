@@ -1,18 +1,15 @@
 package com.neverwinterdp.hadoop.yarn.app.master;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CommonConfigurationKeys;
-import org.apache.hadoop.io.serializer.JavaSerialization;
-import org.apache.hadoop.io.serializer.WritableSerialization;
-import org.apache.hadoop.io.serializer.avro.AvroSerialization;
-import org.apache.hadoop.ipc.RPC;
+import org.apache.hadoop.http.HttpConfig.Policy;
+import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
@@ -32,14 +29,22 @@ import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Records;
+import org.apache.hadoop.yarn.webapp.GenericExceptionHandler;
+import org.apache.hadoop.yarn.webapp.WebApp;
+import org.apache.hadoop.yarn.webapp.WebApps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.Util;
-import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPC;
-import com.neverwinterdp.hadoop.yarn.app.master.ipc.AppMasterRPCImpl;
+import com.neverwinterdp.hadoop.yarn.app.ipc.IPCServiceServer;
+import com.neverwinterdp.hadoop.yarn.app.webapp.AMWebApp;
+import com.neverwinterdp.hadoop.yarn.app.webapp.AMWebServices;
+import com.neverwinterdp.hadoop.yarn.app.webapp.AppController;
+import com.neverwinterdp.hadoop.yarn.app.webapp.JAXBContextResolver;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 
 public class AppMaster {
@@ -50,14 +55,17 @@ public class AppMaster {
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppMaster.class.getName());
   
   private AppConfig config ;
-  private RPC.Server rpcServer ;
+  
   private AMRMClient<ContainerRequest> amrmClient ;
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private Configuration conf;
-  
+
+  private IPCServiceServer ipcServiceServer ;
   private AppMasterMonitor appMonitor = new AppMasterMonitor() ;
   private AppMasterContainerManager containerManager ;
+  
+  private WebApp webApp ;
   
   public AppMaster() {
   }
@@ -72,60 +80,61 @@ public class AppMaster {
   
   public NMClient getNMClient() { return this.nmClient ; }
   
-  public RPC.Server getRPCServer()  { return this.rpcServer ; }
+  public IPCServiceServer getIPCServiceServer()  { return this.ipcServiceServer ; }
   
   public boolean run(String[] args) throws Exception {
-    this.config = new AppConfig() ;
-    new JCommander(config, args) ;
-    
-    conf = new YarnConfiguration() ;
-    config.overrideConfiguration(conf);
+    try {
+      this.config = new AppConfig() ;
+      new JCommander(config, args) ;
 
-    Configuration rpcConf = new Configuration() ;
-    rpcConf.set(
-      CommonConfigurationKeys.IO_SERIALIZATIONS_KEY, 
-      JavaSerialization.class.getName() + "," + 
-      WritableSerialization.class.getName() + "," +
-      AvroSerialization.class.getName()
-    );
-    //RPC.setProtocolEngine(rpcConf, AppMasterRPC.class, ProtobufRpcEngine.class);
-    //RPC.setProtocolEngine(rpcConf, AppWorkerContainerRPC.class, ProtobufRpcEngine.class);
-    rpcServer = 
-        new RPC.Builder(rpcConf).
-        setInstance(new AppMasterRPCImpl(appMonitor)).
-        setProtocol(AppMasterRPC.class).
-        setBindAddress(InetAddress.getLocalHost().getHostAddress()).
-        setPort(config.appRpcPort).
-        build();
-    rpcServer.start() ;
-    this.config.appHostName = rpcServer.getListenerAddress().getAddress().getHostAddress() ;
-    this.config.appRpcPort = rpcServer.getListenerAddress().getPort() ;
-    
-    Class<?> containerClass = Class.forName(config.appContainerManager) ;
-    containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
-    
-    amrmClient = AMRMClient.createAMRMClient();
-    amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
-    amrmClientAsync.init(conf);
-    amrmClientAsync.start();
+      conf = new YarnConfiguration() ;
+      config.overrideConfiguration(conf);
+      ipcServiceServer = new IPCServiceServer(this) ;
+      this.config.appHostName = ipcServiceServer.getHostAddress() ;
+      this.config.appRpcPort =  ipcServiceServer.getListenPort() ;
+      
+      webApp =
+          WebApps.
+            $for("webui", null, null, "ws").
+            withHttpPolicy(conf, Policy.HTTP_ONLY).start(new AMWebApp(this));
 
-    nmClient = NMClient.createNMClient();
-    nmClient.init(conf);
-    nmClient.start();
+      InetSocketAddress listenAddr = NetUtils.getConnectAddress(webApp.getListenerAddress()) ;
+      config.appTrackingUrl = "http://" + listenAddr.getAddress().getHostAddress() + ":" + webApp.port() ;
 
-    containerManager.onInit(this);
-    // Register with RM
-    RegisterApplicationMasterResponse registerResponse = 
-      amrmClientAsync.registerApplicationMaster(config.appHostName, config.appRpcPort, containerManager.getTrackingURL());
-    containerManager.onRequestContainer(this);
-    containerManager.waitForComplete(this);
-    containerManager.onExit(this);
-    amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
-    amrmClientAsync.stop();
-    amrmClientAsync.close(); 
-    nmClient.stop();
-    nmClient.close();
-    this.rpcServer.stop() ; 
+      Class<?> containerClass = Class.forName(config.appContainerManager) ;
+      containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
+
+      amrmClient = AMRMClient.createAMRMClient();
+      amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
+      amrmClientAsync.init(conf);
+      amrmClientAsync.start();
+
+      nmClient = NMClient.createNMClient();
+      nmClient.init(conf);
+      nmClient.start();
+
+      containerManager.onInit(this);
+      // Register with RM
+      RegisterApplicationMasterResponse registerResponse = 
+          amrmClientAsync.registerApplicationMaster(config.appHostName, config.appRpcPort, config.appTrackingUrl);
+      containerManager.onRequestContainer(this);
+      containerManager.waitForComplete(this);
+      containerManager.onExit(this);
+    } finally {
+      if(amrmClientAsync != null) {
+        amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
+        amrmClientAsync.stop();
+        amrmClientAsync.close(); 
+      }
+      if(nmClient != null) {
+        nmClient.stop();
+        nmClient.close();
+      }
+
+      if(webApp != null) webApp.stop() ; 
+
+      if(ipcServiceServer != null) ipcServiceServer.shutdown() ;
+    }
     return true;
   }
 

@@ -1,22 +1,25 @@
 package com.neverwinterdp.hadoop.yarn.app.master;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
-import com.neverwinterdp.util.JSONSerializer;
 
+@XmlRootElement(name = "AppMonitor")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AppMasterMonitor implements Serializable {
+  
   private AtomicInteger completedContainerCount = new AtomicInteger() ;
   private AtomicInteger allocatedContainerCount = new AtomicInteger() ;
   private AtomicInteger failedContainerCount = new AtomicInteger() ;

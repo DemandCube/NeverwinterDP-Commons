@@ -28,7 +28,14 @@ public class HttpGatewayIntegrationTest {
     };
     instance = Server.create(args) ;
     gateway = new ClusterGateway() ;
-    gateway.execute("module install --member-name webserver --autostart --module HttpGateway") ;
+    gateway.execute(
+        "module install " +
+        " -Phttp:port=8080" +
+        " -Phttp:route.names=cluster-rest" +
+        " -Phttp:route.cluster-rest.handler=com.neverwinterdp.server.gateway.http.HttpGatewayRouteHandler" +
+        " -Phttp:route.cluster-rest.path=/cluster/rest" +
+        " --member-name webserver --autostart --module Http"
+    ) ;
   }
 
   @AfterClass

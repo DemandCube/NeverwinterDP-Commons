@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 
-import com.neverwinterdp.netty.http.route.RouteHandlerGeneric;
+import com.neverwinterdp.netty.http.RouteHandlerGeneric;
 import com.neverwinterdp.server.gateway.ClusterGateway;
 import com.neverwinterdp.util.JSONSerializer;
 

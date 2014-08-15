@@ -2,7 +2,9 @@ package com.neverwinterdp.hadoop.yarn.app.worker;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerId;
@@ -15,7 +17,7 @@ public class AppWorkerContainerInfo implements Serializable {
   private int    cores ;
   private List<String> commands ;
   private AppWorkerContainerProgressStatus progressStatus ;
-  private InetSocketAddress rpcAddress ;
+  private Map<String, Object> reports  = new HashMap<String, Object> () ;
   
   public AppWorkerContainerInfo() {}
       
@@ -38,41 +40,19 @@ public class AppWorkerContainerInfo implements Serializable {
 
   public void setNodeId(NodeId nodeId) { this.nodeId = nodeId.toString() ; }
 
-  public int getMemory() {
-    return memory;
-  }
+  public int getMemory() { return memory; }
+  public void setMemory(int memory) { this.memory = memory; }
 
-  public void setMemory(int memory) {
-    this.memory = memory;
-  }
+  public int getCores() { return cores; }
+  public void setCores(int cores) { this.cores = cores; }
 
-  public int getCores() {
-    return cores;
-  }
+  public List<String> getCommands() { return commands; }
+  public void setCommands(List<String> commands) { this.commands = commands; }
 
-  public void setCores(int cores) {
-    this.cores = cores;
-  }
-
-  public List<String> getCommands() {
-    return commands;
-  }
-
-  public void setCommands(List<String> commands) {
-    this.commands = commands;
-  }
-
-  public AppWorkerContainerProgressStatus getProgressStatus() {
-    return progressStatus;
-  }
-
+  public AppWorkerContainerProgressStatus getProgressStatus() { return progressStatus; }
   public void setProgressStatus(AppWorkerContainerProgressStatus progressStatus) {
     this.progressStatus = progressStatus;
   }
   
-  public InetSocketAddress getRpcAddress() { return this.rpcAddress ; }
   
-  public void setRpcAddress(InetSocketAddress rpcAddress) {
-    this.rpcAddress = rpcAddress ;
-  }
 }
