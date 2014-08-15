@@ -118,7 +118,7 @@ public class MulticastServer{
 				.option(ChannelOption.SO_BROADCAST, true)
 				.handler(new MulticastServerHandler(this.messageMap));
 			}
-			logger.info("Binding server");
+			logger.info("Binding server on port "+this.port);
 			//Bind server
 			b.bind(this.port).sync().channel().closeFuture().await();
 		}

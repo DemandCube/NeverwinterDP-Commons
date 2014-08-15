@@ -8,6 +8,7 @@ import org.apache.zookeeper.AsyncCallback.DataCallback;
 import org.apache.zookeeper.AsyncCallback.StatCallback;
 import org.apache.zookeeper.AsyncCallback.StringCallback;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
@@ -116,6 +117,9 @@ public class ZkMaster implements Watcher{
 	 */
 	public void stopZK() throws Exception { 
 		logger.info("Closing ZooKeeper connection");
+		try {
+			zk.delete(this.masterName, -1);
+		} catch (InterruptedException | KeeperException e) {}
 		zk.close(); 
 	}
 	
@@ -143,6 +147,9 @@ public class ZkMaster implements Watcher{
      * @return
      */
     public boolean isMaster(){
+    	if(!this.connected || this.isExpired()){
+    		this.isLeader = false;
+    	}
     	logger.info("Returning isMaster status: "+this.isLeader);
     	return this.isLeader;
     }
@@ -372,7 +379,7 @@ public class ZkMaster implements Watcher{
             default:
             	isLeader = false;
             	state = MasterStates.NOTELECTED;
-                logger.error("Something went wrong when running for master.") ;
+                logger.error("Something went wrong when running for master. Zookeeper exception code: "+String.valueOf(rc)) ;
                 
             }
         }

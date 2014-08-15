@@ -13,11 +13,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.neverwinterdp.netty.multicast.UDPClient;
 import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
 import com.neverwinterdp.broadcast.Broadcast;
 
-public class broadcastTest {
+public class broadcastFailoverTest {
 	  static ZookeeperClusterBuilder clusterBuilder ;
 	  static String connection;
 	  static Broadcast server;
@@ -34,7 +33,6 @@ public class broadcastTest {
 		connection = "127.0.0.1:2181";
 	    clusterBuilder = new ZookeeperClusterBuilder() ;
 	    clusterBuilder.install();
-	    Thread.sleep(3000);
 	    
 	    
 	    map.put("dev", "2.2.2.2:2181,2.2.2.3:2181");
@@ -66,9 +64,7 @@ public class broadcastTest {
 		          e.printStackTrace();
 		        }
 		      }
-	    }.start() ;
-		    
-	    Thread.sleep(10000);
+	    }.start();
 	  }
 	  
 	  /**
@@ -78,60 +74,20 @@ public class broadcastTest {
 	  @AfterClass
 	  static public void teardown() throws Exception {
 	    clusterBuilder.destroy();
-	    server.stopServer();
 	  }
 	  
-	  @Test
-	  public void testServerIsMaster() throws InterruptedException{
-		  //Thread.sleep(15000);
-		  assertTrue(server.isMaster());
-	  }
+	  
 	  
 	  /**
-	   * Test that each key in the hash map returns the correct value 100 times and that an
-	   * invalid key returns "ERROR"
-	   * @throws Exception
+	   * When one server dies, the second server should take over
+	   * It should not take over until the first server has died
+	   * @throws IOException 
+	   * @throws InterruptedException 
 	   */
 	  @Test
-	  public void testServerReturnsCorrectInfo100Times() throws InterruptedException{
-		  UDPClient x = new UDPClient("localhost",port); 
-		  for(int i=0; i<100; i++){
-			  for (Map.Entry<String, String> entry : map.entrySet()) {
-				    String key = entry.getKey();
-				    String value = entry.getValue();
-				    String received = x.sendMessage(key);
-					assertEquals(value, received);
-			  }
-			  String received = x.sendMessage("Force an error!");
-			  assertEquals("ERROR", received);
-		  }
-	  }
-	  
-	  /**
-	   * Test that each key in the hash map returns the correct value and that an
-	   * invalid key returns "ERROR"
-	   * @throws Exception
-	   */
-	  @Test
-	  public void testServerReturnsCorrectInfo() throws Exception {
-		  UDPClient x = new UDPClient("localhost",port); 
-		  for (Map.Entry<String, String> entry : map.entrySet()) {
-			    String key = entry.getKey();
-			    String value = entry.getValue();
-			    String received = x.sendMessage(key);
-				assertEquals(value, received);
-		  }
-		  String received = x.sendMessage("Force an error!");
-		  assertEquals("ERROR", received);
-	  }
-	  
-	  /**
-	   * Opens another Broadcast Server, ensures it is not master and not running the Broadcast server
-	 * @throws IOException 
-	 * @throws InterruptedException 
-	   */
-	  @Test
-	  public void testSecondBroadcasterIsNotMaster() throws IOException, InterruptedException{
+	  public void testSecondServerTakesControlWhenFirstServerDies() throws IOException, InterruptedException{
+		Thread.sleep(10000);
+		
 		String testTempFileName = tempFileName+".tstSecondBroadcasterIsNotMaster"; 
 		  
 		File tempFile = new File(testTempFileName);
@@ -142,9 +98,14 @@ public class broadcastTest {
 		bw.close();
 		
 		
-		String[] broadcastArgs = new String[2];
+		String[] broadcastArgs = new String[4];
+		
 		broadcastArgs[0] = "-propertiesFile";
 		broadcastArgs[1] = tempFile.getAbsolutePath();
+		 //Likely the UDP server won't start, 
+		//netty doesn't like to grab this 2nd port
+		broadcastArgs[2] = "-udpPort";
+		broadcastArgs[3] =  "40000";
 		
 		final Broadcast server2 = new Broadcast( broadcastArgs);
 		assertTrue(server2.initialize());
@@ -158,10 +119,21 @@ public class broadcastTest {
 		      }
 		}.start() ;
 		    
-		Thread.sleep(10000);
+		Thread.sleep(5000);
 		
 		assertFalse(server2.isBroadcastServerRunning());
 		assertFalse(server2.isMaster());
+		
+		server.stopServer();
+		
+		Thread.sleep(20000);
+		
+		//Either of the servers could reconnect at this point
+		//so this is my exclusive or to test that
+		assertTrue(server2.isMaster() != server.isMaster());
+		
 		server2.stopServer();
 	  }
+	  
+	  
 }

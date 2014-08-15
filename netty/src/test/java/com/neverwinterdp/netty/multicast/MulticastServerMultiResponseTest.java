@@ -73,8 +73,6 @@ public class MulticastServerMultiResponseTest {
 		  }
 		  String received = x.sendMessage("Force an error!");
 		  assertEquals("ERROR", received);
-		  
-		  
 	  }
 	  
 	  /**
