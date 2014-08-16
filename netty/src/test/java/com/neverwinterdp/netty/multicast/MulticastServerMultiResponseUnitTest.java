@@ -20,7 +20,7 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 public class MulticastServerMultiResponseUnitTest {
 	private MulticastServer server ;
 	Map<String, String> m = new HashMap<String, String>();
-	private int port = 1111;
+	private int port = 1112;
 	
 	/**
 	 * Create server, pass in hash map argument

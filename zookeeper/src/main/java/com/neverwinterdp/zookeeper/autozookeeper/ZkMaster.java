@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ZkMaster implements Watcher{
   //Unique ID for this instance
-  private String serverId = UUID.randomUUID().toString();
+  private String serverId="";
   
   //Determine if this object is the leader
   boolean isLeader = false;
@@ -99,6 +99,7 @@ public class ZkMaster implements Watcher{
     this.hostPort = hostPort;
     this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
       logger.info("ZkMaster initialized");
+     serverId = UUID.randomUUID().toString();
   }
   
   /**
@@ -117,9 +118,12 @@ public class ZkMaster implements Watcher{
    */
   public void stopZK() throws Exception { 
     logger.info("Closing ZooKeeper connection");
-    try {
-      zk.delete(this.masterName, -1);
-    } catch (InterruptedException | KeeperException e) {}
+    if(this.isLeader){
+      try {
+        zk.delete(this.masterName, -1);
+      } catch (InterruptedException | KeeperException e) {}
+    }
+    this.isLeader = false;
     zk.close(); 
   }
   
@@ -128,8 +132,8 @@ public class ZkMaster implements Watcher{
    * @return
    */
   public boolean isConnected() {
-    logger.info("Returning connection status: "+this.connected);
-        return this.connected;
+    logger.info("Returning connection status: "+(zk.getState() == ZooKeeper.States.CONNECTED));
+      return zk.getState() == ZooKeeper.States.CONNECTED;
     }
     
     /**
@@ -147,7 +151,7 @@ public class ZkMaster implements Watcher{
      * @return
      */
     public boolean isMaster(){
-      if(!this.connected || this.isExpired()){
+      if(!this.isConnected() || this.isExpired()){
         this.isLeader = false;
       }
       logger.info("Returning isMaster status: "+this.isLeader);

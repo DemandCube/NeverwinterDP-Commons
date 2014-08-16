@@ -21,7 +21,8 @@ public class BroadcastServerFailoverUnitTest {
   static String connection;
   static BroadcastServer server;
   static Map<String, String> map = new HashMap<String, String>();
-  static int port =1111;
+  static int port =1130;
+  static int port2=45000;
   static String tempFileName="b.prop.tmp";
   
   /**
@@ -49,9 +50,11 @@ public class BroadcastServerFailoverUnitTest {
     bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
     bw.close();
     
-    String[] broadcastArgs = new String[2];
+    String[] broadcastArgs = new String[4];
     broadcastArgs[0] = "-propertiesFile";
     broadcastArgs[1] = tempFile.getAbsolutePath();
+    broadcastArgs[2] = "-udpPort";
+    broadcastArgs[3] =  Integer.toString(port);
     
     server = new BroadcastServer( broadcastArgs);
     assertTrue(server.initialize());
@@ -84,7 +87,7 @@ public class BroadcastServerFailoverUnitTest {
    * @throws IOException 
    * @throws InterruptedException 
    */
-  @Test
+  @Test(timeout=60000)
   public void testSecondServerTakesControlWhenFirstServerDies() throws IOException, InterruptedException{
     Thread.sleep(10000);
     
@@ -102,10 +105,11 @@ public class BroadcastServerFailoverUnitTest {
     
     broadcastArgs[0] = "-propertiesFile";
     broadcastArgs[1] = tempFile.getAbsolutePath();
+    
      //Likely the UDP server won't start, 
     //netty doesn't like to grab this 2nd port
     broadcastArgs[2] = "-udpPort";
-    broadcastArgs[3] =  "40000";
+    broadcastArgs[3] =  Integer.toString(port2);
     
     final BroadcastServer server2 = new BroadcastServer( broadcastArgs);
     assertTrue(server2.initialize());
@@ -129,9 +133,12 @@ public class BroadcastServerFailoverUnitTest {
     
     Thread.sleep(20000);
     
-    //Either of the servers could reconnect at this point
-    //so this is my exclusive or to test that
-    assertTrue(server2.isMaster() != server.isMaster());
+    assertTrue(server2.isMaster());
+    assertTrue(server2.isBroadcastServerRunning());
+    
+    
+    assertFalse(server.isMaster());
+    assertFalse(server.isBroadcastServerRunning());
     
     server2.stopServer();
   }

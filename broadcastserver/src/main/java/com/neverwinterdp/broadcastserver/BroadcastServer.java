@@ -1,7 +1,5 @@
 package com.neverwinterdp.broadcastserver;
 
-import static org.kohsuke.args4j.ExampleMode.ALL;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.neverwinterdp.netty.multicast.MulticastServer;
 import com.neverwinterdp.zookeeper.autozookeeper.ZkMaster;
 
@@ -25,20 +23,29 @@ import com.neverwinterdp.zookeeper.autozookeeper.ZkMaster;
  *
  */
 public class BroadcastServer {
-  //////////////////////////////////////////////////////////////////////////////////////
-  //Command line args
-  @Option(name="-propertiesFile",usage="Java properties file")
-  public static String propFile = "broadcast.properties";
   
-  @Option(name="-broadcastZookeeper",usage="The zookeeper [host]:[port] for this server to connect to")
-  public static String broadcastZookeeper=null;
+  private class cmdLineParser{
+    //////////////////////////////////////////////////////////////////////////////////////
+    //Command line args
+    @Parameter(names="-propertiesFile",description="Java properties file")
+    public String propFile = "broadcast.properties";
+    
+    @Parameter(names="-broadcastZookeeper",description="The zookeeper [host]:[port] for this server to connect to")
+    public final String broadcastZookeeper=null;
+    
+    @Parameter(names="-udpPort", description="UDP port to run Broadcast server on")
+    public final int udpPort = 1111;
+    
+    @Parameter(names={"-help","--help","-h"}, description="Displays help message")
+    public boolean help = false;
+    //////////////////////////////////////////////////////////////////////////////////////
+  }
   
-  @Option(name="-udpPort", usage="UDP port to run Broadcast server on")
-  public static int udpPort = 1111;
-  
-  @Option(name="-help", usage="Displays help message")
-  public static boolean help = false;
-  //////////////////////////////////////////////////////////////////////////////////////
+  //Cmd line arguments
+  private String propFile;
+  private String broadcastZookeeper;
+  private int udpPort;
+  private boolean help;
   
   
   //The map of data to pass into the broadcast server
@@ -54,6 +61,8 @@ public class BroadcastServer {
   private MulticastServer broadcaster=null;
   //Flag for whether broadcast server is running or not
   private boolean serverRunning=false;
+  //Flag to help stopServer() work
+  public boolean disableServer=false;
   
   /**
    * Constructor.  Meant to parse out command line arguments
@@ -65,7 +74,10 @@ public class BroadcastServer {
     for(int i=0; i<args.length; i++){
       logger.info("Args passed in:"+args[i]);
     }
-    this.parseCommandLine(args);
+    
+    if(!this.parseCommandLine(args) || this.help){
+      System.exit(-1);
+    }
   }
   
   /**
@@ -94,14 +106,7 @@ public class BroadcastServer {
   public boolean isBroadcastServerRunning(){
     return this.serverRunning;
   }
-  
-  /**
-   * Returns true if help flag has been set on command line
-   * @return true if help flag has been set, otherwise false
-   */
-  public boolean getHelp(){
-    return BroadcastServer.help;
-  }
+ 
   
   /**
    * Read in the properties file, verify all the data is appropriate
@@ -160,12 +165,13 @@ public class BroadcastServer {
     //Set the /master keyword and connect to ZooKeeper
     logger.info("Setting master name to "+this.masterName);
     this.m.setMasterName(this.masterName);
-    
+    this.disableServer = false;
     
     //RUN FOREVER
-    while(true){
+    while(!this.disableServer){
       logger.info("Connecting to zookeeper at: "+myZookeeperConnection);
       this.m.startZK();
+      
       //Loop until connected
       while(!m.isConnected()){
         logger.info("Not connected...");
@@ -181,9 +187,10 @@ public class BroadcastServer {
       
       //If we're master, go ahead and start the broadcast server
       if(this.m.isMaster()){
-        logger.info("We are master! Starting broadcast server");
+        logger.info("We are master! Initializing broadcast server");
         this.broadcaster = new MulticastServer(udpPort, zkConnectionMap);
         this.serverRunning = true;
+        logger.info("Broadcast server is beginning!");
         this.broadcaster.run();
         
         logger.info("Broadcast server has stopped!");
@@ -208,6 +215,7 @@ public class BroadcastServer {
    * Stops the broadcaster UDP server and closes connection to Zookeeper
    */
   public void stopServer() {
+    this.disableServer = true;
     try {
       this.m.stopZK();
     } 
@@ -283,7 +291,6 @@ public class BroadcastServer {
       }
     }
     
-    //return hashmap
     return map;
   }
   
@@ -292,36 +299,34 @@ public class BroadcastServer {
   /**
    * Parse out arguments
    * @param args command line arguments from main()
+   * @return True if parsed successfully, False otherwise
    */
-  public void parseCommandLine(String[] args){
-    CmdLineParser parser = new CmdLineParser(this);
-    
+  public boolean parseCommandLine(String[] args){
+    //CmdLineParser parser = new CmdLineParser(this);
+    cmdLineParser parser = new cmdLineParser();
+    JCommander jcomm=null;
     try{
-      // parse the arguments.
-      parser.parseArgument(args);
-    } 
-    catch( CmdLineException e ) {
-      //Catch any invalid arguments
-      System.err.println(e.getMessage());
-      printUsage(System.err,parser);
+      jcomm = new JCommander(parser, args);
     }
+    catch(ParameterException e){
+      System.err.println(e.getMessage()+"\nUse the -h option to get usage");
+      return false;
+    }
+    
+    this.propFile = parser.propFile;
+    this.broadcastZookeeper = parser.broadcastZookeeper;
+    this.udpPort = parser.udpPort;
+    this.help = parser.help;
+    
     //If -help was on command line,
     //Print out help message
-    if (help == true){
-      printUsage(System.out,parser);
+    if (this.help){
+      jcomm.usage();
     }
+    return true;
   }
   
   
-  /**
-   * Print usage to appropriate output
-   * @param output Either System.out, System.err
-   * @param parser the CmdLineParser object
-   */
-  public void printUsage(PrintStream output, CmdLineParser parser){
-    output.println("Example: java Broadcast "+parser.printExample(ALL));
-    parser.printUsage(output);
-  }
   
   
   /**
@@ -330,21 +335,23 @@ public class BroadcastServer {
    * @throws Exception
    */
   public static void main(String args[]) throws Exception {
-    BroadcastServer b = new BroadcastServer(args);
-    
-    //If initialize() returns false,
-    //Then something was wrong with the configuration
-    if(!b.initialize()){
-      System.exit(-1);
-    }
-    
     while(true){
       try{
+        BroadcastServer b = new BroadcastServer(args);
+        
+        //If initialize() returns false,
+        //Then something was wrong with the configuration
+        if(!b.initialize()){
+          System.exit(-1);
+        }
         b.runServerLoop();
       }
       catch(Exception e){
+        
         e.printStackTrace();
       }
     }
   }
 }
+
+

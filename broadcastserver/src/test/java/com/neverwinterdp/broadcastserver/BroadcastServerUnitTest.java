@@ -22,7 +22,7 @@ public class BroadcastServerUnitTest {
   static String connection;
   static BroadcastServer server;
   static Map<String, String> map = new HashMap<String, String>();
-  static int port =1111;
+  static int port = 1120;
   static String tempFileName="b.prop.tmp";
   
   /**
@@ -52,9 +52,11 @@ public class BroadcastServerUnitTest {
     bw.close();
     
     
-    String[] broadcastArgs = new String[2];
+    String[] broadcastArgs = new String[4];
     broadcastArgs[0] = "-propertiesFile";
     broadcastArgs[1] = tempFile.getAbsolutePath();
+    broadcastArgs[2] = "-udpPort";
+    broadcastArgs[3] =  Integer.toString(port);
     
     server = new BroadcastServer( broadcastArgs);
     assertTrue(server.initialize());
@@ -69,7 +71,7 @@ public class BroadcastServerUnitTest {
       }
     }.start() ;
       
-    Thread.sleep(10000);
+    Thread.sleep(5000);
   }
 	  
   /**
@@ -93,7 +95,7 @@ public class BroadcastServerUnitTest {
    * invalid key returns "ERROR"
    * @throws Exception
    */
-  @Test
+  @Test(timeout=60000)
   public void testServerReturnsCorrectInfo100Times() throws InterruptedException{
     UDPClient x = new UDPClient("localhost",port); 
     for(int i=0; i<100; i++){
@@ -113,7 +115,7 @@ public class BroadcastServerUnitTest {
    * invalid key returns "ERROR"
    * @throws Exception
    */
-  @Test
+  @Test(timeout=60000)
   public void testServerReturnsCorrectInfo() throws Exception {
     UDPClient x = new UDPClient("localhost",port); 
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -127,11 +129,11 @@ public class BroadcastServerUnitTest {
   }
   
   /**
-     * Opens another Broadcast Server, ensures it is not master and not running the Broadcast server
+   * Opens another Broadcast Server, ensures it is not master and not running the Broadcast server
    * @throws IOException 
    * @throws InterruptedException 
-     */
-  @Test
+   */
+  @Test(timeout=60000)
   public void testSecondBroadcasterIsNotMaster() throws IOException, InterruptedException{
     String testTempFileName = tempFileName+".tstSecondBroadcasterIsNotMaster"; 
       
@@ -164,6 +166,6 @@ public class BroadcastServerUnitTest {
     
     assertFalse(server2.isBroadcastServerRunning());
     assertFalse(server2.isMaster());
-    server2.stopServer();
+    server2.stopServer();    
   }
 }

@@ -12,13 +12,13 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 
 /**
  * Test to ensure the single message broadcast works for the multicast server
- * @author rcduar
+ * @author Richard Duarte
  *
  */
 public class MulticastServerSingleResponseUnitTest {
 	private MulticastServer server ;
 	private String expectedResponse = "Neverwinter Rocks!";
-	private int port = 1111;
+	private int port = 1113;
 	
 	/**
 	 * Set up server to respond to any request with expectedResponse
