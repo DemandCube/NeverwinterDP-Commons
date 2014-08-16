@@ -82,7 +82,7 @@ public class BroadcastServerFailoverUnitTest {
   
   
   /**
-   * When one server dies, the second server should take over
+   * When one server stops, the second server should take over
    * It should not take over until the first server has died
    * @throws IOException 
    * @throws InterruptedException 

@@ -3,7 +3,6 @@ package com.neverwinterdp.broadcastserver;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -27,14 +26,14 @@ public class BroadcastServer {
   private class cmdLineParser{
     //////////////////////////////////////////////////////////////////////////////////////
     //Command line args
-    @Parameter(names="-propertiesFile",description="Java properties file")
+    @Parameter(names={"-p","-propertiesFile"},description="Java properties file")
     public String propFile = "broadcast.properties";
     
-    @Parameter(names="-broadcastZookeeper",description="The zookeeper [host]:[port] for this server to connect to")
-    public final String broadcastZookeeper=null;
+    @Parameter(names={"-b","-broadcastZookeeper"},description="The zookeeper [host]:[port] for this server to connect to")
+    public String broadcastZookeeper=null;
     
-    @Parameter(names="-udpPort", description="UDP port to run Broadcast server on")
-    public final int udpPort = 1111;
+    @Parameter(names={"-u","-udpPort"}, description="UDP port to run Broadcast server on")
+    public int udpPort = 1111;
     
     @Parameter(names={"-help","--help","-h"}, description="Displays help message")
     public boolean help = false;
