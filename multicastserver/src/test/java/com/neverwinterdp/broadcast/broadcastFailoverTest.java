@@ -17,123 +17,124 @@ import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
 import com.neverwinterdp.broadcast.Broadcast;
 
 public class broadcastFailoverTest {
-	  static ZookeeperClusterBuilder clusterBuilder ;
-	  static String connection;
-	  static Broadcast server;
-	  static Map<String, String> map = new HashMap<String, String>();
-	  static int port =1111;
-	  static String tempFileName="b.prop.tmp";
-	  
-	  /**
-	   * Build zookeeper server
-	   * @throws Exception
-	   */
-	  @BeforeClass
-	  static public void setup() throws Exception {
-		connection = "127.0.0.1:2181";
-	    clusterBuilder = new ZookeeperClusterBuilder() ;
-	    clusterBuilder.install();
-	    
-	    
-	    map.put("dev", "2.2.2.2:2181,2.2.2.3:2181");
-		map.put("local", "127.0.0.1:2181,127.0.0.1:2181");
-		map.put("prod","1.1.1.2:2181,1.1.2.3:2181");
-		map.put("broadcast", "localhost:2181");
-	    
-	    
-        File tempFile = new File(tempFileName);
-        tempFile.deleteOnExit();
-        System.out.println("TempFile:"+tempFile.getAbsolutePath());
-        FileWriter fileWriter = new FileWriter(tempFile, false);
-        BufferedWriter bw = new BufferedWriter(fileWriter);
-        bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
-        bw.close();
-        
+  static ZookeeperClusterBuilder clusterBuilder ;
+  static String connection;
+  static Broadcast server;
+  static Map<String, String> map = new HashMap<String, String>();
+  static int port =1111;
+  static String tempFileName="b.prop.tmp";
+  
+  /**
+   * Build zookeeper server
+   * @throws Exception
+   */
+  @BeforeClass
+  static public void setup() throws Exception {
+    connection = "127.0.0.1:2181";
+    clusterBuilder = new ZookeeperClusterBuilder() ;
+    clusterBuilder.install();
     
-	    String[] broadcastArgs = new String[2];
-	    broadcastArgs[0] = "-propertiesFile";
-	    broadcastArgs[1] = tempFile.getAbsolutePath();
-	    
-	    server = new Broadcast( broadcastArgs);
-	    assertTrue(server.initialize());
-	    new Thread() {
-	    	public void run() {
-	    		try {
-		          server.runServerLoop() ;
-		        } catch (Exception e) {
-		          e.printStackTrace();
-		        }
-		      }
-	    }.start();
-	  }
-	  
-	  /**
-	   * Destroy zookeeper server and broadcast server
-	   * @throws Exception
-	   */
-	  @AfterClass
-	  static public void teardown() throws Exception {
-	    clusterBuilder.destroy();
-	  }
-	  
-	  
-	  
-	  /**
-	   * When one server dies, the second server should take over
-	   * It should not take over until the first server has died
-	   * @throws IOException 
-	   * @throws InterruptedException 
-	   */
-	  @Test
-	  public void testSecondServerTakesControlWhenFirstServerDies() throws IOException, InterruptedException{
-		Thread.sleep(10000);
-		
-		String testTempFileName = tempFileName+".tstSecondBroadcasterIsNotMaster"; 
-		  
-		File tempFile = new File(testTempFileName);
-		tempFile.deleteOnExit();
-		FileWriter fileWriter = new FileWriter(tempFile, false);
-		BufferedWriter bw = new BufferedWriter(fileWriter);
-		bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
-		bw.close();
-		
-		
-		String[] broadcastArgs = new String[4];
-		
-		broadcastArgs[0] = "-propertiesFile";
-		broadcastArgs[1] = tempFile.getAbsolutePath();
-		 //Likely the UDP server won't start, 
-		//netty doesn't like to grab this 2nd port
-		broadcastArgs[2] = "-udpPort";
-		broadcastArgs[3] =  "40000";
-		
-		final Broadcast server2 = new Broadcast( broadcastArgs);
-		assertTrue(server2.initialize());
-		new Thread() {
-			public void run() {
-				try {
-		          server2.runServerLoop() ;
-		        } catch (Exception e) {
-		          e.printStackTrace();
-		        }
-		      }
-		}.start() ;
-		    
-		Thread.sleep(5000);
-		
-		assertFalse(server2.isBroadcastServerRunning());
-		assertFalse(server2.isMaster());
-		
-		server.stopServer();
-		
-		Thread.sleep(20000);
-		
-		//Either of the servers could reconnect at this point
-		//so this is my exclusive or to test that
-		assertTrue(server2.isMaster() != server.isMaster());
-		
-		server2.stopServer();
-	  }
-	  
-	  
+    
+    map.put("dev", "2.2.2.2:2181,2.2.2.3:2181");
+    map.put("local", "127.0.0.1:2181,127.0.0.1:2181");
+    map.put("prod","1.1.1.2:2181,1.1.2.3:2181");
+    map.put("broadcast", "localhost:2181");
+     
+    
+    File tempFile = new File(tempFileName);
+    tempFile.deleteOnExit();
+    System.out.println("TempFile:"+tempFile.getAbsolutePath());
+    FileWriter fileWriter = new FileWriter(tempFile, false);
+    BufferedWriter bw = new BufferedWriter(fileWriter);
+    bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
+    bw.close();
+    
+    String[] broadcastArgs = new String[2];
+    broadcastArgs[0] = "-propertiesFile";
+    broadcastArgs[1] = tempFile.getAbsolutePath();
+    
+    server = new Broadcast( broadcastArgs);
+    assertTrue(server.initialize());
+    new Thread() {
+      public void run() {
+        try {
+          server.runServerLoop() ;
+        } 
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }.start();
+  }
+  
+  /**
+   * Destroy zookeeper server and broadcast server
+   * @throws Exception
+   */
+  @AfterClass
+  static public void teardown() throws Exception {
+    clusterBuilder.destroy();
+  }
+  
+  
+  
+  /**
+   * When one server dies, the second server should take over
+   * It should not take over until the first server has died
+   * @throws IOException 
+   * @throws InterruptedException 
+   */
+  @Test
+  public void testSecondServerTakesControlWhenFirstServerDies() throws IOException, InterruptedException{
+    Thread.sleep(10000);
+    
+    String testTempFileName = tempFileName+".tstSecondBroadcasterIsNotMaster"; 
+      
+    File tempFile = new File(testTempFileName);
+    tempFile.deleteOnExit();
+    FileWriter fileWriter = new FileWriter(tempFile, false);
+    BufferedWriter bw = new BufferedWriter(fileWriter);
+    bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
+    bw.close();
+    
+    
+    String[] broadcastArgs = new String[4];
+    
+    broadcastArgs[0] = "-propertiesFile";
+    broadcastArgs[1] = tempFile.getAbsolutePath();
+     //Likely the UDP server won't start, 
+    //netty doesn't like to grab this 2nd port
+    broadcastArgs[2] = "-udpPort";
+    broadcastArgs[3] =  "40000";
+    
+    final Broadcast server2 = new Broadcast( broadcastArgs);
+    assertTrue(server2.initialize());
+    new Thread() {
+      public void run() {
+        try {
+          server2.runServerLoop() ;
+        } 
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }.start() ;
+        
+    Thread.sleep(5000);
+    
+    assertFalse(server2.isBroadcastServerRunning());
+    assertFalse(server2.isMaster());
+    
+    server.stopServer();
+    
+    Thread.sleep(20000);
+    
+    //Either of the servers could reconnect at this point
+    //so this is my exclusive or to test that
+    assertTrue(server2.isMaster() != server.isMaster());
+    
+    server2.stopServer();
+  }
+  
+   
 }

@@ -25,8 +25,8 @@ public final class UDPClient {
     private String host;
     
     public UDPClient(String Host, int Port){
-    	this.host = Host;
-    	this.port = Port;
+      this.host = Host;
+      this.port = Port;
     }
     
     /**
@@ -36,7 +36,7 @@ public final class UDPClient {
      * @throws InterruptedException
      */
     public String sendMessage(String message) throws InterruptedException{
-    	return this.sendMessage(message,1024);
+      return this.sendMessage(message,1024);
     }
     
     /**
@@ -46,40 +46,40 @@ public final class UDPClient {
      * @return String response from server
      * @throws InterruptedException
      */
-	public String sendMessage(String message,int responseSize) throws InterruptedException{
-    	String retVal=null;
-    	try {
-    		byte[] msg = message.getBytes( CharsetUtil.UTF_8);
-    		// Get the internet address of the specified host
-    		InetAddress address = InetAddress.getByName(this.host);
+  public String sendMessage(String message,int responseSize) throws InterruptedException{
+      String retVal=null;
+      try {
+        byte[] msg = message.getBytes( CharsetUtil.UTF_8);
+        // Get the internet address of the specified host
+        InetAddress address = InetAddress.getByName(this.host);
 
-    		// Initialize a datagram packet with data and address
-    		DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, address, port);
+        // Initialize a datagram packet with data and address
+        DatagramPacket sendPacket = new DatagramPacket(msg, msg.length, address, port);
 
-    		// Create a datagram socket, send the packet through it
-    		DatagramSocket dsocket = new DatagramSocket();
-    		dsocket.send(sendPacket);
-    		
-    		//If we can't allocate memory for the response
-    		//Then just return
-    		if(responseSize < 1){
-    			dsocket.close();
-    			return "";
-    		}
-    		
-    		//Get response
-    		byte[] buf = new byte[responseSize];
-    		DatagramPacket receivePacket = new DatagramPacket(buf, buf.length);
-    		dsocket.receive(receivePacket);
-    		
-    		retVal = new String(receivePacket.getData(), 0, receivePacket.getLength());
-    		
-    		dsocket.close();
-    	} 
-    	catch (Exception e) {
-    		System.err.println(e);
-    	}
-    	return retVal;
+        // Create a datagram socket, send the packet through it
+        DatagramSocket dsocket = new DatagramSocket();
+        dsocket.send(sendPacket);
+        
+        //If we can't allocate memory for the response
+        //Then just return
+        if(responseSize < 1){
+          dsocket.close();
+          return "";
+        }
+        
+        //Get response
+        byte[] buf = new byte[responseSize];
+        DatagramPacket receivePacket = new DatagramPacket(buf, buf.length);
+        dsocket.receive(receivePacket);
+        
+        retVal = new String(receivePacket.getData(), 0, receivePacket.getLength());
+        
+        dsocket.close();
+      } 
+      catch (Exception e) {
+        System.err.println(e);
+      }
+      return retVal;
     }
 
 }

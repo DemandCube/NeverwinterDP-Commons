@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
  * //Connect to zookeeper
  * m.startZK();
  * while(!m.isConnected()){
- * 		//Not connected, so wait
- * 		Thread.sleep(100);
+ *     //Not connected, so wait
+ *     Thread.sleep(100);
  * }
  * 
  * //Now that we're connected, try to become master
@@ -47,17 +47,17 @@ import org.slf4j.LoggerFactory;
  * Thread.sleep(5000);
  * 
  * if(m.isMaster()){
- * 		System.out.println("We are master!");
- * 		//do what master should do
- * 	}
+ *     System.out.println("We are master!");
+ *     //do what master should do
+ *   }
  *  else{
- *  	System.out.println("We ain't master!");
+ *    System.out.println("We ain't master!");
  *  }
  *  
  *  //While our session doesn't expire, just hang out
  *  while(!m.isExpired()){
- *  	Thread.sleep(1000);
- *  }	
+ *    Thread.sleep(1000);
+ *  }  
  *  
  *  //Close connection to zookeeper
  *  m.stopZK();
@@ -66,16 +66,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ZkMaster implements Watcher{
-	//Unique ID for this instance
-	private String serverId = UUID.randomUUID().toString();
-	
-	//Determine if this object is the leader
-	boolean isLeader = false;
+  //Unique ID for this instance
+  private String serverId = UUID.randomUUID().toString();
+  
+  //Determine if this object is the leader
+  boolean isLeader = false;
     
-	//Zookeeper object
-	ZooKeeper zk;
-	
-	//Form should be [ip address]:[port]
+  //Zookeeper object
+  ZooKeeper zk;
+  
+  //Form should be [ip address]:[port]
     String hostPort;
     
     private Logger logger;
@@ -83,7 +83,7 @@ public class ZkMaster implements Watcher{
     //States the master can be in
     enum MasterStates {RUNNING, ELECTED, NOTELECTED};
     @SuppressWarnings("unused") //it is actually used, but is giving a warning
-	private volatile MasterStates state = MasterStates.RUNNING;
+  private volatile MasterStates state = MasterStates.RUNNING;
     
     //Status booleans
     private volatile boolean connected = false;
@@ -95,40 +95,40 @@ public class ZkMaster implements Watcher{
      * Constructor
      * @param hostPort - format is "[ip/hostname]:[port],[ip/hostname]:[port]..."
      */
-	public ZkMaster(String hostPort) { 
-		this.hostPort = hostPort;
-		this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
-	    logger.info("ZkMaster initialized");
-	}
-	
-	/**
-	 * Connects to Zookeeper instance
-	 * Timeout is default 15 seconds
-	 * @throws IOException
-	 */
-	public void startZK() throws IOException {
-		logger.info("Starting new ZooKeeper connection");
-		zk = new ZooKeeper(hostPort, 15000, this);
-	}
-	
-	/**
-	 * Closes zookeeper connection
-	 * @throws Exception
-	 */
-	public void stopZK() throws Exception { 
-		logger.info("Closing ZooKeeper connection");
-		try {
-			zk.delete(this.masterName, -1);
-		} catch (InterruptedException | KeeperException e) {}
-		zk.close(); 
-	}
-	
-	/**
-	 * Check if ZooKeeper session is active
-	 * @return
-	 */
-	public boolean isConnected() {
-		logger.info("Returning connection status: "+this.connected);
+  public ZkMaster(String hostPort) { 
+    this.hostPort = hostPort;
+    this.logger = LoggerFactory.getLogger(getClass().getSimpleName()) ;
+      logger.info("ZkMaster initialized");
+  }
+  
+  /**
+   * Connects to Zookeeper instance
+   * Timeout is default 15 seconds
+   * @throws IOException
+   */
+  public void startZK() throws IOException {
+    logger.info("Starting new ZooKeeper connection");
+    zk = new ZooKeeper(hostPort, 15000, this);
+  }
+  
+  /**
+   * Closes zookeeper connection
+   * @throws Exception
+   */
+  public void stopZK() throws Exception { 
+    logger.info("Closing ZooKeeper connection");
+    try {
+      zk.delete(this.masterName, -1);
+    } catch (InterruptedException | KeeperException e) {}
+    zk.close(); 
+  }
+  
+  /**
+   * Check if ZooKeeper session is active
+   * @return
+   */
+  public boolean isConnected() {
+    logger.info("Returning connection status: "+this.connected);
         return this.connected;
     }
     
@@ -138,7 +138,7 @@ public class ZkMaster implements Watcher{
      * @return boolean ZooKeeper session has expired
      */
     public boolean isExpired() {
-    	logger.info("Returning expiration status: "+this.expired);
+      logger.info("Returning expiration status: "+this.expired);
         return this.expired;
     }
     
@@ -147,11 +147,11 @@ public class ZkMaster implements Watcher{
      * @return
      */
     public boolean isMaster(){
-    	if(!this.connected || this.isExpired()){
-    		this.isLeader = false;
-    	}
-    	logger.info("Returning isMaster status: "+this.isLeader);
-    	return this.isLeader;
+      if(!this.connected || this.isExpired()){
+        this.isLeader = false;
+      }
+      logger.info("Returning isMaster status: "+this.isLeader);
+      return this.isLeader;
     }
     
     /**
@@ -159,8 +159,8 @@ public class ZkMaster implements Watcher{
      * @return the server's ID
      */
     public String getServerId(){
-    	logger.info("Returning Server ID: "+this.serverId);
-    	return this.serverId;
+      logger.info("Returning Server ID: "+this.serverId);
+      return this.serverId;
     }
     
     /**
@@ -169,13 +169,13 @@ public class ZkMaster implements Watcher{
      * @return true if change was successful, false otherwise
      */
     public boolean setMasterName(String master){
-    	logger.info("Setting master name: "+master);
-    	if(master.startsWith("/") && master.length()>1){
-    		masterName = master;
-    		return true;
-    	}
-    	logger.error(master+" - Master name invalid.  Must start with '/' character");
-    	return false;
+      logger.info("Setting master name: "+master);
+      if(master.startsWith("/") && master.length()>1){
+        masterName = master;
+        return true;
+      }
+      logger.error(master+" - Master name invalid.  Must start with '/' character");
+      return false;
     }
     
     /**
@@ -183,65 +183,65 @@ public class ZkMaster implements Watcher{
      * @return
      */
     String getMasterName(){
-    	logger.info("Returning master znode name");
-    	return masterName;
+      logger.info("Returning master znode name");
+      return masterName;
     }
-	
+  
     /**
      * Asynchronous call
-	 * Checks if /master exists
-	 * Checks for existence, sets watcher for /master - masterExistsWatcher()
-	 * and sets the callback method - masterExistsCallback()
-	 */
-	void masterExists() {
-		logger.info("Starting asynch call to see if master exists");
+   * Checks if /master exists
+   * Checks for existence, sets watcher for /master - masterExistsWatcher()
+   * and sets the callback method - masterExistsCallback()
+   */
+  void masterExists() {
+    logger.info("Starting asynch call to see if master exists");
         zk.exists(masterName, 
                 masterExistsWatcher, 
                 masterExistsCallback, 
                 null);
     }
-	
-	/**
+  
+  /**
      * Watches if /master is deleted, tries to become master if it is
      */
     Watcher masterExistsWatcher = new Watcher(){
         public void process(WatchedEvent e) {
-        	logger.info("Starting watcher for master");
+          logger.info("Starting watcher for master");
             if(e.getType() == EventType.NodeDeleted) {
                 if(masterName.equals( e.getPath())){
-                	runForMaster();
+                  runForMaster();
                 }
             }
         }
     };
-	
+  
     /**
      * Callback for when masterExists returns
      */
     StatCallback masterExistsCallback = new StatCallback() {
         public void processResult(int rc, String path, Object ctx, Stat stat){
-        	logger.info("Processing Master Exists callback");
+          logger.info("Processing Master Exists callback");
             switch (Code.get(rc)) { 
-            	//retry on connection loss
-	            case CONNECTIONLOSS:
-	            	logger.info("Connection lost, Checking if master exists again");
-	                masterExists();
-	                break;
-	            //everything is kosher
-	            case OK:
-	            	logger.info("Everything ok");
-	                break;
-	            //try to become master if /master doesn't exist
-	            case NONODE:
-	            	logger.info("Master doesn't exist, Going to run for master");
-	                state = MasterStates.RUNNING;
-	                runForMaster();
-	                break;
-	            //Check data from /master
-	            default:     
-	            	logger.info("Default case - checking for master");
-	                checkMaster();
-	                break;
+              //retry on connection loss
+              case CONNECTIONLOSS:
+                logger.info("Connection lost, Checking if master exists again");
+                  masterExists();
+                  break;
+              //everything is kosher
+              case OK:
+                logger.info("Everything ok");
+                  break;
+              //try to become master if /master doesn't exist
+              case NONODE:
+                logger.info("Master doesn't exist, Going to run for master");
+                  state = MasterStates.RUNNING;
+                  runForMaster();
+                  break;
+              //Check data from /master
+              default:     
+                logger.info("Default case - checking for master");
+                  checkMaster();
+                  break;
             }
         }
     };
@@ -251,55 +251,55 @@ public class ZkMaster implements Watcher{
      * Checks data from /master
      * Sets callback - masterCheckCallback()
      */
- 	void checkMaster() {
- 		logger.info("Checking if master exists");
+   void checkMaster() {
+     logger.info("Checking if master exists");
          zk.getData(masterName, false, masterCheckCallback, null);
      }
- 	
+   
     /**
      * Callback for when checkMaster returns
      * Becomes master if possible
      */
     DataCallback masterCheckCallback = new DataCallback() {
         public void processResult(int rc, String path, Object ctx, byte[] data, Stat stat) {
-        	logger.info("Master Check Callback");
+          logger.info("Master Check Callback");
             switch (Code.get(rc)) {
             //Try again
             case CONNECTIONLOSS:
-            	logger.info("Connection lost, checking for master again");
+              logger.info("Connection lost, checking for master again");
                 checkMaster();
                 break;
             //Try to become master if /master doesn't exist
             case NONODE:
-            	logger.info("Master doesn't exist, going to run for master");
+              logger.info("Master doesn't exist, going to run for master");
                 runForMaster();
                 break; 
             //Master exists
             case OK:
-            	//If this znode is the master then take leadership
+              //If this znode is the master then take leadership
                 if( serverId.equals( new String(data) ) ) {
-                	logger.info("We shall now become master!");
+                  logger.info("We shall now become master!");
                     state = MasterStates.ELECTED;
                     logger.info("Taking leadership");
                     takeLeadership();
                 } 
                 //Otherwise don't, but keep checking
                 else {
-                	logger.info("Checking for master");
+                  logger.info("Checking for master");
                     state = MasterStates.NOTELECTED;
                     masterExists();
                 }
                 break;
             //Something went wrong
             default:
-            	logger.error("Error when reading data");
-            	break;
+              logger.error("Error when reading data");
+              break;
             }
         } 
     };
     
     
-	/**
+  /**
      * This method implements the process method of the
      * Watcher interface. We use it to deal with the
      * different states of a session. 
@@ -323,24 +323,24 @@ public class ZkMaster implements Watcher{
             }
         }
     }
-	
-	
-	/**
-	 * This is where we would perform recovery to recover abandoned tasks
-	 * But that shit's complicated
-	 */
-	void takeLeadership(){
-		logger.info("Taking leadership");
-		isLeader = true;
-	}
-	
-	/**
+  
+  
+  /**
+   * This is where we would perform recovery to recover abandoned tasks
+   * But that shit's complicated
+   */
+  void takeLeadership(){
+    logger.info("Taking leadership");
+    isLeader = true;
+  }
+  
+  /**
      * Tries to create a /master lock znode to acquire leadership.
      * /master is ephemeral, so when client disconnects, /master disappears
      * and another node will attempt to become master
      */
     public void runForMaster() {
-    	logger.info("Running For Master");
+      logger.info("Running For Master");
         zk.create(masterName, 
                 serverId.getBytes(), 
                 Ids.OPEN_ACL_UNSAFE, 
@@ -348,37 +348,37 @@ public class ZkMaster implements Watcher{
                 masterCreateCallback,
                 null);
     }
-	
-	/**
-	 * Callback for when runForMaster() returns
-	 * Sets state and tries to take leadership if need be
-	 */
-	StringCallback masterCreateCallback = new StringCallback() {
+  
+  /**
+   * Callback for when runForMaster() returns
+   * Sets state and tries to take leadership if need be
+   */
+  StringCallback masterCreateCallback = new StringCallback() {
         public void processResult(int rc, String path, Object ctx, String name) {
-        	logger.info("runForMaster Callback");
+          logger.info("runForMaster Callback");
             switch (Code.get(rc)) { 
             case CONNECTIONLOSS:
-            	logger.info("Connection Lost. Checking for master");
-            	isLeader = false;
+              logger.info("Connection Lost. Checking for master");
+              isLeader = false;
                 checkMaster();
                 break;
             //We have become master
             case OK:
-            	logger.info("We are master");
+              logger.info("We are master");
                 state = MasterStates.ELECTED;
                 takeLeadership();
                 break;
             //Master already exists
             case NODEEXISTS:
-            	logger.info("Master already exists");
-            	isLeader = false;
-            	state = MasterStates.NOTELECTED;
+              logger.info("Master already exists");
+              isLeader = false;
+              state = MasterStates.NOTELECTED;
                 masterExists();
                 break;
             //Something went wrong...
             default:
-            	isLeader = false;
-            	state = MasterStates.NOTELECTED;
+              isLeader = false;
+              state = MasterStates.NOTELECTED;
                 logger.error("Something went wrong when running for master. Zookeeper exception code: "+String.valueOf(rc)) ;
                 
             }
