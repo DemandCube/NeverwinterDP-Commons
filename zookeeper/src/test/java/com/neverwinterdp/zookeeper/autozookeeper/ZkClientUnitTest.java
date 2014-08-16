@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
 import com.neverwinterdp.zookeeper.autozookeeper.ZkClient;
 
-public class ZkClientTest {
+public class ZkClientUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
     static String connection;
 

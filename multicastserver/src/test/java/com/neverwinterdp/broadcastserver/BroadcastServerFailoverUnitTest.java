@@ -1,4 +1,4 @@
-package com.neverwinterdp.broadcast;
+package com.neverwinterdp.broadcastserver;
 
 import static org.junit.Assert.*;
 
@@ -14,12 +14,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
-import com.neverwinterdp.broadcast.Broadcast;
+import com.neverwinterdp.broadcastserver.BroadcastServer;
 
-public class broadcastFailoverTest {
+public class BroadcastServerFailoverUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
   static String connection;
-  static Broadcast server;
+  static BroadcastServer server;
   static Map<String, String> map = new HashMap<String, String>();
   static int port =1111;
   static String tempFileName="b.prop.tmp";
@@ -53,7 +53,7 @@ public class broadcastFailoverTest {
     broadcastArgs[0] = "-propertiesFile";
     broadcastArgs[1] = tempFile.getAbsolutePath();
     
-    server = new Broadcast( broadcastArgs);
+    server = new BroadcastServer( broadcastArgs);
     assertTrue(server.initialize());
     new Thread() {
       public void run() {
@@ -107,7 +107,7 @@ public class broadcastFailoverTest {
     broadcastArgs[2] = "-udpPort";
     broadcastArgs[3] =  "40000";
     
-    final Broadcast server2 = new Broadcast( broadcastArgs);
+    final BroadcastServer server2 = new BroadcastServer( broadcastArgs);
     assertTrue(server2.initialize());
     new Thread() {
       public void run() {

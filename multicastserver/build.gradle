@@ -1,8 +1,8 @@
-archivesBaseName = 'commons.multicastserver'
+archivesBaseName = 'commons.broadcastserver'
 
 eclipse {
   project {
-    name = 'commons.multicastserver'
+    name = 'commons.broadcastserver'
   }
 }
 

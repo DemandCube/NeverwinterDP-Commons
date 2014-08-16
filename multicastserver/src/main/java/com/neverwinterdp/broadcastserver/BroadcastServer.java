@@ -1,4 +1,4 @@
-package com.neverwinterdp.broadcast;
+package com.neverwinterdp.broadcastserver;
 
 import static org.kohsuke.args4j.ExampleMode.ALL;
 
@@ -24,7 +24,7 @@ import com.neverwinterdp.zookeeper.autozookeeper.ZkMaster;
  * @author Richard Duarte
  *
  */
-public class Broadcast {
+public class BroadcastServer {
   //////////////////////////////////////////////////////////////////////////////////////
   //Command line args
   @Option(name="-propertiesFile",usage="Java properties file")
@@ -59,7 +59,7 @@ public class Broadcast {
    * Constructor.  Meant to parse out command line arguments
    * @param args
    */
-  public Broadcast(String args[]){
+  public BroadcastServer(String args[]){
     logger = LoggerFactory.getLogger("Broadcast");
     logger.info("Initializing Broadcast object");
     for(int i=0; i<args.length; i++){
@@ -100,7 +100,7 @@ public class Broadcast {
    * @return true if help flag has been set, otherwise false
    */
   public boolean getHelp(){
-    return Broadcast.help;
+    return BroadcastServer.help;
   }
   
   /**
@@ -330,7 +330,7 @@ public class Broadcast {
    * @throws Exception
    */
   public static void main(String args[]) throws Exception {
-    Broadcast b = new Broadcast(args);
+    BroadcastServer b = new BroadcastServer(args);
     
     //If initialize() returns false,
     //Then something was wrong with the configuration

@@ -15,7 +15,7 @@ import com.neverwinterdp.netty.multicast.UDPClient;
  * @author rcduar
  *
  */
-public class MulticastServerSingleResponseTest {
+public class MulticastServerSingleResponseUnitTest {
 	private MulticastServer server ;
 	private String expectedResponse = "Neverwinter Rocks!";
 	private int port = 1111;

@@ -17,7 +17,7 @@ import com.neverwinterdp.netty.multicast.UDPClient;
  * @author Richard Duarte
  *
  */
-public class MulticastServerMultiResponseTest {
+public class MulticastServerMultiResponseUnitTest {
 	private MulticastServer server ;
 	Map<String, String> m = new HashMap<String, String>();
 	private int port = 1111;

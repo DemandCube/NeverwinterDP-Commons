@@ -13,7 +13,7 @@ import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
 /**
  * @author Richard Duarte
  */
-public class ZkMasterTest {
+public class ZkMasterUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
   static String connection;
 
