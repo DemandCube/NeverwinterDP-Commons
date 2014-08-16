@@ -19,7 +19,7 @@ public class ZkClientTest {
      */
     @BeforeClass
     static public void setup() throws Exception {
-    connection = "127.0.0.1:2181";
+      connection = "127.0.0.1:2181";
       clusterBuilder = new ZookeeperClusterBuilder() ;
       clusterBuilder.install();
       Thread.sleep(3000);
