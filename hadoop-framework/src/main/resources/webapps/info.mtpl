@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+
+<html>
+  <head>
+    <title>Hello</title>
+    <style>
+      html { padding: 0px; margin: 0px }
+      body { padding: 0px; margin: 0px }
+      hr { border-bottom: solid 1px lightgray }
+      table { border-collapse: collapse; width: 99%;}
+      th, td { border: 1px solid ; padding: 3px }
+      #navigation { float: left; width: 200px; border-right: 1px solid;}
+      #body { margin-left: 210px; }
+      #body:after { clear: both; }
+    </style>
+  </head>
+
+  <body>
+    <div class="banner">
+      This is the banner
+    </div>
+    <hr/>
+
+    <div id="navigation">
+      {{&navigation}}
+    </div>
+
+    <div id="body">
+      {{&body}}
+    </div>
+  </body>
+</html>

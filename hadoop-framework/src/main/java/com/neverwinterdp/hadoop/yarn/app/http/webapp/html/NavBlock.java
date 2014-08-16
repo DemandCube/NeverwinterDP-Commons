@@ -1,11 +1,11 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp.html;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp.html;
 
 import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.apache.hadoop.yarn.webapp.hamlet.Hamlet.DIV;
 import org.apache.hadoop.yarn.webapp.view.HtmlBlock;
 
 import com.google.inject.Inject;
-import com.neverwinterdp.hadoop.yarn.app.webapp.App;
+import com.neverwinterdp.hadoop.yarn.app.http.webapp.App;
 
 public class NavBlock extends HtmlBlock {
   final App app;

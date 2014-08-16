@@ -60,8 +60,8 @@ def createHelloAppHome(String appHomeDir) {
   println "*************************************************"
 
   def jars = [ 
-    "commons.utils", 
-    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander"
+    "commons.utils", "commons.netty",
+    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "netty-all", "compiler-0.8.16"
   ] 
 
   println "Copy the dependencies library"

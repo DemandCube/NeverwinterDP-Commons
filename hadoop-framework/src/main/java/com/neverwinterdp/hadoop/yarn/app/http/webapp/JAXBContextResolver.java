@@ -16,7 +16,7 @@
 * limitations under the License.
 */
 
-package com.neverwinterdp.hadoop.yarn.app.webapp;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp;
 
 import java.util.Set;
 import java.util.HashSet;

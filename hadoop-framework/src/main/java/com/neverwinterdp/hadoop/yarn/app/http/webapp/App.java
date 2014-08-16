@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

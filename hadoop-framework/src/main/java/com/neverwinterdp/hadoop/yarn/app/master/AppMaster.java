@@ -1,15 +1,12 @@
 package com.neverwinterdp.hadoop.yarn.app.master;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.http.HttpConfig.Policy;
-import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
@@ -29,22 +26,16 @@ import org.apache.hadoop.yarn.client.api.async.AMRMClientAsync;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.util.Records;
-import org.apache.hadoop.yarn.webapp.GenericExceptionHandler;
-import org.apache.hadoop.yarn.webapp.WebApp;
-import org.apache.hadoop.yarn.webapp.WebApps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.Util;
+import com.neverwinterdp.hadoop.yarn.app.http.HttpService;
+import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
+import com.neverwinterdp.hadoop.yarn.app.http.webapp.YarnHttpService;
 import com.neverwinterdp.hadoop.yarn.app.ipc.IPCServiceServer;
-import com.neverwinterdp.hadoop.yarn.app.webapp.AMWebApp;
-import com.neverwinterdp.hadoop.yarn.app.webapp.AMWebServices;
-import com.neverwinterdp.hadoop.yarn.app.webapp.AppController;
-import com.neverwinterdp.hadoop.yarn.app.webapp.JAXBContextResolver;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 
 public class AppMaster {
@@ -65,7 +56,8 @@ public class AppMaster {
   private AppMasterMonitor appMonitor = new AppMasterMonitor() ;
   private AppMasterContainerManager containerManager ;
   
-  private WebApp webApp ;
+  //private WebApp webApp ;
+  private HttpService httpService ;
   
   public AppMaster() {
   }
@@ -93,14 +85,11 @@ public class AppMaster {
       this.config.appHostName = ipcServiceServer.getHostAddress() ;
       this.config.appRpcPort =  ipcServiceServer.getListenPort() ;
       
-      webApp =
-          WebApps.
-            $for("webui", null, null, "ws").
-            withHttpPolicy(conf, Policy.HTTP_ONLY).start(new AMWebApp(this));
-
-      InetSocketAddress listenAddr = NetUtils.getConnectAddress(webApp.getListenerAddress()) ;
-      config.appTrackingUrl = "http://" + listenAddr.getAddress().getHostAddress() + ":" + webApp.port() ;
-
+      httpService = new NettyHttpService(this) ;
+      httpService.start();
+      Thread.sleep(3000);
+      config.appTrackingUrl = httpService.getTrackingUrl() ;
+      System.out.println("Tracking URL: " + config.appTrackingUrl);
       Class<?> containerClass = Class.forName(config.appContainerManager) ;
       containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
 
@@ -131,7 +120,7 @@ public class AppMaster {
         nmClient.close();
       }
 
-      if(webApp != null) webApp.stop() ; 
+      if(httpService != null) httpService.shutdown() ; 
 
       if(ipcServiceServer != null) ipcServiceServer.shutdown() ;
     }
@@ -235,6 +224,11 @@ public class AppMaster {
     public float getProgress() { return 0; }
   }
 
+  public AppMaster mock(AppConfig config) {
+    this.config = config ;
+    return this ;
+  }
+  
   static public void main(String[] args) throws Exception {
     new AppMaster().run(args) ;
   }

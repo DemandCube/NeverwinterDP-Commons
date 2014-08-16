@@ -29,10 +29,12 @@ public class RestRouteHandler extends RouteHandlerGeneric {
   }
   
   protected Object get(ChannelHandlerContext ctx, FullHttpRequest request) {
-    throw new RuntimeException("This method need to be implemented") ;
+    String stacktrace = ExceptionUtil.getStackTrace(new Exception("This method is not implemented")) ;
+    return stacktrace ;
   }
   
   protected Object post(ChannelHandlerContext ctx, FullHttpRequest request) {
-    throw new RuntimeException("This method need to be implemented") ;
+    String stacktrace = ExceptionUtil.getStackTrace(new Exception("This method is not implemented")) ;
+    return stacktrace ;
   }
 }

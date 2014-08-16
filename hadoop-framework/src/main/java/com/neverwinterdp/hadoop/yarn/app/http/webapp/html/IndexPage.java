@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp.html;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp.html;
 
 import org.apache.hadoop.yarn.webapp.SubView;
 import org.apache.hadoop.yarn.webapp.view.HtmlBlock;

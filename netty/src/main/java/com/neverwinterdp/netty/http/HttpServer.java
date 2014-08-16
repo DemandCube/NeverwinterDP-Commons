@@ -12,6 +12,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -50,10 +53,11 @@ public class HttpServer {
     }
   }
   
-  public int getPort() {
-    return this.port;
+  public String getHostIpAddress() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostAddress()  ;
   }
-
+  
+  public int getPort() { return this.port; }
   public HttpServer setPort(int port) {
     this.port = port;
     return this ;
@@ -119,6 +123,8 @@ public class HttpServer {
         channel(NioServerSocketChannel.class).
         childHandler(initializer);
       channel = b.bind(port).sync().channel();
+      InetSocketAddress addr = (InetSocketAddress)channel.localAddress() ;
+      this.port = addr.getPort() ;
       logger.info("bind port successfully, channel = " + channel);
       logger.info("Start start() waitting to handle request");
       channel.closeFuture().sync();

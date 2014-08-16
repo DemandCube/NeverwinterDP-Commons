@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp;
 
 import java.util.Date;
 
@@ -6,9 +6,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.webapp.Controller;
 
 import com.google.inject.Inject;
+import com.neverwinterdp.hadoop.yarn.app.http.webapp.html.IndexPage;
+import com.neverwinterdp.hadoop.yarn.app.http.webapp.html.MonitorPage;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.webapp.html.IndexPage;
-import com.neverwinterdp.hadoop.yarn.app.webapp.html.MonitorPage;
 
 public class AppController extends Controller  {
   

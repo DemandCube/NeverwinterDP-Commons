@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp;
 
 import org.apache.hadoop.yarn.webapp.GenericExceptionHandler;
 import org.apache.hadoop.yarn.webapp.WebApp;

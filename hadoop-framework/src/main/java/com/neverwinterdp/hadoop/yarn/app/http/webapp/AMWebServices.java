@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.webapp;
+package com.neverwinterdp.hadoop.yarn.app.http.webapp;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
