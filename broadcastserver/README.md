@@ -1,7 +1,30 @@
 #BROADCAST SERVER#
 
-The broadcast server is a highly available, redundant UDP server for serving out IP/Hostname:Port configurations for zookeeper configurations
+The broadcast server is a highly available, redundant UDP server for serving out 
+IP/Hostname:Port configurations for autodiscovery configurations
 
+The Autodiscovery broadcast server.  Uses zookeeper to remain highly available and 
+listens on a port (1111) by default
+Upon receipt of a broadcasted udp packet, the server will automatically reponsd
+ 
+The -propertiesFile option (default is broadcast.properties) is a Java properties file
+with numerous key:value pairs.  Example properties file:
+```
+dev=2.2.2.2:2181,2.2.2.3:2181
+prod=1.1.1.2:2181,1.1.2.3:2181
+local=127.0.0.1:2181,127.0.0.1:2181
+broadcast=localhost:2181
+```
+`
+Using the above file, when sent a UDP packet with the payload "dev" the server will respond to 
+the sender with "2.2.2.2:2181,2.2.2.3:2181"
+  
+The "broadcast" key is required if the -broadcastZookeeper option is not given.  This is the 
+zookeeper that the broadcastServer will connect to in order to stay highly available.  All 
+broadcastServers that connect to that zookeeper cluster will attempt to become master, but 
+only one server will remain as master.  Only the master node will launch the UDP server
+
+Check the main() method of this class for an example usage
 
 ##Configuration##
 The server will read in a file, by default is ./broadcast.properties
