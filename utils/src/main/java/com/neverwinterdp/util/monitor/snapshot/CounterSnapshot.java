@@ -6,28 +6,27 @@ import com.codahale.metrics.Counter;
 
 /**
  * @author Tuan Nguyen
- * @email  tuan08@gmail.com
+ * @email tuan08@gmail.com
  */
 public class CounterSnapshot implements Serializable {
-  private long count;
+    private long count;
 
-  public CounterSnapshot() {
-  }
+    public CounterSnapshot() {
+    }
 
-  CounterSnapshot(Counter counter) {
-    this.count = counter.getCount() ;
-  }
-  
-  public long getCount() {
-    return count;
-  }
+    CounterSnapshot(Counter counter) {
+	this.count = counter.getCount();
+    }
 
-  public void setCount(long count) {
-    this.count = count;
-  }
-  
-  //TODO: to implement
-  public void merge(CounterSnapshot other) {
-    
-  }
+    public long getCount() {
+	return count;
+    }
+
+    public void setCount(long count) {
+	this.count = count;
+    }
+
+    public void merge(CounterSnapshot other) {
+    	count += other.getCount();
+    }
 }
