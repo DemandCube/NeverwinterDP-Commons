@@ -195,8 +195,8 @@ public class BroadcastServer {
         logger.info("Broadcast server has stopped!");
         //We shouldn't ever hit this step since run() blocks
         //That's assuming nothing goes wrong though
-        this.broadcaster.stop();
         this.serverRunning = false;
+        this.broadcaster.stop();
       }
       else{
         this.serverRunning = false;
