@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import com.neverwinterdp.netty.multicast.MulticastServer;
 import com.neverwinterdp.netty.multicast.UDPClient;
 
@@ -18,7 +17,7 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 public class MulticastServerSingleResponseUnitTest {
 	private MulticastServer server ;
 	private String expectedResponse = "Neverwinter Rocks!";
-	private int port = 1113;
+  private int udpport = 1113;
 	
 	/**
 	 * Set up server to respond to any request with expectedResponse
@@ -26,7 +25,7 @@ public class MulticastServerSingleResponseUnitTest {
 	 */
 	@Before
 	public void setup() throws Exception {
-		server = new MulticastServer(port, expectedResponse);
+	  server = new MulticastServer(udpport, expectedResponse);
 	    new Thread() {
 	      public void run() {
 	        try {
@@ -56,9 +55,9 @@ public class MulticastServerSingleResponseUnitTest {
 	   * Ensure expectedResponse is received for any UDP message
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=60000)
 	  public void testSingleResponseBroadcastServer() throws Exception {
-		  UDPClient x = new UDPClient("localhost",port); 
+		  UDPClient x = new UDPClient("localhost",udpport); 
 		  String received = x.sendMessage("Hi UDP Server!");
 		  assertEquals(expectedResponse, received);
 	  }
@@ -68,9 +67,9 @@ public class MulticastServerSingleResponseUnitTest {
 	   * Run 100 times
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=60000)
 	  public void testSingleResponseBroadcastServer100Times() throws Exception {
-		  UDPClient x = new UDPClient("localhost",port); 
+		  UDPClient x = new UDPClient("localhost",udpport); 
 		  for(int i=0; i<100; i++){
 			  String received = x.sendMessage("Hi UDP Server!");
 			  assertEquals(expectedResponse, received);

@@ -17,6 +17,11 @@ import java.net.InetAddress;
  * //Sends UDP packet "Hi UDP Server!" and prints out the string of what gets returned from Server 
  * System.out.println("Received: "+x.sendMessage("Hi UDP Server!"));
  * 
+ * To send a broadcast on your local subnet:
+ * //Sends UDP broadcast to IP's 192.168.1.1 to 192.168.1.254
+ * UDPClient x = new UDPClient("192.168.1.255",1111); 
+ * System.out.println("Received: "+x.sendMessage("Hi UDP Server!"));
+ * 
  * @author Richard Duarte
  */
 public final class UDPClient {
@@ -39,13 +44,13 @@ public final class UDPClient {
       return this.sendMessage(message,1024);
     }
     
-    /**
-     * Send a message via UDP
-     * @param message The message to send over the wire
-     * @param responseSize The size of the byte[] to store the response
-     * @return String response from server
-     * @throws InterruptedException
-     */
+  /**
+   * Send a message via UDP
+   * @param message The message to send over the wire
+   * @param responseSize The size of the byte[] to store the response
+   * @return String response from server
+   * @throws InterruptedException
+   */
   public String sendMessage(String message,int responseSize) throws InterruptedException{
       String retVal=null;
       try {

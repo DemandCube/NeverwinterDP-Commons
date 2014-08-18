@@ -84,7 +84,7 @@ public class BroadcastServerUnitTest {
     server.stopServer();
   }
   
-  @Test
+  @Test(timeout=60000)
   public void testServerIsMaster() throws InterruptedException{
     //Thread.sleep(15000);
     assertTrue(server.isMaster());

@@ -17,12 +17,37 @@ import com.neverwinterdp.netty.multicast.MulticastServer;
 import com.neverwinterdp.zookeeper.autozookeeper.ZkMaster;
 
 /**
+ * The Autodiscovery broadcast server.  Uses zookeeper to remain highly available and 
+ * Listens on a port (1111) by default
+ * Upon receipt of a broadcasted udp packet, the server will automatically reponsd
+ * 
+ * The -propertiesFile option (default is broadcast.properties) is a Java properties file
+ * with numerous key:value pairs.  Example properties file:
+ * dev=2.2.2.2:2181,2.2.2.3:2181
+ * prod=1.1.1.2:2181,1.1.2.3:2181
+ * local=127.0.0.1:2181,127.0.0.1:2181
+ * broadcast=localhost:2181
+ * 
+ * Using the above file, when sent a UDP packet with the payload "dev" the server will respond
+ * to the sender with "2.2.2.2:2181,2.2.2.3:2181"
+ * 
+ * The "broadcast" key is required if the -broadcastZookeeper option is not given.  This is the 
+ * zookeeper that the broadcastServer will connect to in order to stay highly available.  All 
+ * broadcastServers that connect to that zookeeper cluster will attempt to become master, but 
+ * only one server will remain as master.  Only the master node will launch the UDP server
+ * 
+ * Check the main() method of this class for an example usage
  * 
  * @author Richard Duarte
  *
  */
 public class BroadcastServer {
   
+  /**
+   * Required an inner class to help parse command line args from jcommander
+   * @author rcduar
+   *
+   */
   private class cmdLineParser{
     //////////////////////////////////////////////////////////////////////////////////////
     //Command line args
@@ -65,7 +90,7 @@ public class BroadcastServer {
   
   /**
    * Constructor.  Meant to parse out command line arguments
-   * @param args
+   * @param args Command line arguments
    */
   public BroadcastServer(String args[]){
     logger = LoggerFactory.getLogger("Broadcast");
@@ -74,6 +99,8 @@ public class BroadcastServer {
       logger.info("Args passed in:"+args[i]);
     }
     
+    //Exit out if there's a problem parsing out command line args
+    //Or if the help flag was passed in
     if(!this.parseCommandLine(args) || this.help){
       System.exit(-1);
     }
@@ -153,7 +180,7 @@ public class BroadcastServer {
   }
   
   /**
-   * Main server loop.  Should run forever
+   * Main server loop.  Runs in an infinite while loop
    * Attempts to become zookeeper master
    * If master, then launches broadcast server
    * @throws Exception
@@ -161,6 +188,7 @@ public class BroadcastServer {
   public void runServerLoop() throws Exception{
     logger.info("Entering infinite loop");
     this.m = new ZkMaster(myZookeeperConnection);
+    
     //Set the /master keyword and connect to ZooKeeper
     logger.info("Setting master name to "+this.masterName);
     this.m.setMasterName(this.masterName);
@@ -191,6 +219,8 @@ public class BroadcastServer {
         this.serverRunning = true;
         logger.info("Broadcast server is beginning!");
         this.broadcaster.run();
+        
+        while(!this.disableServer){Thread.sleep(1000);}
         
         logger.info("Broadcast server has stopped!");
         //We shouldn't ever hit this step since run() blocks
@@ -329,7 +359,7 @@ public class BroadcastServer {
   
   
   /**
-   * Main method
+   * Main method.  Runs broadcast server in an infinite loop
    * @param args Command line arguments. Can be found by running "java Broadcast -help"
    * @throws Exception
    */
@@ -346,7 +376,6 @@ public class BroadcastServer {
         b.runServerLoop();
       }
       catch(Exception e){
-        
         e.printStackTrace();
       }
     }

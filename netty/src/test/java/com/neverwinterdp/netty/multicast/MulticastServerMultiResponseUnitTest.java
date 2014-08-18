@@ -20,7 +20,8 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 public class MulticastServerMultiResponseUnitTest {
 	private MulticastServer server ;
 	Map<String, String> m = new HashMap<String, String>();
-	private int port = 1112;
+	private int udpport = 1192;
+	
 	
 	/**
 	 * Create server, pass in hash map argument
@@ -30,8 +31,7 @@ public class MulticastServerMultiResponseUnitTest {
 		m.put("dev", "1.1.1.1:8080");
 		m.put("local", "2.2.2.2:1111");
 		m.put("prod","3.3.3.3:1234,3.3.3.4:1234,3.3.3.3:1234");
-		
-		server = new MulticastServer(port, m);
+		server = new MulticastServer(udpport, m);
 	    new Thread() {
 	      public void run() {
 	        try {
@@ -62,9 +62,9 @@ public class MulticastServerMultiResponseUnitTest {
 	   * invalid key returns "ERROR"
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=60000)
 	  public void testSingleResponseBroadcastServer() throws Exception {
-		  UDPClient x = new UDPClient("localhost",port); 
+		  UDPClient x = new UDPClient("localhost",udpport); 
 		  for (Map.Entry<String, String> entry : m.entrySet()) {
 			    String key = entry.getKey();
 			    String value = entry.getValue();
@@ -81,9 +81,9 @@ public class MulticastServerMultiResponseUnitTest {
 	   * Run this 100 times
 	   * @throws Exception
 	   */
-	  @Test
+	  @Test(timeout=60000)
 	  public void testSingleResponseBroadcastServer100Times() throws Exception {
-		  UDPClient x = new UDPClient("localhost",port); 
+		  UDPClient x = new UDPClient("localhost",udpport); 
 		  for(int i=0; i<100; i++){
 			  for (Map.Entry<String, String> entry : m.entrySet()) {
 				    String key = entry.getKey();
