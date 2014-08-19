@@ -20,7 +20,7 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 public class MulticastServerMultiResponseUnitTest {
 	private MulticastServer server ;
 	Map<String, String> m = new HashMap<String, String>();
-	private int udpport = 1192;
+	private int udpport = 54555;
 	
 	
 	/**
@@ -63,12 +63,12 @@ public class MulticastServerMultiResponseUnitTest {
 	   * @throws Exception
 	   */
 	  @Test(timeout=60000)
-	  public void testSingleResponseBroadcastServer() throws Exception {
+	  public void testMultiResponseBroadcastServer() throws Exception {
 		  UDPClient x = new UDPClient("localhost",udpport); 
 		  for (Map.Entry<String, String> entry : m.entrySet()) {
-			    String key = entry.getKey();
-			    String value = entry.getValue();
-			    String received = x.sendMessage(key);
+			  String key = entry.getKey();
+			  String value = entry.getValue();
+			  String received = x.sendMessage(key);
 				assertEquals(value, received);
 		  }
 		  String received = x.sendMessage("Force an error!");
@@ -82,13 +82,13 @@ public class MulticastServerMultiResponseUnitTest {
 	   * @throws Exception
 	   */
 	  @Test(timeout=60000)
-	  public void testSingleResponseBroadcastServer100Times() throws Exception {
+	  public void testMultiResponseBroadcastServer100Times() throws Exception {
 		  UDPClient x = new UDPClient("localhost",udpport); 
 		  for(int i=0; i<100; i++){
 			  for (Map.Entry<String, String> entry : m.entrySet()) {
-				    String key = entry.getKey();
-				    String value = entry.getValue();
-				    String received = x.sendMessage(key);
+				  String key = entry.getKey();
+				  String value = entry.getValue();
+				  String received = x.sendMessage(key);
 					assertEquals(value, received);
 			  }
 			  String received = x.sendMessage("Force an error!");
