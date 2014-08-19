@@ -1,4 +1,4 @@
-package com.neverwinterdp.broadcastserver;
+package com.neverwinterdp.broadcast.server;
 
 import static org.junit.Assert.*;
 
@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
-import com.neverwinterdp.broadcastserver.BroadcastServer;
+import com.neverwinterdp.broadcast.server.BroadcastServer;
 
 public class BroadcastServerFailoverUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;

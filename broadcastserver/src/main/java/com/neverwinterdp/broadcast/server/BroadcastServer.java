@@ -1,4 +1,4 @@
-package com.neverwinterdp.broadcastserver;
+package com.neverwinterdp.broadcast.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
