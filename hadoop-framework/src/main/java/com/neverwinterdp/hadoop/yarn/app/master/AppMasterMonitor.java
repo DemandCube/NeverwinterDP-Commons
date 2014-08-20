@@ -48,6 +48,12 @@ public class AppMasterMonitor implements Serializable {
     return containerInfos.values().toArray(new AppWorkerContainerInfo[containerInfos.size()]) ;
   }
   
+  public void setContainerInfos(AppWorkerContainerInfo[] cinfo) {
+    for(AppWorkerContainerInfo sel : cinfo) {
+      containerInfos.put(sel.getContainerId(), sel) ;
+    }
+  }
+  
   public void onContainerRequest(ContainerRequest containerReq) {
     requestedContainerCount.incrementAndGet() ;
   }

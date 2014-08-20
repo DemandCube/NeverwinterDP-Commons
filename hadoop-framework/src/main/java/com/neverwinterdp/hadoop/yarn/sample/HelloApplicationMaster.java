@@ -18,12 +18,12 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.util.Records;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 
 public class HelloApplicationMaster {
   public static void main(String[] args) throws Exception {
     System.out.println("HelloApplicationMaster: in main(..................)") ;
-    AppConfig appConfig = new AppConfig() ;
+    AppInfo appConfig = new AppInfo() ;
     new JCommander(appConfig, args) ;
     
     // Initialize clients to ResourceManager and NodeManagers

@@ -31,14 +31,13 @@ public class AppWorkerContainerInfo implements Serializable {
   }
 
   public int getContainerId() { return containerId; }
-
-  public void setContainerId(ContainerId containerId) {
-    this.containerId = containerId.getId() ;
+  
+  public void setContainerId(int containerId) {
+    this.containerId = containerId ;
   }
-
+  
   public String getNodeId() { return nodeId; }
-
-  public void setNodeId(NodeId nodeId) { this.nodeId = nodeId.toString() ; }
+  public void setNodeId(String nodeId) { this.nodeId = nodeId ; }
 
   public int getMemory() { return memory; }
   public void setMemory(int memory) { this.memory = memory; }

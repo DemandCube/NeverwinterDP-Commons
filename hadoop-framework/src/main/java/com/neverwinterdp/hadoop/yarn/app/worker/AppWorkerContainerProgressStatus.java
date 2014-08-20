@@ -49,7 +49,7 @@ public class AppWorkerContainerProgressStatus implements Serializable, Writable 
   public String getError() { return error; }
   public void setError(String error) { this.error = error; }
   
-  public void setError(Throwable error) {
+  public void setThrowableError(Throwable error) {
     StringWriter swriter = new StringWriter() ;
     error.printStackTrace(new PrintWriter(swriter));
     this.error = swriter.toString();

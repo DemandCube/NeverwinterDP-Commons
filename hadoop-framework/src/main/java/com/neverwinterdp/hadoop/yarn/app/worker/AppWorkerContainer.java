@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
 
 public class AppWorkerContainer {
@@ -22,12 +22,12 @@ public class AppWorkerContainer {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppWorkerContainer.class.getName());
   
-  private AppConfig config ;
+  private AppInfo config ;
   private IPCService ipcService ;
   private AppWorker worker ;
   private AppWorkerContainerProgressStatus progressStatus ;
   
-  public AppWorkerContainer(AppConfig config) {
+  public AppWorkerContainer(AppInfo config) {
     this.config = config ;
     try {
       Configuration rpcConf = new Configuration() ;
@@ -50,7 +50,7 @@ public class AppWorkerContainer {
     }
   }
   
-  public AppConfig getConfig() { return this.config ; }
+  public AppInfo getConfig() { return this.config ; }
   
   public IPCService getAppMasterRPC() { return this.ipcService ; }
 
@@ -72,7 +72,7 @@ public class AppWorkerContainer {
       ipcService.report(workerContainerId, progressStatus) ;
     } catch(Throwable error) {
       LOGGER.error("Error", error);
-      progressStatus.setError(error);
+      progressStatus.setThrowableError(error);
       ipcService.report(workerContainerId, progressStatus);
     } finally {
       onDestroy() ;
@@ -90,7 +90,7 @@ public class AppWorkerContainer {
   }
   
   static public void main(String[] args) throws Exception {
-    AppConfig options = new AppConfig() ;
+    AppInfo options = new AppInfo() ;
     new JCommander(options, args) ;
     new AppWorkerContainer(options).run() ;
   }

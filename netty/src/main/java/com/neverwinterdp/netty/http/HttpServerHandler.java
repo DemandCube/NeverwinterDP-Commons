@@ -17,7 +17,7 @@ import org.slf4j.Logger;
  */
 public class HttpServerHandler extends ChannelInboundHandlerAdapter  {
   private Logger logger ;
-  private RouteMatcher routeMatcher ;
+  private RouteMatcher<RouteHandler> routeMatcher ;
   
   public HttpServerHandler(HttpServer server) {
     logger = server.getLoggerFactory().getLogger(getClass().getSimpleName()) ;

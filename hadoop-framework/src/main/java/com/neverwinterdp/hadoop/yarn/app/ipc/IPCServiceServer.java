@@ -34,7 +34,7 @@ public class IPCServiceServer {
         setInstance(new IPCServiceImpl()).
         setProtocol(IPCService.class).
         setBindAddress(InetAddress.getLocalHost().getHostAddress()).
-        setPort(appMaster.getConfig().appRpcPort).
+        setPort(appMaster.getAppInfo().appRpcPort).
         build();
     rpcServer.start() ;
   }

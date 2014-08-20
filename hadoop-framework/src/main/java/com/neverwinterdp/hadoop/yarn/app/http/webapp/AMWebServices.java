@@ -21,8 +21,8 @@ public class AMWebServices {
   @Inject
   public AMWebServices(AppMaster appMaster) {
     this.appMaster = appMaster ;
-    System.out.println("AMWebServices: application id = " + appMaster.getConfig().appId);
-    this.app = new App(appMaster.getConfig().appId);
+    System.out.println("AMWebServices: application id = " + appMaster.getAppInfo().appId);
+    this.app = new App(appMaster.getAppInfo().appId);
   }
   
   @GET

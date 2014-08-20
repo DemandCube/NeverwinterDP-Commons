@@ -1,0 +1,50 @@
+<div>
+  <h3>Monitor</h3>
+
+  {{#appMonitor}}
+    <table style="width: 600px">
+      <tr>
+        <td style="width: 200px">Requested Container Count:</td> 
+        <td>{{requestedContainerCount}}</td>
+      </tr>
+      <tr>
+        <td style="width: 200px">Allocated Container Count:</td> 
+        <td>{{allocatedContainerCount}}</td>
+      </tr>
+      <tr>
+        <td style="width: 200px">Failed Container Count:</td> 
+        <td>{{failedContainerCount}}</td>
+      </tr>
+      <tr>
+        <td style="width: 200px">Completed Container Count:</td> 
+        <td>{{completedContainerCount}}</td>
+      </tr>
+    </table>
+
+    <h4>Container Infos</h4>
+    <table>
+      <tr>
+        <th>Container Id</th>
+        <th>Node Id</th>
+        <th>Memory</th>
+        <th>Cores</th>
+        <th>State</th>
+        <th>Progress</th>
+        <th>Status Message</th>
+        <th>More</th>
+      </tr>
+      {{#containerInfos}}
+      <tr>
+        <td>{{containerId}}</td>
+        <td>{{nodeId}}</td>
+        <td>{{memory}}</td>
+        <td>{{cores}}</td>
+        <td>{{progressStatus.containerState}}</td>
+        <td>{{progressStatus.progress}}</td>
+        <td>{{progressStatus.statusMessage}}</td>
+        <td style="text-align: center"><a href="{{baseUrl}}/info/container/{{containerId}}">More</a></td>
+      </tr>
+      {{/containerInfos}}
+    </table>
+  {{/appMonitor}}
+</div>

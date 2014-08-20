@@ -10,7 +10,7 @@ import com.beust.jcommander.Parameter;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
 
-public class AppConfig {
+public class AppInfo {
   @Parameter(names = "--mini-cluster-env", description = "Setup the mini cluster env for testing")
   public boolean miniClusterEnv = false ;
   
@@ -38,7 +38,6 @@ public class AppConfig {
   @Parameter(names = "--app-tracking-url", description = "The application tracking url")
   public String appTrackingUrl  ;
   
-  
   @Parameter(names = "--app-container-manager", description = "The application container manager class")
   public String appContainerManager   ;
   
@@ -47,6 +46,19 @@ public class AppConfig {
   
   @Parameter(names = "--app-num-of-worker", description = "Number of worker")
   public int appNumOfWorkers = 1;
+
+  @Parameter(names = "--app-start-time", description = "Start Time")
+  public long appStartTime ;
+  
+  @Parameter(names = "--app-finish-time", description = "Finish Time")
+  public long appFinishTime ;
+  
+  @Parameter(names = "--app-state", description = "App State")
+  public String appState ;
+  
+  @Parameter(names = "--app-history-server-address", description = "Number of worker")
+  public String appHistoryServerAddress = null;
+  
   
   @Parameter(names = "--worker-class", description = "App worker")
   public String worker ;
@@ -70,7 +82,7 @@ public class AppConfig {
     yarnConf.put("worker-container-id", Integer.toString(id)) ;
   }
 
-  public void setWorker(Class<?> type) { this.worker = type.getName(); }
+  public void setWorkerByType(Class<?> type) { this.worker = type.getName(); }
   
   public String buildMasterCommand() {
     StringBuilder b = new StringBuilder() ;
@@ -125,6 +137,16 @@ public class AppConfig {
     b.append(" --app-container-manager ").append(this.appContainerManager) ;
     b.append(" --app-max-memory ").append(this.appMaxMemory) ;
     b.append(" --app-num-of-worker ").append(this.appNumOfWorkers) ;
+    b.append(" --app-start-time ").append(this.appStartTime) ;
+    b.append(" --app-finish-time ").append(this.appFinishTime) ;
+    
+    if(appState != null) {
+      b.append(" --app-state ").append(this.appState) ;
+    }
+    
+    if(appHistoryServerAddress != null) {
+      b.append(" --app-history-server-address ").append(this.appHistoryServerAddress) ;
+    }
     
     if(worker != null) {
       b.append(" --worker-class ").append(this.worker) ;

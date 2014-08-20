@@ -28,7 +28,7 @@ import com.neverwinterdp.util.MapUtil;
 public class HttpServer {
   private Logger  logger;
   private int     port = 8080;
-  private RouteMatcher routeMatcher = new RouteMatcher() ;
+  private RouteMatcher<RouteHandler> routeMatcher = new RouteMatcher<RouteHandler>() ;
   private Channel channel;
   EventLoopGroup bossGroup, workerGroup ;
   private LoggerFactory loggerFactory = new LoggerFactory() ;
@@ -45,10 +45,10 @@ public class HttpServer {
       String prefix = "route." + routeName + ".";
       Map<String, String> routeHandlerProps = MapUtil.getSubMap(props, prefix) ;
       String handlerType = routeHandlerProps.get("handler") ;
-      String routePath   = routeHandlerProps.get("path") ;
       Class<RouteHandler> clazz = (Class<RouteHandler>) Class.forName(handlerType) ;
       RouteHandler handler = clazz.newInstance() ;
       handler.configure(routeHandlerProps);
+      String[] routePath   = MapUtil.getStringArray(routeHandlerProps, "path", null) ;
       add(routePath, handler) ;
     }
   }
@@ -72,11 +72,20 @@ public class HttpServer {
     return this ;
   }
   
-  public RouteMatcher getRouteMatcher() { return this.routeMatcher ; }
+  public RouteMatcher<RouteHandler> getRouteMatcher() { return this.routeMatcher ; }
 
   public HttpServer add(String path, RouteHandler handler) {
     handler.setLogger(loggerFactory.getLogger(handler.getClass().getSimpleName()));
     routeMatcher.addPattern(path, handler);
+    return this ;
+  }
+  
+  public HttpServer add(String[] path, RouteHandler handler) {
+    if(path == null) return this ;
+    handler.setLogger(loggerFactory.getLogger(handler.getClass().getSimpleName()));
+    for(String sel : path) {
+      routeMatcher.addPattern(sel, handler);
+    }
     return this ;
   }
   

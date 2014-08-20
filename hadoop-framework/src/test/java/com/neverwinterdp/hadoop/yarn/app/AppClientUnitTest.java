@@ -39,6 +39,7 @@ public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
       "--app-name", "HelloYarn",
       "--app-container-manager", "com.neverwinterdp.hadoop.yarn.sample.HelloAppContainerManger",
       "--app-rpc-port", "63200" ,
+      "--app-history-server-address", "http://127.0.0.1:8080/yarn-app/history",
       "--conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030"
     } ;
     AppClient appClient = new AppClient() ;

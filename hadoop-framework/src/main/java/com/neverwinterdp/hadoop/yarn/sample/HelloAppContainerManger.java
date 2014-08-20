@@ -9,7 +9,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterContainerManager;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
@@ -21,8 +21,8 @@ public class HelloAppContainerManger implements AppMasterContainerManager {
   protected static final Logger LOGGER = LoggerFactory.getLogger(HelloAppContainerManger.class);
 
   public void onInit(AppMaster appMaster) {
-    AppConfig config = appMaster.getConfig() ;
-    config.setWorker(HelloWorker.class) ;
+    AppInfo config = appMaster.getAppInfo() ;
+    config.setWorkerByType(HelloWorker.class) ;
   }
   
   public void onRequestContainer(AppMaster appMaster) {
@@ -36,7 +36,7 @@ public class HelloAppContainerManger implements AppMasterContainerManager {
 
   public void onAllocatedContainer(AppMaster master, Container container) {
     try {
-      AppConfig config = master.getConfig() ;
+      AppInfo config = master.getAppInfo() ;
       master.startContainer(container) ;
       LOGGER.info("Start container with command: " + config.buildWorkerCommand());
     } catch (YarnException e) {
@@ -75,7 +75,7 @@ public class HelloAppContainerManger implements AppMasterContainerManager {
   
   public void waitForComplete(AppMaster appMaster) {
     LOGGER.info("Start waitForComplete(AppMaster appMaster)");
-    AppConfig appConfig = appMaster.getConfig() ;
+    AppInfo appConfig = appMaster.getAppInfo() ;
     try {
       boolean finished = false ;
       while(!finished) {

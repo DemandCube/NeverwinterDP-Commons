@@ -36,7 +36,7 @@ public class NotFoundRouteHandler implements RouteHandler {
     FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND, contentBuf);
     response.headers().set(CONTENT_TYPE, "text/plain");
     response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
-    ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     logger.info(message);
   }
 }

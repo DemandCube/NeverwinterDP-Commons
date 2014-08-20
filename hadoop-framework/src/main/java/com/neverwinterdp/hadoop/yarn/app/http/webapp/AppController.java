@@ -19,7 +19,7 @@ public class AppController extends Controller  {
   @Inject
   protected AppController(AppMaster appMaster, Configuration conf, RequestContext ctx) {
     this(appMaster, conf, ctx, "am");
-    System.out.println("AppController: application id = " + appMaster.getConfig().appId);
+    System.out.println("AppController: application id = " + appMaster.getAppInfo().appId);
   }
   
   /**

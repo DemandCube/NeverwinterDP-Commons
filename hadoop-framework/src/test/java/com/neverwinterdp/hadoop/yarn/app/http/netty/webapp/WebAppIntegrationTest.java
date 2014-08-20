@@ -1,16 +1,15 @@
 package com.neverwinterdp.hadoop.yarn.app.http.netty.webapp;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
-import com.neverwinterdp.netty.http.client.DumpResponseHandler;
-import com.neverwinterdp.netty.http.client.HttpClient;
+import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
+import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -20,10 +19,12 @@ public class WebAppIntegrationTest {
   
   @Before
   public void setup() throws Exception {
-    AppConfig appConfig = new AppConfig() ;
+    AppInfo appConfig = new AppInfo() ;
     appConfig.appHome = "Mock/App/Home" ;
     AppMaster appMaster = new AppMaster() ;
     appMaster.mock(appConfig) ;
+    String appMonitorJson = IOUtil.getFileContentAsString("src/test/resources/AppMonitor.json") ;
+    appMaster.mock(JSONSerializer.INSTANCE.fromString(appMonitorJson, AppMasterMonitor.class)) ;
     httpService = new NettyHttpService(appMaster);
     httpService.start() ;
     Thread.sleep(1000);

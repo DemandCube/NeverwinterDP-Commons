@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.client.DumpResponseHandler;
-import com.neverwinterdp.netty.http.client.HttpClient;
+import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -45,7 +45,7 @@ public class WebAppUnitTest {
   @Test
   public void testHello() throws Exception {
     DumpResponseHandler handler = new DumpResponseHandler() ;
-    HttpClient client = new HttpClient ("127.0.0.1", 8080, handler) ;
+    AsyncHttpClient client = new AsyncHttpClient ("127.0.0.1", 8080, handler) ;
     client.get("/hello");
     
     Thread.sleep(1000);

@@ -1,9 +1,9 @@
 <div>
   <h3>App Config</h3>
 
-  <table>
+  <table style="width: 700px">
     <tr>
-      <th>Property</th>
+      <th style="width: 200px">Property</th>
       <th>Value</th>
     </tr>
     
@@ -71,6 +71,5 @@
       <td>Worker Number Of Core</td>
       <td>{{appConfig.workerNumOfCore}}</td>
     </tr>
-
   </table>
 </div>

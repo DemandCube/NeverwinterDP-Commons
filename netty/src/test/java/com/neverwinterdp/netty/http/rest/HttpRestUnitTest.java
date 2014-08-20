@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.client.DumpResponseHandler;
-import com.neverwinterdp.netty.http.client.HttpClient;
+import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
 /**
  * @author Tuan Nguyen
@@ -45,7 +45,7 @@ public class HttpRestUnitTest {
   @Test
   public void testPing() throws Exception {
     DumpResponseHandler handler = new DumpResponseHandler() ;
-    HttpClient client = new HttpClient ("127.0.0.1", 8080, handler) ;
+    AsyncHttpClient client = new AsyncHttpClient ("127.0.0.1", 8080, handler) ;
     client.get("/ping");
     client.post("/ping", "Hello");
     

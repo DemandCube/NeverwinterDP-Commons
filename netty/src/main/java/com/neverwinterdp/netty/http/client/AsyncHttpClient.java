@@ -29,13 +29,17 @@ import com.neverwinterdp.util.JSONSerializer;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class HttpClient {
+public class AsyncHttpClient {
   private String host ;
   private int    port ;
   private Channel channel ;
   private EventLoopGroup group ;
   
-  public HttpClient(String host, int port, final ResponseHandler handler) throws Exception {
+  public AsyncHttpClient(String hostport, final ResponseHandler handler) throws Exception {
+    
+  }
+  
+  public AsyncHttpClient(String host, int port, final ResponseHandler handler) throws Exception {
     this.host = host ;
     this.port = port ;
     ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {

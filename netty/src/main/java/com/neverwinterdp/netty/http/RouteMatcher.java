@@ -12,17 +12,17 @@ import java.util.regex.Pattern;
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class RouteMatcher {
-  private List<PatternBinding> bindings = new ArrayList<PatternBinding>() ;
-  private RouteHandler defaultHandler ; 
+public class RouteMatcher<T> {
+  private List<PatternBinding<T>> bindings = new ArrayList<PatternBinding<T>>() ;
+  private T defaultHandler ; 
   
-  public RouteHandler getDefaultHandler() { return this.defaultHandler ; }
-  public void setDefaultHandler(RouteHandler handler) {
+  public T getDefaultHandler() { return this.defaultHandler ; }
+  public void setDefaultHandler(T handler) {
     this.defaultHandler = handler ;
   }
   
-  public RouteHandler findHandler(String path) {
-    for (PatternBinding binding: bindings) {
+  public T findHandler(String path) {
+    for (PatternBinding<T> binding: bindings) {
       Matcher m = binding.pattern.matcher(path);
       if (m.matches()) {
         Map<String, String> params = new HashMap<>(m.groupCount());
@@ -44,7 +44,7 @@ public class RouteMatcher {
     return defaultHandler ;
   }
   
-  public void addPattern(String input, RouteHandler handler) {
+  public void addPattern(String input, T handler) {
     // We need to search for any :<token name> tokens in the String and replace them with named capture groups
     Matcher m =  Pattern.compile(":([A-Za-z][A-Za-z0-9_]*)").matcher(input);
     StringBuffer sb = new StringBuffer();
@@ -59,16 +59,16 @@ public class RouteMatcher {
     }
     m.appendTail(sb);
     String regex = sb.toString();
-    PatternBinding binding = new PatternBinding(Pattern.compile(regex), groups, handler);
+    PatternBinding<T> binding = new PatternBinding<T>(Pattern.compile(regex), groups, handler);
     bindings.add(binding);
   }
   
-  private static class PatternBinding {
+  private static class PatternBinding<T> {
     final Pattern pattern;
-    final RouteHandler handler;
+    final T handler;
     final Set<String> paramNames;
 
-    private PatternBinding(Pattern pattern, Set<String> paramNames, RouteHandler handler) {
+    private PatternBinding(Pattern pattern, Set<String> paramNames, T handler) {
       this.pattern = pattern;
       this.paramNames = paramNames;
       this.handler = handler;

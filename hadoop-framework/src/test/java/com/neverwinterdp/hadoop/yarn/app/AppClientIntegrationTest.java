@@ -13,6 +13,7 @@ public class AppClientIntegrationTest  {
         "--app-home", "/tmp/app/hello",
         "--app-home-local", "./build/hello"  ,
         "--app-name", "Hello_Yarn",
+        "--app-history-server-address", "http://192.168.1.30:8080/yarn-app/history",
         
         "--app-container-manager", "com.neverwinterdp.hadoop.yarn.sample.HelloAppContainerManger",
         "--conf:fs.default.name=hdfs://hadoop:9000",

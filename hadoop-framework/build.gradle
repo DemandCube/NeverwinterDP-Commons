@@ -17,7 +17,6 @@ configurations.all {
   exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
 
   resolutionStrategy {
-    //failOnVersionConflict()
     force 'com.google.guava:guava:13.0'
   }
 }
@@ -26,6 +25,7 @@ dependencies {
   compile project(':utils')
   compile project(':api')
   compile project(':netty')
+  compile project(':cluster')
 
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 

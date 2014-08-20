@@ -3,9 +3,8 @@ package com.neverwinterdp.hadoop.yarn.app.http.netty;
 import java.net.UnknownHostException;
 
 import com.neverwinterdp.hadoop.yarn.app.http.HttpService;
-import com.neverwinterdp.hadoop.yarn.app.http.netty.rest.AppConfigRouteHandler;
-import com.neverwinterdp.hadoop.yarn.app.http.netty.rest.AppMonitorRouteHandler;
-import com.neverwinterdp.hadoop.yarn.app.http.netty.webapp.InfoPageHandler;
+import com.neverwinterdp.hadoop.yarn.app.http.netty.rest.AppRestRouteHandler;
+import com.neverwinterdp.hadoop.yarn.app.http.netty.webapp.InfoRouteHandler;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.netty.http.HttpServer;
 
@@ -15,11 +14,12 @@ public class NettyHttpService implements HttpService {
   public NettyHttpService(AppMaster appMaster) throws Exception {
     server = new HttpServer();
     server.setPort(0) ;
-    InfoPageHandler defaultHandler = new InfoPageHandler(appMaster) ;
-    server.add("/"    ,         defaultHandler);
-    server.add("/info",         defaultHandler);
-    server.add("/rest/config",  new AppConfigRouteHandler());
-    server.add("/rest/monitor", new AppMonitorRouteHandler());
+    InfoRouteHandler infoHandler = new InfoRouteHandler(appMaster) ;
+    server.add("/"    ,         infoHandler);
+    server.add("/info",         infoHandler);
+    server.add("/info/:view",   infoHandler);
+    server.add("/info/container/:id",   infoHandler);
+    server.add("/rest/:res",  new AppRestRouteHandler(appMaster));
   }
   
   public String getListenIPAddress() {

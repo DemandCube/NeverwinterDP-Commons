@@ -18,12 +18,12 @@ import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 public class AppClientMonitor {
-  private AppConfig     config ;
+  private AppInfo     config ;
   private YarnClient    yarnClient;
   private ApplicationId appId;
   private IPCService    ipcService ;
 
-  public AppClientMonitor(AppConfig config, YarnClient yarnClient, ApplicationId appId) throws Exception {
+  public AppClientMonitor(AppInfo config, YarnClient yarnClient, ApplicationId appId) throws Exception {
     this.config = config ;
     this.yarnClient = yarnClient;
     this.appId = appId;
@@ -45,7 +45,7 @@ public class AppClientMonitor {
     }
   }
 
-  public AppConfig getAppConfig() { return this.config ; }
+  public AppInfo getAppConfig() { return this.config ; }
   
   public YarnClient getYarnClient() {
     return this.yarnClient;
