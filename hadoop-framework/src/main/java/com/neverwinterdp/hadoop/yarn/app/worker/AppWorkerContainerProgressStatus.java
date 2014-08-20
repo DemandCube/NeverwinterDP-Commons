@@ -3,7 +3,9 @@ package com.neverwinterdp.hadoop.yarn.app.worker;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
@@ -13,7 +15,7 @@ public class AppWorkerContainerProgressStatus implements Serializable, Writable 
   private AppWorkerContainerState containerState = AppWorkerContainerState.ALLOCATED ;
   private float          progress = 0f;
   private String         statusMessage ;
-  private Throwable      error ;
+  private String         error ;
   
   public AppWorkerContainerProgressStatus() {
   }
@@ -44,12 +46,13 @@ public class AppWorkerContainerProgressStatus implements Serializable, Writable 
     this.containerState = containerState;
   }
 
-  public Throwable getError() {
-    return error;
-  }
-
-  public void setError(Throwable error) {
-    this.error = error;
+  public String getError() { return error; }
+  public void setError(String error) { this.error = error; }
+  
+  public void setThrowableError(Throwable error) {
+    StringWriter swriter = new StringWriter() ;
+    error.printStackTrace(new PrintWriter(swriter));
+    this.error = swriter.toString();
   }
 
   @Override

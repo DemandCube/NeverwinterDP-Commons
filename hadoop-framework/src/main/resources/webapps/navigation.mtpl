@@ -1,0 +1,24 @@
+<div>
+  <h3 style="margin: 10px 0px;">App Info</h3> 
+
+  <div>
+    <div>
+      <a href="{{baseUrl}}/info/config">App Config</a>
+    </div>
+
+    <div>
+      <a href="{{baseUrl}}/info/monitor">App Monitor</a>
+    </div>
+  </div>
+
+  <h3 style="margin: 10px 0px;">Rest API</h3> 
+
+  <div>
+    <div>
+      <a href="{{baseUrl}}/rest/config" target="rest_window">App Config</a>
+    </div>
+    <div>
+      <a href="{{baseUrl}}/rest/monitor" target="rest_window">App Monitor</a>
+    </div>
+  </div>
+</div>

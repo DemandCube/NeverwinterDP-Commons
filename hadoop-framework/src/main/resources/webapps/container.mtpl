@@ -1,0 +1,43 @@
+<div>
+  {{#containerInfo}}
+  <h3>Container {{containerId}} Info</h3>
+    <table>
+      <tr>
+        <td style="width: 200px">Container Id</td>
+        <td>{{containerId}}</td>
+      </tr>
+      <tr>
+        <td>Node Id</td>
+        <td>{{nodeId}}</td>
+      </tr>
+      <tr>
+        <td>Memory</td>
+        <td>{{memory}}</td>
+      </tr>
+      <tr>
+        <td>CPU Cores</td>
+        <td>{{cores}}</td>
+      </tr>
+      <tr>
+        <td>Launch Commands</td>
+        <td>{{commands}}</td>
+      </tr>
+      <tr>
+        <td>Container State</td>
+        <td>{{progressStatus.containerState}}</td>
+      </tr>
+      <tr>
+        <td>Progress</td>
+        <td>{{progressStatus.progress}}</td>
+      </tr>
+      <tr>
+        <td>Status Message</td>
+        <td>{{progressStatus.statusMessage}}</td>
+      </tr>
+      <tr>
+        <td>Error</td>
+        <td>{{error}}</td>
+      </tr>
+    </table>
+  {{/containerInfo}}
+</div>

@@ -1,0 +1,31 @@
+{
+  "completedContainerCount" : 1,
+  "allocatedContainerCount" : 2,
+  "failedContainerCount" : 0,
+  "requestedContainerCount" : 2,
+  "containerInfos" : [ {
+    "containerId" : 2,
+    "nodeId" : "192.168.1.30:55526",
+    "memory" : 128,
+    "cores" : 1,
+    "commands" : [ "java  -Xmx128m com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer --mini-cluster-env  --app-id application_1408179551441_0001 --app-name HelloYarn --app-host-name 192.168.1.30 --app-rpc-port 63200 --app-tracking-url http://192.168.1.30:55535 --app-container-manager com.neverwinterdp.hadoop.yarn.sample.HelloAppContainerManger --app-max-memory 128 --app-num-of-worker 1 --worker-class com.neverwinterdp.hadoop.yarn.sample.HelloWorker --worker-max-memory 128 --worker-num-of-core 1 --conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030 --conf:worker-container-id=2 1> <LOG_DIR>/stdout 2> <LOG_DIR>/stderr" ],
+    "progressStatus" : {
+      "containerState" : "FINISHED",
+      "progress" : 1.0,
+      "statusMessage" : null,
+      "error" : null
+    }
+  }, {
+    "containerId" : 3,
+    "nodeId" : "192.168.1.30:55526",
+    "memory" : 128,
+    "cores" : 1,
+    "commands" : [ "java  -Xmx128m com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer --mini-cluster-env  --app-id application_1408179551441_0001 --app-name HelloYarn --app-host-name 192.168.1.30 --app-rpc-port 63200 --app-tracking-url http://192.168.1.30:55535 --app-container-manager com.neverwinterdp.hadoop.yarn.sample.HelloAppContainerManger --app-max-memory 128 --app-num-of-worker 1 --worker-class com.neverwinterdp.hadoop.yarn.sample.HelloWorker --worker-max-memory 128 --worker-num-of-core 1 --conf:yarn.resourcemanager.scheduler.address=0.0.0.0:8030 --conf:worker-container-id=3 1> <LOG_DIR>/stdout 2> <LOG_DIR>/stderr" ],
+    "progressStatus" : {
+      "containerState" : "FINISHED",
+      "progress" : 1.0,
+      "statusMessage" : null,
+      "error" : null
+    }
+  } ]
+}

@@ -3,10 +3,6 @@ package com.neverwinterdp.netty.http;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-
-import com.neverwinterdp.netty.http.route.RouteHandler;
-import com.neverwinterdp.netty.http.route.RouteHandlerGeneric;
-import com.neverwinterdp.netty.http.route.RouteMatcher;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com

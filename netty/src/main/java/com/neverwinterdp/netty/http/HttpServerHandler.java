@@ -5,24 +5,19 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 
 import java.net.URI;
 
 import org.slf4j.Logger;
-
-import com.neverwinterdp.netty.http.route.RouteHandler;
-import com.neverwinterdp.netty.http.route.RouteMatcher;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
 public class HttpServerHandler extends ChannelInboundHandlerAdapter  {
   private Logger logger ;
-  private RouteMatcher routeMatcher ;
+  private RouteMatcher<RouteHandler> routeMatcher ;
   
   public HttpServerHandler(HttpServer server) {
     logger = server.getLoggerFactory().getLogger(getClass().getSimpleName()) ;

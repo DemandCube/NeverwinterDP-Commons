@@ -1,18 +1,12 @@
 package com.neverwinterdp.hadoop.yarn.app.master;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CommonConfigurationKeys;
-import org.apache.hadoop.io.serializer.JavaSerialization;
-import org.apache.hadoop.io.serializer.WritableSerialization;
-import org.apache.hadoop.io.serializer.avro.AvroSerialization;
-import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
@@ -36,8 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.Util;
+import com.neverwinterdp.hadoop.yarn.app.history.AppHistorySender;
+import com.neverwinterdp.hadoop.yarn.app.http.HttpService;
+import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
+import com.neverwinterdp.hadoop.yarn.app.ipc.IPCServiceServer;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
 
 public class AppMaster {
@@ -47,20 +45,25 @@ public class AppMaster {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppMaster.class.getName());
   
-  private AppConfig config ;
-  private RPC.Server rpcServer ;
+  private AppInfo appInfo ;
+  
   private AMRMClient<ContainerRequest> amrmClient ;
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private Configuration conf;
-  
+
+  private IPCServiceServer ipcServiceServer ;
   private AppMasterMonitor appMonitor = new AppMasterMonitor() ;
   private AppMasterContainerManager containerManager ;
   
+  //private WebApp webApp ;
+  private HttpService httpService ;
+  private AppHistorySender appHistorySender ;
+
   public AppMaster() {
   }
   
-  public AppConfig getConfig() { return this.config ; }
+  public AppInfo getAppInfo() { return this.appInfo ; }
   
   public Configuration getConfiguration() { return this.conf ; }
   
@@ -70,60 +73,68 @@ public class AppMaster {
   
   public NMClient getNMClient() { return this.nmClient ; }
   
-  public RPC.Server getRPCServer()  { return this.rpcServer ; }
+  public IPCServiceServer getIPCServiceServer()  { return this.ipcServiceServer ; }
   
   public boolean run(String[] args) throws Exception {
-    this.config = new AppConfig() ;
-    new JCommander(config, args) ;
-    
-    conf = new YarnConfiguration() ;
-    config.overrideConfiguration(conf);
+    try {
+      this.appInfo = new AppInfo() ;
+      new JCommander(appInfo, args) ;
+      appInfo.appStartTime = System.currentTimeMillis() ;
+      appInfo.appState = "RUNNING" ;
+      conf = new YarnConfiguration() ;
+      appInfo.overrideConfiguration(conf);
+      ipcServiceServer = new IPCServiceServer(this) ;
+      this.appInfo.appHostName = ipcServiceServer.getHostAddress() ;
+      this.appInfo.appRpcPort =  ipcServiceServer.getListenPort() ;
+      
+      httpService = new NettyHttpService(this) ;
+      httpService.start();
+      Thread.sleep(3000);
+      appInfo.appTrackingUrl = httpService.getTrackingUrl() ;
+      System.out.println("Tracking URL: " + appInfo.appTrackingUrl);
+      Class<?> containerClass = Class.forName(appInfo.appContainerManager) ;
+      containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
 
-    Configuration rpcConf = new Configuration() ;
-    rpcConf.set(
-      CommonConfigurationKeys.IO_SERIALIZATIONS_KEY, 
-      JavaSerialization.class.getName() + "," + 
-      WritableSerialization.class.getName() + "," +
-      AvroSerialization.class.getName()
-    );
-    //RPC.setProtocolEngine(rpcConf, AppMasterRPC.class, ProtobufRpcEngine.class);
-    //RPC.setProtocolEngine(rpcConf, AppWorkerContainerRPC.class, ProtobufRpcEngine.class);
-    rpcServer = 
-        new RPC.Builder(rpcConf).
-        setInstance(new AppMasterRPCImpl(appMonitor)).
-        setProtocol(AppMasterRPC.class).
-        setBindAddress(InetAddress.getLocalHost().getHostAddress()).
-        setPort(config.appRpcPort).
-        build();
-    rpcServer.start() ;
-    this.config.appHostName = rpcServer.getListenerAddress().getAddress().getHostAddress() ;
-    this.config.appRpcPort = rpcServer.getListenerAddress().getPort() ;
-    
-    Class<?> containerClass = Class.forName(config.appContainerManager) ;
-    containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
-    
-    amrmClient = AMRMClient.createAMRMClient();
-    amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
-    amrmClientAsync.init(conf);
-    amrmClientAsync.start();
+      amrmClient = AMRMClient.createAMRMClient();
+      amrmClientAsync = AMRMClientAsync.createAMRMClientAsync(amrmClient, 1000, new AMRMCallbackHandler());
+      amrmClientAsync.init(conf);
+      amrmClientAsync.start();
 
-    nmClient = NMClient.createNMClient();
-    nmClient.init(conf);
-    nmClient.start();
+      nmClient = NMClient.createNMClient();
+      nmClient.init(conf);
+      nmClient.start();
+      
+      appHistorySender = new AppHistorySender(this) ;
+      
+      containerManager.onInit(this);
+      appHistorySender.startAutoSend(this);
+      // Register with RM
+      RegisterApplicationMasterResponse registerResponse = 
+          amrmClientAsync.registerApplicationMaster(appInfo.appHostName, appInfo.appRpcPort, appInfo.appTrackingUrl);
+      containerManager.onRequestContainer(this);
+      containerManager.waitForComplete(this);
+      containerManager.onExit(this);
+    } catch(Throwable t) {
+      LOGGER.error("Error: " , t);
+    } finally {
+      if(amrmClientAsync != null) {
+        amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
+        amrmClientAsync.stop();
+        amrmClientAsync.close(); 
+      }
+      if(nmClient != null) {
+        nmClient.stop();
+        nmClient.close();
+      }
 
-    containerManager.onInit(this);
-    // Register with RM
-    RegisterApplicationMasterResponse registerResponse = 
-      amrmClientAsync.registerApplicationMaster(config.appHostName, config.appRpcPort, containerManager.getTrackingURL());
-    containerManager.onRequestContainer(this);
-    containerManager.waitForComplete(this);
-    containerManager.onExit(this);
-    amrmClientAsync.unregisterApplicationMaster(FinalApplicationStatus.SUCCEEDED, "", "");
-    amrmClientAsync.stop();
-    amrmClientAsync.close(); 
-    nmClient.stop();
-    nmClient.close();
-    this.rpcServer.stop() ; 
+      if(httpService != null) httpService.shutdown() ; 
+
+      if(ipcServiceServer != null) ipcServiceServer.shutdown() ;
+      appInfo.appState = "FINISHED" ;
+      appInfo.appFinishTime = System.currentTimeMillis() ;
+      if(appHistorySender != null) appHistorySender.shutdown(); 
+      //IOUtil.save(JSONSerializer.INSTANCE.toString(appMonitor), "UTF-8", "/tmp/AppMonitor.json");
+    }
     return true;
   }
 
@@ -172,10 +183,10 @@ public class AppMaster {
     Util.setupAppMasterEnv(true, conf, appMasterEnv);
     ctx.setEnvironment(appMasterEnv);
     
-    config.setAppWorkerContainerId(container.getId().getId());
+    appInfo.setAppWorkerContainerId(container.getId().getId());
     StringBuilder sb = new StringBuilder();
     List<String> commands = Collections.singletonList(
-        sb.append(config.buildWorkerCommand()).
+        sb.append(appInfo.buildWorkerCommand()).
         append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
         append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr")
         .toString()
@@ -224,6 +235,16 @@ public class AppMaster {
     public float getProgress() { return 0; }
   }
 
+  public AppMaster mock(AppInfo config) {
+    this.appInfo = config ;
+    return this ;
+  }
+  
+  public AppMaster mock(AppMasterMonitor monitor) {
+    this.appMonitor = monitor ;
+    return this ;
+  }
+  
   static public void main(String[] args) throws Exception {
     new AppMaster().run(args) ;
   }

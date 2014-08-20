@@ -15,11 +15,17 @@ repositories {
 
 configurations.all {
   exclude(group: 'ring', name: 'ring-core', version: '0.3.11')
+
+  resolutionStrategy {
+    force 'com.google.guava:guava:13.0'
+  }
 }
 
 dependencies {
   compile project(':utils')
   compile project(':api')
+  compile project(':netty')
+  compile project(':cluster')
 
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 
@@ -32,6 +38,8 @@ dependencies {
   compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '3.0.3'
 
   compile group: 'org.apache.mrunit', name: 'mrunit', version: '1.0.0', classifier: 'hadoop2'
+  compile group: 'com.google.guava', name: 'guava', version: '13.0'
+
 }
 
 
@@ -52,8 +60,8 @@ def createHelloAppHome(String appHomeDir) {
   println "*************************************************"
 
   def jars = [ 
-    "commons.utils", 
-    "jcommander"
+    "commons.utils", "commons.netty",
+    "jackson-core-2.2.2", "jackson-databind", "jackson-annotations", "jcommander", "netty-all", "compiler-0.8.16"
   ] 
 
   println "Copy the dependencies library"

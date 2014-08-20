@@ -1,0 +1,75 @@
+<div>
+  <h3>App Config</h3>
+
+  <table style="width: 700px">
+    <tr>
+      <th style="width: 200px">Property</th>
+      <th>Value</th>
+    </tr>
+    
+    <tr>
+      <td>App Id</td>
+      <td>{{appConfig.appId}}</td>
+    </tr>
+
+    <tr>
+      <td>App Name</td>
+      <td>{{appConfig.appName}}</td>
+    </tr>
+
+    <tr>
+      <td>App Home</td>
+      <td>{{appConfig.appHome}}</td>
+    </tr>
+
+    <tr>
+      <td>App Local Home</td>
+      <td>{{appConfig.appLocalHome}}</td>
+    </tr>
+
+    <tr>
+      <td>App Host Name</td>
+      <td>{{appConfig.appHostName}}</td>
+    </tr>
+
+    <tr>
+      <td>App RPC Port</td>
+      <td>{{appConfig.appRpcPort}}</td>
+    </tr>
+
+    <tr>
+      <td>App Tracking Url</td>
+      <td>{{appConfig.appTrackingUrl}}</td>
+    </tr>
+
+    <tr>
+      <td>App Container Manager</td>
+      <td>{{appConfig.appContainerManager}}</td>
+    </tr>
+
+    <tr>
+      <td>App Max Memory</td>
+      <td>{{appConfig.appMaxMemory}}</td>
+    </tr>
+
+    <tr>
+      <td>App Number Of Workers</td>
+      <td>{{appConfig.appNumOfWorkers}}</td>
+    </tr>
+
+    <tr>
+      <td>Worker Class</td>
+      <td>{{appConfig.worker}}</td>
+    </tr>
+
+    <tr>
+      <td>Worker Max Memory</td>
+      <td>{{appConfig.workerMaxMemory}}</td>
+    </tr>
+
+    <tr>
+      <td>Worker Number Of Core</td>
+      <td>{{appConfig.workerNumOfCore}}</td>
+    </tr>
+  </table>
+</div>

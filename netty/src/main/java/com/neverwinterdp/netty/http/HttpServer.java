@@ -9,19 +9,18 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.neverwinterdp.netty.http.route.NotFoundRouteHandler;
-import com.neverwinterdp.netty.http.route.RouteHandler;
-import com.neverwinterdp.netty.http.route.RouteMatcher;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.util.MapUtil;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -29,33 +28,64 @@ import com.neverwinterdp.util.LoggerFactory;
 public class HttpServer {
   private Logger  logger;
   private int     port = 8080;
-  private RouteMatcher routeMatcher = new RouteMatcher() ;
+  private RouteMatcher<RouteHandler> routeMatcher = new RouteMatcher<RouteHandler>() ;
   private Channel channel;
   EventLoopGroup bossGroup, workerGroup ;
   private LoggerFactory loggerFactory = new LoggerFactory() ;
   private Thread deamonThread ;
   
-  public int getPort() {
-    return this.port;
+  public void configure(Map<String, String> props) throws Exception {
+    port = MapUtil.getInteger(props, "port", 8080) ;
+    String wwwDir = props.get("www-dir") ; 
+    if(wwwDir != null) {
+      setDefault(new StaticFileHandler(wwwDir)) ;
+    }
+    String[] routeNames = MapUtil.getStringArray(props, "route.names", new String[] {});
+    for(String routeName : routeNames) {
+      String prefix = "route." + routeName + ".";
+      Map<String, String> routeHandlerProps = MapUtil.getSubMap(props, prefix) ;
+      String handlerType = routeHandlerProps.get("handler") ;
+      Class<RouteHandler> clazz = (Class<RouteHandler>) Class.forName(handlerType) ;
+      RouteHandler handler = clazz.newInstance() ;
+      handler.configure(routeHandlerProps);
+      String[] routePath   = MapUtil.getStringArray(routeHandlerProps, "path", null) ;
+      add(routePath, handler) ;
+    }
   }
-
+  
+  public String getHostIpAddress() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostAddress()  ;
+  }
+  
+  public int getPort() { return this.port; }
   public HttpServer setPort(int port) {
     this.port = port;
     return this ;
   }
   
-  public LoggerFactory getLoggerFactory() { return this.loggerFactory ; }
+  public LoggerFactory getLoggerFactory() { 
+    return this.loggerFactory ; 
+  }
 
   public HttpServer setLoggerFactory(LoggerFactory factory) {
     this.loggerFactory = factory ;
     return this ;
   }
   
-  public RouteMatcher getRouteMatcher() { return this.routeMatcher ; }
+  public RouteMatcher<RouteHandler> getRouteMatcher() { return this.routeMatcher ; }
 
   public HttpServer add(String path, RouteHandler handler) {
     handler.setLogger(loggerFactory.getLogger(handler.getClass().getSimpleName()));
     routeMatcher.addPattern(path, handler);
+    return this ;
+  }
+  
+  public HttpServer add(String[] path, RouteHandler handler) {
+    if(path == null) return this ;
+    handler.setLogger(loggerFactory.getLogger(handler.getClass().getSimpleName()));
+    for(String sel : path) {
+      routeMatcher.addPattern(sel, handler);
+    }
     return this ;
   }
   
@@ -102,6 +132,8 @@ public class HttpServer {
         channel(NioServerSocketChannel.class).
         childHandler(initializer);
       channel = b.bind(port).sync().channel();
+      InetSocketAddress addr = (InetSocketAddress)channel.localAddress() ;
+      this.port = addr.getPort() ;
       logger.info("bind port successfully, channel = " + channel);
       logger.info("Start start() waitting to handle request");
       channel.closeFuture().sync();

@@ -15,7 +15,4 @@ public interface AppMasterContainerManager {
   public void onExit(AppMaster appMaster) ;
   
   public void waitForComplete(AppMaster appMaster);
-  
-  public String getTrackingURL() ;
-  public int    getAppRPCPort() ;
 }

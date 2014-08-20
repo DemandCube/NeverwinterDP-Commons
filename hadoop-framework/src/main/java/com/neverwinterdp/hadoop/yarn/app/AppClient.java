@@ -37,7 +37,7 @@ public class AppClient  {
   
   public AppClientMonitor run(String[] args, Configuration conf) throws Exception {
     try {
-      AppConfig appConfig = new AppConfig() ;
+      AppInfo appConfig = new AppInfo() ;
       new JCommander(appConfig, args) ;
       appConfig.overrideConfiguration(conf);
       
@@ -50,7 +50,8 @@ public class AppClient  {
 
       System.out.println("Create YarnClientApplication via YarnClient") ;
       YarnClientApplication app = yarnClient.createApplication();
-      System.out.println("Application Id = " + app.getApplicationSubmissionContext().getApplicationId()) ;
+      appConfig.appId =  app.getApplicationSubmissionContext().getApplicationId().toString() ;
+      System.out.println("Application Id = " + appConfig.appId) ;
       System.out.println("Set up the container launch context for the application master") ;
       ContainerLaunchContext amContainer = Records.newRecord(ContainerLaunchContext.class);
       StringBuilder sb = new StringBuilder();
@@ -96,7 +97,7 @@ public class AppClient  {
     }
   }
   
-  public void uploadApp(AppConfig appOpts) throws Exception {
+  public void uploadApp(AppInfo appOpts) throws Exception {
     if(appOpts.appHome == null) return ;
     HdfsConfiguration hdfsConf = new HdfsConfiguration() ;
     appOpts.overrideConfiguration(hdfsConf);
@@ -110,7 +111,7 @@ public class AppClient  {
     dfs.copyFromLocalFile(false, true, appHomePath, appHomeSharePath);
   }
   
-  Map<String, LocalResource> createLocalResources(Configuration conf, AppConfig appConfig) throws Exception {
+  Map<String, LocalResource> createLocalResources(Configuration conf, AppInfo appConfig) throws Exception {
     Map<String, LocalResource> libs = new HashMap<String, LocalResource>() ;
     FileSystem fs = FileSystem.get(conf) ;
     RemoteIterator<LocatedFileStatus> itr = fs.listFiles(new Path(appConfig.appHome + "/libs"), true) ;

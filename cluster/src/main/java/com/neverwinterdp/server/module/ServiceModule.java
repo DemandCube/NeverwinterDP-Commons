@@ -35,7 +35,7 @@ abstract public class ServiceModule extends AbstractModule {
   
   protected <T extends Service> void bindService(Class<T> type) {
     Key<Service> key = Key.get(Service.class, Names.named(type.getSimpleName())) ;
-    bind(key).to(type).asEagerSingleton(); ;
+    bind(key).to(type).asEagerSingleton();
   }
   
   protected <T extends Service> void bind(String serviceId, Service instance) {
