@@ -12,7 +12,8 @@ dependencies {
   compile group: 'io.netty', name: 'netty-all', version: '4.0.20.Final'
   compile group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.4.6'
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
-  testCompile group: 'com.neverwinterdp', name: 'commons.zookeeper', version: '1.0-SNAPSHOT', classifier: 'tests'
+
+  testCompile project(':zookeeper').sourceSets.test.output
 }
 
 test {
@@ -24,3 +25,5 @@ test {
     includeTestsMatching "*Test"
   }
 }
+
+
