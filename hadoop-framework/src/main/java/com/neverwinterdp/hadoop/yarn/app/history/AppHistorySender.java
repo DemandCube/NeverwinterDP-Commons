@@ -49,6 +49,7 @@ public class AppHistorySender {
         }
       };
       client = new AsyncHttpClient (urlParser.getHost(), urlParser.getPort(), handler) ;
+      error = Error.None ;
     } catch(ConnectException ex) {
       error = Error.Error ;
       logger.error("Connect Exception: ", ex);
@@ -56,7 +57,6 @@ public class AppHistorySender {
       error = Error.Error ;
       logger.error("Unknown Exception: ", ex);
     }
-    error = Error.None ;
   }
   
   public void send(AppHistory history) {
@@ -66,6 +66,7 @@ public class AppHistorySender {
       if(System.currentTimeMillis() - 60000 > lastConnectTime) {
         connect() ;
         send(history) ;
+        return ;
       } else {
         return ;
       }

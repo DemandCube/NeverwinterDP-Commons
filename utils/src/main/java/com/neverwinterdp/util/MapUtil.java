@@ -13,6 +13,12 @@ public class MapUtil {
     return defaultValue ;
   }
   
+  static public long getLong(Map<String, String> map, String name, long defaultValue) {
+    String val = map.get(name) ;
+    if(val != null) return Long.parseLong(val) ;
+    return defaultValue ;
+  }
+  
   static public String getString(Map<String, String> map, String name, String defaultValue) {
     String val = map.get(name) ;
     if(val != null) return val ;

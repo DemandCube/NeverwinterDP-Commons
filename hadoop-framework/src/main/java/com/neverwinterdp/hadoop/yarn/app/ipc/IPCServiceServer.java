@@ -52,7 +52,7 @@ public class IPCServiceServer {
   }
   
   public void shutdown() {
-    this.rpcServer.stop() ; 
+    rpcServer.stop() ;
   }
     
   public class IPCServiceImpl implements IPCService {

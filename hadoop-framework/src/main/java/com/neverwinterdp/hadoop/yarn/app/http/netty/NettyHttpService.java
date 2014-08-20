@@ -10,6 +10,7 @@ import com.neverwinterdp.netty.http.HttpServer;
 
 public class NettyHttpService implements HttpService {
   private HttpServer server ;
+  private Thread serviceThread ;
   
   public NettyHttpService(AppMaster appMaster) throws Exception {
     server = new HttpServer();
@@ -40,7 +41,7 @@ public class NettyHttpService implements HttpService {
   }
   
   public void start() throws Exception {
-    new Thread() {
+    serviceThread = new Thread() {
       public void run() {
         try {
           server.start() ;
@@ -48,11 +49,12 @@ public class NettyHttpService implements HttpService {
           e.printStackTrace();
         }
       }
-    }.start();
+    };
+    serviceThread.start();
   }
   
   public void startAsDeamon() throws Exception {
-    new Thread() {
+    serviceThread = new Thread() {
       public void run() {
         try {
           server.startAsDeamon(); ;
@@ -60,10 +62,14 @@ public class NettyHttpService implements HttpService {
           e.printStackTrace();
         }
       }
-    }.start();
+    };
+    serviceThread.start();
   }
   
   public void shutdown() {
-    server.shutdown(); 
+    if(serviceThread  != null) {
+      serviceThread.interrupt();
+      server.shutdown(); 
+    }
   }
 }

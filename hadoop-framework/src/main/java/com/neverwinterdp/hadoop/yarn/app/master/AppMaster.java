@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.ApplicationConstants;
@@ -75,7 +76,7 @@ public class AppMaster {
   
   public IPCServiceServer getIPCServiceServer()  { return this.ipcServiceServer ; }
   
-  public boolean run(String[] args) throws Exception {
+  public void run(String[] args) throws Exception {
     try {
       this.appInfo = new AppInfo() ;
       new JCommander(appInfo, args) ;
@@ -127,15 +128,31 @@ public class AppMaster {
         nmClient.close();
       }
 
-      if(httpService != null) httpService.shutdown() ; 
+      if(httpService != null) {
+        LOGGER.info("Shutdown the HttpService");
+        httpService.shutdown() ; 
+      }
 
       if(ipcServiceServer != null) ipcServiceServer.shutdown() ;
       appInfo.appState = "FINISHED" ;
       appInfo.appFinishTime = System.currentTimeMillis() ;
-      if(appHistorySender != null) appHistorySender.shutdown(); 
+      if(appHistorySender != null) {
+        LOGGER.info("Shutdown the AppHistorySender");
+        appHistorySender.shutdown(); 
+      }
       //IOUtil.save(JSONSerializer.INSTANCE.toString(appMonitor), "UTF-8", "/tmp/AppMonitor.json");
     }
-    return true;
+    Thread.sleep(3000);
+    Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+    for(Thread thread : threadSet) {
+      System.out.println("Thread: " + thread.getName()) ;
+      System.out.println("=============================================") ;
+      for(StackTraceElement st : thread.getStackTrace()) {
+        System.out.println(st.toString()) ;
+      }
+      System.out.println("\n\n");
+    }
+    if(appInfo.miniClusterEnv) System.exit(0);
   }
 
   public ContainerRequest createContainerRequest(int priority, int numOfCores, int memory) {

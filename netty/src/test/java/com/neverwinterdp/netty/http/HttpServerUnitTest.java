@@ -2,6 +2,8 @@ package com.neverwinterdp.netty.http;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Set;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

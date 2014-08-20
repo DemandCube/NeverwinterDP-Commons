@@ -150,8 +150,8 @@ public class HttpServer {
 
   public void shutdown() {
     logger.info("Start shutdown()");
-    //bossGroup.shutdownGracefully();
-    //workerGroup.shutdownGracefully();
+    bossGroup.shutdownGracefully();
+    workerGroup.shutdownGracefully();
     channel.close();
     logger.info("Finish shutdown()");
   }
