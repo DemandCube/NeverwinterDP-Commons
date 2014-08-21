@@ -251,10 +251,11 @@ public class BroadcastServer {
     catch (Exception e) {
       logger.error(e.getMessage());
     }
-    if(this.serverRunning){
+    try{
       this.serverRunning=false;
       this.broadcaster.stop();
     }
+    catch(Exception e){}
     
     
     this.serverRunning=false;

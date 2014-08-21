@@ -20,6 +20,7 @@ public class BroadcastServerFailoverUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
   static String connection;
   static BroadcastServer server;
+  static BroadcastServer server2;
   static Map<String, String> map = new HashMap<String, String>();
   static int port =1130;
   static int port2=45000;
@@ -77,6 +78,9 @@ public class BroadcastServerFailoverUnitTest {
   @AfterClass
   static public void teardown() throws Exception {
     clusterBuilder.destroy();
+    server.stopServer();
+    server2.stopServer();
+    
   }
   
   
@@ -111,7 +115,7 @@ public class BroadcastServerFailoverUnitTest {
     broadcastArgs[2] = "-udpPort";
     broadcastArgs[3] =  Integer.toString(port2);
     
-    final BroadcastServer server2 = new BroadcastServer( broadcastArgs);
+    server2 = new BroadcastServer( broadcastArgs);
     assertTrue(server2.initialize());
     new Thread() {
       public void run() {

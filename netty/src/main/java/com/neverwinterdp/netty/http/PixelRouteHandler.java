@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.HttpRequest;
 public class PixelRouteHandler extends RouteHandlerGeneric {
   
   //This is a byte array for a 1x1 100% transparent .png image 
-  final ByteBuf imgBuf = Unpooled.wrappedBuffer(
+  final static ByteBuf IMAGE = Unpooled.wrappedBuffer(
                     new byte[]
                     {(byte)0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 
                       0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 
@@ -34,7 +34,10 @@ public class PixelRouteHandler extends RouteHandlerGeneric {
                       0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, (byte)0xAE,
                       0x42, 0x60, (byte)0x82});
   
+  /**
+   * Serves IMAGE as mimetype "image/png"
+   */
   protected void doGet(ChannelHandlerContext ctx, HttpRequest httpReq) {
-    this.writeContent(ctx, httpReq, imgBuf, "image/png");
+    this.writeContent(ctx, httpReq, IMAGE, "image/png");
   }
 }

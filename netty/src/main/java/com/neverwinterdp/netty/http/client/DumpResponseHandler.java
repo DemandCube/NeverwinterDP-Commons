@@ -13,6 +13,8 @@ public class DumpResponseHandler implements ResponseHandler {
   
   public int getCount() { return count; }
   
+  private String content = null;
+  
   public void onResponse(HttpResponse response) {
     System.out.println("Message") ;
     System.out.println("--------------------------------------------------------") ;
@@ -38,11 +40,16 @@ public class DumpResponseHandler implements ResponseHandler {
   private void printContent(HttpResponse response) {
     if(response instanceof HttpContent) {
       HttpContent content = (HttpContent) response;
-      System.out.print(content.content().toString(CharsetUtil.UTF_8));
+      this.content = content.content().toString(CharsetUtil.UTF_8);
+      System.out.print(this.content);
       System.out.flush();
       if (content instanceof LastHttpContent) {
         System.out.println();
       }
     }
+  }
+  
+  public String getContent(){
+    return this.content;
   }
 }
