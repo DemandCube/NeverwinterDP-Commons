@@ -38,7 +38,9 @@ public class HttpServer {
     port = MapUtil.getInteger(props, "port", 8080) ;
     String wwwDir = props.get("www-dir") ; 
     if(wwwDir != null) {
-      setDefault(new StaticFileHandler(wwwDir)) ;
+      StaticFileHandler staticFileHandler = new StaticFileHandler(wwwDir) ;
+      staticFileHandler.configure(props);
+      setDefault(staticFileHandler) ;
     }
     String[] routeNames = MapUtil.getStringArray(props, "route.names", new String[] {});
     for(String routeName : routeNames) {

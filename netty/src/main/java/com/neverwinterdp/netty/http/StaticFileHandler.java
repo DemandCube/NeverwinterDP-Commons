@@ -47,9 +47,11 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -76,6 +78,7 @@ public class StaticFileHandler implements RouteHandler {
   
   protected Logger           logger;
   private String baseDir ;
+  private List<StaticFileHandlerPlugin> plugins = new ArrayList<StaticFileHandlerPlugin>() ;
   
   public StaticFileHandler(String wwwDir) {
     init(wwwDir) ;
@@ -98,10 +101,26 @@ public class StaticFileHandler implements RouteHandler {
   public void configure(Map<String, String> props) {
     String wwwDir = MapUtil.getString(props, "www-dir", null) ;
     init(wwwDir) ;
+    String[] pluginNames = MapUtil.getStringArray(props, "static-file-handler.plugins", new String[] {}) ;
+    for(String name : pluginNames) {
+      String clazz = props.get("static-file-handler." + name + ".class") ;
+      try {
+        Class<StaticFileHandlerPlugin> type = (Class<StaticFileHandlerPlugin>) Class.forName(clazz) ;
+        StaticFileHandlerPlugin plugin = type.newInstance() ;
+        plugin.init(props);
+        addPlugin(plugin) ;
+      } catch(Exception ex) {
+        logger.error("Plugin Error: ", ex);
+      }
+    }
   }
   
   public void setLogger(Logger logger) { this.logger = logger; }
-
+  
+  public void addPlugin(StaticFileHandlerPlugin plugin) {
+    plugins.add(plugin) ;
+  }
+  
   public void handle(ChannelHandlerContext ctx, HttpRequest req) {
     try { 
       process(ctx, (FullHttpRequest) req) ;
@@ -127,7 +146,11 @@ public class StaticFileHandler implements RouteHandler {
       sendError(ctx, FORBIDDEN);
       return;
     }
-
+    
+    for(StaticFileHandlerPlugin sel : plugins) {
+      sel.preProcess(ctx, request, path);
+    }
+    
     File file = new File(path);
     if (file.isHidden() || !file.exists()) {
       sendError(ctx, NOT_FOUND);
@@ -183,7 +206,9 @@ public class StaticFileHandler implements RouteHandler {
 
     // Write the initial line and the header.
     ctx.write(response);
-
+    for(StaticFileHandlerPlugin sel : plugins) {
+      sel.postProcess(ctx, request, response, path);
+    }
     // Write the content.
     ChannelFuture sendFileFuture;
     if (ctx.pipeline().get(SslHandler.class) == null) {
