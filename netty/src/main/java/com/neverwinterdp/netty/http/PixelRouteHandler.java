@@ -1,18 +1,8 @@
 package com.neverwinterdp.netty.http;
 
-import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders.Values;
 import io.netty.handler.codec.http.HttpRequest;
 
 /**
@@ -44,21 +34,7 @@ public class PixelRouteHandler extends RouteHandlerGeneric {
                       0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, (byte)0xAE,
                       0x42, 0x60, (byte)0x82});
   
-  protected void writeContent(ChannelHandlerContext ctx, HttpRequest req, ByteBuf content, String contentType){
-    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, imgBuf);
-    
-    
-    response.headers().set(CONTENT_TYPE, "image/png");
-    response.headers().set(CONTENT_LENGTH, imgBuf.capacity());
-    
-    boolean keepAlive = isKeepAlive(req);
-    if (!keepAlive) {
-      ctx.write(response).addListener(ChannelFutureListener.CLOSE);
-    } else {
-      response.headers().set(CONNECTION, Values.KEEP_ALIVE);
-      ctx.write(response);
-    }
-    ctx.flush() ;
+  protected void doGet(ChannelHandlerContext ctx, HttpRequest httpReq) {
+    this.writeContent(ctx, httpReq, imgBuf, "image/png");
   }
-  
 }
