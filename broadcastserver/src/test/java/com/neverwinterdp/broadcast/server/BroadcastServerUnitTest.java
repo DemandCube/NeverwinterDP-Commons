@@ -17,6 +17,10 @@ import com.neverwinterdp.netty.multicast.UDPClient;
 import com.neverwinterdp.zookeeper.cluster.ZookeeperClusterBuilder;
 import com.neverwinterdp.broadcast.server.BroadcastServer;
 
+//TODO: you should enable show space character in your IDE , I still see the mixed tab and spaces in this class, for ex
+//line 37, 38...
+//I need to spend more time to read the entire code to have better comment , and code organization. But I think the 
+//key to be a good coder is to be discipline , learn every small trick and pattern every days.
 public class BroadcastServerUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
   static String connection;
@@ -49,9 +53,14 @@ public class BroadcastServerUnitTest {
     System.out.println("TempFile:"+tempFile.getAbsolutePath());
     FileWriter fileWriter = new FileWriter(tempFile, false);
     BufferedWriter bw = new BufferedWriter(fileWriter);
+    
     bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
     bw.close();
     
+    //TODO: make better readable code 
+    String[] args = {
+      "-propertiesFile", tempFile.getAbsolutePath(), "-udpPort", Integer.toString(port)
+    } ;
     
     String[] broadcastArgs = new String[4];
     broadcastArgs[0] = "-propertiesFile";
@@ -59,6 +68,8 @@ public class BroadcastServerUnitTest {
     broadcastArgs[2] = "-udpPort";
     broadcastArgs[3] =  Integer.toString(port);
     
+    //TODO: Usually , a good server implementation should manage its own deamon thread , when you call close or shutdown.
+    //the deamon thread should be interrupted and release the resources.
     server = new BroadcastServer( broadcastArgs);
     assertTrue(server.initialize());
     new Thread() {
@@ -71,7 +82,8 @@ public class BroadcastServerUnitTest {
         }
       }
     }.start() ;
-      
+    //TODO: estimate the correct amount of time to launch the server. You can also have a method in the server to check
+    //if the server is launched.
     Thread.sleep(5000);
   }
 	  
@@ -81,6 +93,8 @@ public class BroadcastServerUnitTest {
    */
   @AfterClass
   static public void teardown() throws Exception {
+    //TODO since your broadcast server is depended on the zookeeper , so you should shutdown the broadcast server 
+    //first and then zookeeper. Always know your system and its dependencies
     clusterBuilder.destroy();
     server.stopServer();
     server2.stopServer();
