@@ -7,7 +7,7 @@ task wrapper(type: Wrapper) {
 
 subprojects {
   apply plugin: 'java'
-  apply plugin: 'eclipse' 
+  apply plugin: 'eclipse'
   apply plugin: 'maven'
   apply plugin: 'maven-publish'
 
@@ -43,11 +43,14 @@ subprojects {
 
   test {
     forkEvery = 1
-    ignoreFailures = true
-    testLogging.showStandardStreams = true
+    //ignoreFailures = true
+    //testLogging.showStandardStreams = true
 
     filter {
       includeTestsMatching "*UnitTest"
+    }
+    testLogging {
+      events "passed", "skipped", "failed"
     }
   }
 
@@ -56,19 +59,19 @@ subprojects {
     from sourceSets.test.output
   }
 
-  configurations { 
-    tests 
-    published.extendsFrom tests, archives 
-  } 
+  configurations {
+    tests
+    published.extendsFrom tests, archives
+  }
 
 
-  install { 
-    configuration = configurations.published 
-  } 
+  install {
+    configuration = configurations.published
+  }
 
-  artifacts { 
-    tests testJar 
-  } 
+  artifacts {
+    tests testJar
+  }
 }
 
 
