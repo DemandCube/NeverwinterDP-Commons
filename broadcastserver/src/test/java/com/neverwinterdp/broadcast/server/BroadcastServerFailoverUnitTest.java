@@ -20,6 +20,7 @@ public class BroadcastServerFailoverUnitTest {
   static ZookeeperClusterBuilder clusterBuilder ;
   static String connection;
   static BroadcastServer server;
+  static BroadcastServer server2;
   static Map<String, String> map = new HashMap<String, String>();
   static int port =1130;
   static int port2=45000;
@@ -50,24 +51,16 @@ public class BroadcastServerFailoverUnitTest {
     bw.write("dev=2.2.2.2:2181,2.2.2.3:2181\nprod=1.1.1.2:2181,1.1.2.3:2181\nlocal=127.0.0.1:2181,127.0.0.1:2181\nbroadcast=localhost:2181\n");
     bw.close();
     
-    String[] broadcastArgs = new String[4];
-    broadcastArgs[0] = "-propertiesFile";
-    broadcastArgs[1] = tempFile.getAbsolutePath();
-    broadcastArgs[2] = "-udpPort";
-    broadcastArgs[3] =  Integer.toString(port);
+    String[] broadcastArgs = {
+      "-propertiesFile", tempFile.getAbsolutePath(), "-udpPort", Integer.toString(port)
+    };
     
     server = new BroadcastServer( broadcastArgs);
     assertTrue(server.initialize());
-    new Thread() {
-      public void run() {
-        try {
-          server.runServerLoop() ;
-        } 
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }.start();
+    server.startServer();
+    while(!server.isBroadcastServerRunning()){
+      Thread.sleep(500);
+    }
   }
   
   /**
@@ -76,6 +69,8 @@ public class BroadcastServerFailoverUnitTest {
    */
   @AfterClass
   static public void teardown() throws Exception {
+    server.stopServer();
+    server2.stopServer();
     clusterBuilder.destroy();
   }
   
@@ -111,7 +106,7 @@ public class BroadcastServerFailoverUnitTest {
     broadcastArgs[2] = "-udpPort";
     broadcastArgs[3] =  Integer.toString(port2);
     
-    final BroadcastServer server2 = new BroadcastServer( broadcastArgs);
+    server2 = new BroadcastServer( broadcastArgs);
     assertTrue(server2.initialize());
     new Thread() {
       public void run() {

@@ -13,6 +13,7 @@ public class DumpResponseHandler implements ResponseHandler {
   
   public int getCount() { return count; }
   
+  
   public void onResponse(HttpResponse response) {
     System.out.println("Message") ;
     System.out.println("--------------------------------------------------------") ;
@@ -45,4 +46,6 @@ public class DumpResponseHandler implements ResponseHandler {
       }
     }
   }
+  
+ 
 }

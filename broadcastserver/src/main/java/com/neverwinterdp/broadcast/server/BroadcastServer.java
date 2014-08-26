@@ -87,6 +87,7 @@ public class BroadcastServer {
   private boolean serverRunning=false;
   //Flag to help stopServer() work
   public boolean disableServer=false;
+  private Thread serverThread;
   
   /**
    * Constructor.  Meant to parse out command line arguments
@@ -178,6 +179,23 @@ public class BroadcastServer {
     return true;
     
   }
+
+  /**
+   * Launches server thread
+   */
+  public void startServer(){
+    serverThread = new Thread() {
+      public void run() {
+        try{
+          runServerLoop() ;
+        }
+          catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    serverThread.start();
+  }
   
   /**
    * Main server loop.  Runs in an infinite while loop
@@ -216,10 +234,10 @@ public class BroadcastServer {
       if(this.m.isMaster()){
         logger.info("We are master! Initializing broadcast server");
         this.broadcaster = new MulticastServer(udpPort, zkConnectionMap);
-        this.serverRunning = true;
-        logger.info("Broadcast server is beginning!");
-        this.broadcaster.run();
         
+        logger.info("Broadcast server is beginning!");
+        this.serverRunning = true;
+        this.broadcaster.run();
         while(!this.disableServer){Thread.sleep(1000);}
         
         logger.info("Broadcast server has stopped!");
@@ -244,6 +262,12 @@ public class BroadcastServer {
    * Stops the broadcaster UDP server and closes connection to Zookeeper
    */
   public void stopServer() {
+    try{
+      serverThread.interrupt();
+    }
+    catch (Exception e){
+      logger.error(e.getMessage());
+    }
     this.disableServer = true;
     try {
       this.m.stopZK();
@@ -251,10 +275,11 @@ public class BroadcastServer {
     catch (Exception e) {
       logger.error(e.getMessage());
     }
-    if(this.serverRunning){
+    try{
       this.serverRunning=false;
       this.broadcaster.stop();
     }
+    catch(Exception e){}
     
     
     this.serverRunning=false;
