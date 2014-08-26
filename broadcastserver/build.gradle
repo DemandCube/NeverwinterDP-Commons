@@ -26,4 +26,44 @@ test {
   }
 }
 
+task release (dependsOn: 'build') << {
+  def releaseDir = "${buildDir}/release/broadcastServer"
+  doRelease(releaseDir)
+  println "To run:"
+  println "java -cp commons.broadcastserver-1.0-SNAPSHOT.jar:jcommander-1.35.jar:log4j-1.2.17.jar:slf4j-log4j12-1.7.5.jar:slf4j-api-1.7.5.jar:commons.netty-1.0-SNAPSHOT.jar:commons.zookeeper-1.0-SNAPSHOT.jar:zookeeper-3.4.6.jar:netty-3.7.0.Final.jar:netty-all-4.0.20.Final.jar com.neverwinterdp.broadcast.server.BroadcastServer -p [path to broadcast.properties]"
+}
 
+def doRelease(String releaseDir) {
+  println "\n\n"
+  println "*************************************************"
+  println "Preparing the release directory ${releaseDir}"
+  println "*************************************************"
+
+  def jars = [ 
+    "commons.netty", 'commons.zookeeper', 'jcommander',
+    "log4j", "slf4j-api", "slf4j-simple", "slf4j-log4j12",
+    "zookeeper", "netty"
+  ] 
+
+  copy {
+    from "${buildDir}/libs"
+    into "${releaseDir}/libs"
+  }
+  
+  configurations.compile.each { File file -> 
+    if(isIn(jars, file)) {
+      println "  Copy $file.name to queuengin/libs"
+      copy {
+        from file
+        into "${releaseDir}/libs"
+      }
+    }
+  }
+}
+
+def isIn(set, File file) {
+  for(item in set) {
+    if(file.name.startsWith(item)) return true ;
+  }
+  return false ;
+}
