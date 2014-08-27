@@ -2,7 +2,6 @@ package com.neverwinterdp.netty.http;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
 
 import java.util.HashMap;
@@ -14,8 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.netty.http.client.DumpResponseHandler;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
+import com.neverwinterdp.netty.http.client.DumpResponseHandler;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com

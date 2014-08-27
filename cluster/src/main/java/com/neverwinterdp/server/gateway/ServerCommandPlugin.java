@@ -59,11 +59,11 @@ public class ServerCommandPlugin extends CommandPlugin {
   
   static public class shutdown implements SubCommandExecutor {
     public Object execute(ClusterClient clusterClient, Command command) throws Exception {
-      ServerCommand<ServerState> ping = new ServerCommands.Shutdown() ;
-      return command.getMemberSelector().execute(clusterClient, ping) ;
+      ServerCommand<ServerState> shutdown = new ServerCommands.Shutdown() ;
+      return command.getMemberSelector().execute(clusterClient, shutdown) ;
     }
   }
-    
+
   static public class exit implements SubCommandExecutor {
     public Object execute(ClusterClient clusterClient, Command command) throws Exception {
       ServerCommand<ServerState> ping = new ServerCommands.Exit() ;
