@@ -47,7 +47,12 @@
         <multicast-port>54327</multicast-port>
       </multicast>
       <tcp-ip enabled="false">
+        <interface>10.128.197.220-250</interface>
+        <interface>10.128.105.200-250</interface>
+        <!--
+        <interface>192.168.1.*</interface>
         <interface>127.0.0.1</interface>
+        -->
       </tcp-ip>
       <aws enabled="false">
         <access-key>my-access-key</access-key>
@@ -64,8 +69,9 @@
     </join>
 
     <interfaces enabled="true">
-      <interface>127.0.0.*</interface>
+      <interface>10.128.*.*</interface>
       <interface>192.168.1.*</interface>
+      <interface>127.0.0.*</interface>
     </interfaces>
 
     <ssl enabled="false" />

@@ -5,7 +5,9 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
+import com.beust.jcommander.JCommander;
 import com.neverwinterdp.server.Server;
+import com.neverwinterdp.server.shell.Shell.Options;
 import com.neverwinterdp.util.FileUtil;
 /**
  * @author Tuan Nguyen
@@ -56,6 +58,7 @@ public class ShellUnitTest {
     shell.execute(":echo \":echo host = $host and port = $port\"");
     
     shell.execute("server ping");
+    shell.execute("server ping --member-role master");
     shell.execute("server registration");
     shell.execute(
      ":assert" +

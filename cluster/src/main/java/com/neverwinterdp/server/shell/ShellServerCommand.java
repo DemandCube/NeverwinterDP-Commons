@@ -23,6 +23,7 @@ public class ShellServerCommand extends ShellCommand {
     super("cluster") ;
     add("ping", Ping.class);
     add("shutdown", Shutdown.class);
+    add("start", Start.class);
     add("exit", Exit.class);
     add("registration", Registration.class);
     add("metric", Metric.class);
@@ -72,6 +73,19 @@ public class ShellServerCommand extends ShellCommand {
   }
   
   static public class Shutdown extends ShellSubCommand {
+    @ParametersDelegate
+    MemberSelector memberSelector = new MemberSelector();
+    
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ServerState>[] results = ctx.getClusterGateway().execute(command) ;
+      String[] explaination = {
+        "The result is the running state of the server."
+      };
+      CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
+    }
+  }
+
+  static public class Start extends ShellSubCommand {
     @ParametersDelegate
     MemberSelector memberSelector = new MemberSelector();
     
