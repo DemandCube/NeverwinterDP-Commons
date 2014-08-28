@@ -18,10 +18,17 @@ abstract public class AbstractService implements Service {
     start() ;
   }
 
+  /**
+   * This method allow the client send a command with a properties parameter to reconfigure the service
+   */
   public boolean configure(Map<String, String> properties) throws Exception{
     throw new Exception("This method should be overrided") ;
   }
   
+  /**
+   * This method is convienent to clean the data of the service in order to have a clean service state, convienient 
+   * for testing
+   */
   public boolean cleanup() throws Exception {
     return false ;
   }

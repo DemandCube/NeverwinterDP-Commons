@@ -12,15 +12,22 @@ import com.neverwinterdp.util.text.TabularPrinter;
 public class ShellModuleCommand extends ShellCommand {
   public ShellModuleCommand() {
     add("list", ModuleList.class);
+    add("list-installed", ModuleListInstalled.class);
     add("install", Install.class);
     add("uninstall", Uninstall.class);
   }
   
-  @Parameters(commandDescription = "execute various module list option such available, installed")
   static public class ModuleList extends ShellSubCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
       ServerCommandResult<ModuleRegistration[]>[] results =  ctx.getClusterGateway().execute(command) ;
-      list(ctx, results, "List installed") ;
+      list(ctx, results, "List Available Modules") ;
+    }
+  }
+  
+  static public class ModuleListInstalled extends ShellSubCommand {
+    public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
+      ServerCommandResult<ModuleRegistration[]>[] results =  ctx.getClusterGateway().execute(command) ;
+      list(ctx, results, "List Installed Modules") ;
     }
   }
   

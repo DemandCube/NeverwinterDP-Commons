@@ -68,6 +68,14 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
     return selector.selectClusterMemberByUuid(uuid) ;
   }
   
+  public ClusterMember[] findClusterMemberByName(String nameExp) {
+    return clusterRegistration.findClusterMemberByName(nameExp) ;
+  }
+  
+  public ClusterMember[] findClusterMemberByRole(String roleExp) {
+    return clusterRegistration.findClusterMemberByRole(roleExp) ;
+  }
+  
   public void addListener(ClusterListener<ClusterClient> listener) {
     listeners.add(listener) ;
   }
@@ -120,6 +128,7 @@ public class HazelcastClusterClient implements ClusterClient,  MessageListener<C
   
   public void shutdown() {
     clusterEventTopic.removeMessageListener(clusterEventTopicListenerId) ;
+    clusterEventTopic.destroy() ;
     hzclient.shutdown();
   }
 }

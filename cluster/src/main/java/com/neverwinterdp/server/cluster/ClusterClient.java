@@ -21,6 +21,10 @@ public interface ClusterClient {
   
   public ClusterMember getClusterMemberByUuid(String uuid) ;
   
+  public ClusterMember[] findClusterMemberByName(String nameExp) ;
+  
+  public ClusterMember[] findClusterMemberByRole(String roleExp) ;
+  
   public ServerRegistration getServerRegistration(ClusterMember member) ; 
   
   public <T> ServiceCommandResult<T> execute(ServiceCommand<T> command, ClusterMember member) ;
