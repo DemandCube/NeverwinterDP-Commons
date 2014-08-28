@@ -40,4 +40,8 @@ public class PixelRouteHandler extends RouteHandlerGeneric {
   protected void doGet(ChannelHandlerContext ctx, HttpRequest httpReq) {
     this.writeContent(ctx, httpReq, IMAGE, "image/png");
   }
+  
+  public static ByteBuf getImageBytes(){
+    return IMAGE;
+  }
 }
