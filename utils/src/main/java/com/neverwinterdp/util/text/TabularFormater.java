@@ -76,8 +76,8 @@ public class TabularFormater {
   
   private void printCell(Appendable out, String cell, int width) {
     int len = cell.length();
-    if (len > 40) {
-      cell = cell.substring(0, 40) + "...";
+    if (len > 80) {
+      cell = cell.substring(0, 80) + "...";
       len = cell.length();
     }
     print(out, cell);

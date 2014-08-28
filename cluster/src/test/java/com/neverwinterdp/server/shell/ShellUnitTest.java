@@ -5,9 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import com.beust.jcommander.JCommander;
 import com.neverwinterdp.server.Server;
-import com.neverwinterdp.server.shell.Shell.Options;
 import com.neverwinterdp.util.FileUtil;
 /**
  * @author Tuan Nguyen

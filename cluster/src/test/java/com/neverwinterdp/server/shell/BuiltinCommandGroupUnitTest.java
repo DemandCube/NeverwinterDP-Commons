@@ -18,7 +18,8 @@ public class BuiltinCommandGroupUnitTest {
       "  --line .*exp3.* .*exp4.* 1"
     );
     assertFalse(shell.getShellContext().getExecuteContext().hasError()) ;
-    
+
+    shell.execute(":set stringWithSpaces=\"this is a test\"");
     shell.execute(":set shell=test");
     shell.execute(":set host=127.0.0.1");
     shell.execute(":set --type int port=5701");
