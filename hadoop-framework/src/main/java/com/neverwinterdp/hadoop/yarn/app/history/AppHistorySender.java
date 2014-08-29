@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
+import com.neverwinterdp.util.UrlParser;
 
 public class AppHistorySender {
   static private Logger logger = LoggerFactory.getLogger(AppHistorySender.class);

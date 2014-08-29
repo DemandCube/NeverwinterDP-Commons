@@ -1,4 +1,4 @@
-package com.neverwinterdp.hadoop.yarn.app.history;
+package com.neverwinterdp.util;
 
 public class UrlParser {
   private String scheme = "http";
