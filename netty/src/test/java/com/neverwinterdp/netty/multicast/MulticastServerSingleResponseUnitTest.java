@@ -26,17 +26,9 @@ public class MulticastServerSingleResponseUnitTest {
   @Before
   public void setup() throws Exception {
     server = new MulticastServer(udpport, expectedResponse);
-      new Thread() {
-        public void run() {
-          try {
-            server.run() ;
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      }.start() ;
-      Thread.sleep(1000);
-    }
+    server.run() ;
+    Thread.sleep(1000);
+  }
     
   /**
    * Tear down server at end of test
