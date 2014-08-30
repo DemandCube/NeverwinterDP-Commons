@@ -13,8 +13,12 @@ public class NettyHttpService implements HttpService {
   private Thread serviceThread ;
   
   public NettyHttpService(AppMaster appMaster) throws Exception {
+    this(appMaster, 0);
+  }
+  
+  public NettyHttpService(AppMaster appMaster, int port) throws Exception {
     server = new HttpServer();
-    server.setPort(0) ;
+    server.setPort(port) ;
     InfoRouteHandler infoHandler = new InfoRouteHandler(appMaster) ;
     server.add("/"    ,         infoHandler);
     server.add("/info",         infoHandler);

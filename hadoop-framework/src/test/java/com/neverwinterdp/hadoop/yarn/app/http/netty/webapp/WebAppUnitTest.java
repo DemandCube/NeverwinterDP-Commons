@@ -17,12 +17,12 @@ import com.neverwinterdp.netty.http.client.AsyncHttpClient;
  */
 public class WebAppUnitTest {
   private NettyHttpService httpService ;
-  
+  private int port = 8181;
   @Before
   public void setup() throws Exception {
     AppMaster appMaster = new AppMaster() ;
     appMaster.mock(new AppInfo()) ;
-    httpService = new NettyHttpService(appMaster);
+    httpService = new NettyHttpService(appMaster,port);
     httpService.start() ;
     Thread.sleep(1000);
   }
@@ -35,7 +35,7 @@ public class WebAppUnitTest {
   @Test
   public void testInfo() throws Exception {
     DumpResponseHandler handler = new DumpResponseHandler() ;
-    AsyncHttpClient client = new AsyncHttpClient ("127.0.0.1", 8080, handler) ;
+    AsyncHttpClient client = new AsyncHttpClient ("127.0.0.1", port, handler) ;
     client.get("/info");
     
     Thread.sleep(1000);
