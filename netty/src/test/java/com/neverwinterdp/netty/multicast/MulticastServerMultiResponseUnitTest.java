@@ -32,17 +32,9 @@ public class MulticastServerMultiResponseUnitTest {
     m.put("local", "2.2.2.2:1111");
     m.put("prod","3.3.3.3:1234,3.3.3.4:1234,3.3.3.3:1234");
     server = new MulticastServer(udpport, m);
-      new Thread() {
-        public void run() {
-          try {
-            server.run() ;
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      }.start() ;
-      Thread.sleep(1000);
-    }
+    server.run() ;
+    Thread.sleep(1000);
+  }
     
   /**
    * Stop server
