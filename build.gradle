@@ -49,8 +49,8 @@ subprojects {
 
   test {
     forkEvery = 1
-    //ignoreFailures = true
-    //testLogging.showStandardStreams = true
+    ignoreFailures = true
+    testLogging.showStandardStreams = true
 
     filter {
       includeTestsMatching "*UnitTest"
