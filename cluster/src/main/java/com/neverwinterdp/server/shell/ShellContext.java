@@ -22,7 +22,10 @@ public class ShellContext {
   
   public Console console() { return this.console ; }
   
-  public Timer getTimer() { return this.timer ; }
+  public Timer getTimer() {
+    if(timer == null) timer = new Timer() ;
+    return this.timer ; 
+  }
   
   public ClusterGateway getClusterGateway() { return this.cluster ; }
   
@@ -33,7 +36,6 @@ public class ShellContext {
   public void connect(String ... members) {
     if(cluster == null) cluster = new ClusterGateway(members) ;
     else cluster.connect(members);
-    timer = new Timer() ;
   }
   
   public void onStartCommand(ShellCommand shellCommand, ShellSubCommand shellSubCommand) {
@@ -48,10 +50,16 @@ public class ShellContext {
   
   public boolean isClose() { return cluster == null ; }
   
+  public void terminateTimer() {
+    if(timer != null) {
+      timer.cancel() ;
+      timer.purge() ;
+      timer = null ;
+    }
+  }
+  
   public void close() {
-    timer.purge() ;
-    timer.cancel() ; 
-    timer = null ;
+    terminateTimer() ;
     if(cluster != null) {
       cluster.close(); 
       cluster = null ;

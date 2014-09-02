@@ -24,8 +24,12 @@ public class ServiceCommands {
   }
   
   static public class Start extends ServiceCommand<ServiceRegistration> {
+    @Parameter(names = {"--cleanup"}, description = "Clean the all the data to get a clean environment")
+    private boolean cleanup = false ;
+    
     public ServiceRegistration execute(Server server, Service service) throws Exception {
       ServiceRegistration registration = service.getServiceRegistration() ;
+      if(cleanup) service.cleanup();
       server.getModuleContainer().start(registration);
       return service.getServiceRegistration() ;
     }
@@ -38,7 +42,7 @@ public class ServiceCommands {
     public ServiceRegistration execute(Server server, Service service) throws Exception {
       server.getModuleContainer().stop(service.getServiceRegistration());
       if(cleanup) service.cleanup();
-      server.getModuleContainer().stop(service.getServiceRegistration());
+      server.getModuleContainer().start(service.getServiceRegistration());
       return service.getServiceRegistration() ;
     }
   }

@@ -35,7 +35,6 @@ public class ZookeeperClusterService extends AbstractService {
     logger = factory.getLogger(getClass().getSimpleName()) ;
     logger.info("Start init()");
     this.serviceInfo = serviceInfo ;
-    
     if(moduleProperties.isDataDrop()) cleanup() ;
     logger.info("Finish init()");
   }
@@ -43,7 +42,7 @@ public class ZookeeperClusterService extends AbstractService {
   public boolean cleanup() throws Exception {
     String dataDir = serviceInfo.zookeeperProperties().getProperty("dataDir") ;
     FileUtil.removeIfExist(dataDir, false);
-    logger.info("Clean data directory");
+    logger.info("Clean zookeeper data directory");
     return true ;
   }
   
