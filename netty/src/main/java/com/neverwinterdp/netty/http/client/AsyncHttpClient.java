@@ -54,7 +54,7 @@ public class AsyncHttpClient {
         p.addLast("inflater", new HttpContentDecompressor());
         
         //handle HttpChunks.
-        p.addLast("aggregator", new HttpObjectAggregator(1048576));
+        p.addLast("aggregator", new HttpObjectAggregator(3 * 1024 * 1024));
         p.addLast("handler", new HttpClientHandler(handler));
       }
     };
@@ -93,17 +93,20 @@ public class AsyncHttpClient {
   public void post(String uriString, String data) throws Exception {
     ByteBuf content = Unpooled.wrappedBuffer(data.getBytes()) ;
     post(uriString, content) ;
+    //content.release() ;
   }
   
   public void post(String uriString, byte[] data) throws Exception {
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     post(uriString, content) ;
+    //content.release() ;
   }
   
   public <T> void post(String uriString, T object) throws Exception {
     byte[] data = JSONSerializer.INSTANCE.toBytes(object) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     post(uriString, content) ;
+    //content.release() ;
   }
   
   public void post(String uriString, ByteBuf content) throws Exception {

@@ -14,4 +14,5 @@ public interface RouteHandler {
   public void setLogger(Logger logger) ;
   public void configure(Map<String, String> props) ;
   public void handle(ChannelHandlerContext ctx, HttpRequest request) ;
+  public void close() ;
 }

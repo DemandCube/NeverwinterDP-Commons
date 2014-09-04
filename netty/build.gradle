@@ -8,7 +8,7 @@ eclipse {
 
 dependencies {
   compile project(':utils')
-  compile group: 'io.netty', name: 'netty-all', version: '4.0.20.Final'
+  compile group: 'io.netty', name: 'netty-all', version: '4.0.23.Final'
   compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.16'
 }
 

@@ -245,6 +245,9 @@ public class StaticFileHandler implements RouteHandler {
       lastContentFuture.addListener(ChannelFutureListener.CLOSE);
     }
   }
+  
+  public void close() {
+  }
 
   private String sanitizeUri(String uri) {
     // Decode the path.

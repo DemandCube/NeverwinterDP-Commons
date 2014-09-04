@@ -67,6 +67,7 @@ public class RouteHandlerGeneric implements RouteHandler {
     response.headers().set(CONTENT_TYPE, "text/plain");
     response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
     ctx.write(response).addListener(ChannelFutureListener.CLOSE);
+    contentBuf.release() ;
     logger.info(message);
   }
   
@@ -83,7 +84,7 @@ public class RouteHandlerGeneric implements RouteHandler {
   }
   
   protected void writeContent(ChannelHandlerContext ctx, HttpRequest req, ByteBuf content, String contentType) {
-    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, OK, content.retain());
+    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, OK, content);
     response.headers().set(CONTENT_TYPE, contentType);
     response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
     response.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
@@ -96,7 +97,7 @@ public class RouteHandlerGeneric implements RouteHandler {
       ctx.write(response).addListener(ChannelFutureListener.CLOSE);
     } else {
       response.headers().set(CONNECTION, Values.KEEP_ALIVE);
-      ctx.write(response);
+      ctx.write(response) ;
     }
     ctx.flush() ;
   }
@@ -106,5 +107,8 @@ public class RouteHandlerGeneric implements RouteHandler {
     byte[] bytes = new byte[byteBuf.readableBytes()] ;
     byteBuf.readBytes(bytes) ;
     return bytes ;
+  }
+  
+  public void close() {
   }
 }

@@ -25,15 +25,7 @@ public class HttpRestUnitTest {
     server = new HttpServer();
     server.add("/ping", new Ping());
     server.add("/ping/:topic", new PingTopic());
-    new Thread() {
-      public void run() {
-        try {
-          server.start() ;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }.start() ;
+    server.startAsDeamon();
     Thread.sleep(1000);
   }
   

@@ -15,6 +15,8 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import com.neverwinterdp.util.MapUtil;
 public class HttpServer {
   private Logger  logger;
   private int     port = 8080;
+  private List<RouteHandler> handlers = new ArrayList<RouteHandler>() ;
   private RouteMatcher<RouteHandler> routeMatcher = new RouteMatcher<RouteHandler>() ;
   private Channel channel;
   EventLoopGroup bossGroup, workerGroup ;
@@ -79,6 +82,7 @@ public class HttpServer {
   public HttpServer add(String path, RouteHandler handler) {
     handler.setLogger(loggerFactory.getLogger(handler.getClass().getSimpleName()));
     routeMatcher.addPattern(path, handler);
+    handlers.add(handler) ;
     return this ;
   }
   
@@ -88,6 +92,7 @@ public class HttpServer {
     for(String sel : path) {
       routeMatcher.addPattern(sel, handler);
     }
+    handlers.add(handler) ;
     return this ;
   }
   
@@ -125,7 +130,7 @@ public class HttpServer {
           //handle automatic content decompression.
           //p.addLast("inflater", new HttpContentDecompressor());
           
-          p.addLast("aggregator", new HttpObjectAggregator(1048576));
+          p.addLast("aggregator", new HttpObjectAggregator(3 * 1024 * 1024));
           p.addLast("handler", new HttpServerHandler(HttpServer.this));
         }
       };
@@ -155,6 +160,9 @@ public class HttpServer {
     bossGroup.shutdownGracefully();
     workerGroup.shutdownGracefully();
     channel.close();
+    for(RouteHandler handler : handlers) {
+      handler.close();
+    }
     logger.info("Finish shutdown()");
   }
   

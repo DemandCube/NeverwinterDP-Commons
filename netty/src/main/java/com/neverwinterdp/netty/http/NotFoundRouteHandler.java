@@ -39,4 +39,7 @@ public class NotFoundRouteHandler implements RouteHandler {
     ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     logger.info(message);
   }
+  
+  public void close() {
+  }
 }
