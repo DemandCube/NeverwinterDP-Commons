@@ -70,13 +70,12 @@ public class AsyncHttpClient {
    
     // Make the connection attempt.
     channel = b.connect(host, port).sync().channel();
-    System.out.println("http client connection" + channel.localAddress()) ;
   }
   
   public void close() {
     //Shut down executor threads to exit.
-    group.shutdownGracefully();
     channel.close();
+    group.shutdownGracefully();
   }
   
   public void await() throws InterruptedException {

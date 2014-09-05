@@ -30,6 +30,7 @@ import com.neverwinterdp.util.MapUtil;
 public class HttpServer {
   private Logger  logger;
   private int     port = 8080;
+  private int     numberOfWorkers = 3;
   private List<RouteHandler> handlers = new ArrayList<RouteHandler>() ;
   private RouteMatcher<RouteHandler> routeMatcher = new RouteMatcher<RouteHandler>() ;
   private Channel channel;
@@ -67,6 +68,9 @@ public class HttpServer {
     this.port = port;
     return this ;
   }
+  
+  public int  getNumberOfWorkers() { return this.numberOfWorkers ; }
+  public void setNumberOfWorkers(int workers) { this.numberOfWorkers = workers ; }
   
   public LoggerFactory getLoggerFactory() { 
     return this.loggerFactory ; 
@@ -109,7 +113,7 @@ public class HttpServer {
       setDefault(new NotFoundRouteHandler()) ;
     }
     bossGroup = new NioEventLoopGroup(1);
-    workerGroup = new NioEventLoopGroup(3);
+    workerGroup = new NioEventLoopGroup(numberOfWorkers);
     try {
       ServerBootstrap b = new ServerBootstrap();
       //b.childOption(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024);
