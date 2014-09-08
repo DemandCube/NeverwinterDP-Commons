@@ -26,6 +26,8 @@ public class HttpService extends AbstractService {
     logger.info("Finish init(..)");
   }
   
+  public HttpServer getHttpServer() { return server ; }
+  
   public void start() throws Exception {
     logger.info("Start start()");
     logger.info("Http listen port = " + server.getPort()) ;

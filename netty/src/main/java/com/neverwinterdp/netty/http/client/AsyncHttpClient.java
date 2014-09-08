@@ -117,7 +117,7 @@ public class AsyncHttpClient {
   public void flush() { channel.flush() ; }
   
   DefaultFullHttpRequest createRequest(URI uri, HttpMethod method, ByteBuf content) {
-   // Prepare the HTTP request.
+    //Prepare the HTTP request.
     if(uri.getHost() != null && !host.equalsIgnoreCase(uri.getHost())) {
       throw new RuntimeException("expect uri with the host " + host) ;
     }
@@ -138,6 +138,7 @@ public class AsyncHttpClient {
     request.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
     request.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
 
+    
     // Set some example cookies.
     //request.headers().set(
     //    HttpHeaders.Names.COOKIE,
@@ -148,6 +149,7 @@ public class AsyncHttpClient {
     //);
     return request ;
   }
+  
   
   static public class HttpClientHandler extends SimpleChannelInboundHandler<HttpObject> {
     private ResponseHandler responseHandler ;

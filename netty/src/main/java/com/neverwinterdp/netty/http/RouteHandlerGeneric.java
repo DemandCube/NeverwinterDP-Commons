@@ -78,17 +78,27 @@ public class RouteHandlerGeneric implements RouteHandler {
   }
   
   protected <T> void writeContent(ChannelHandlerContext ctx, HttpRequest req, String content, String mimeType) {
-    byte[] data = content.getBytes(StringUtil.UTF8) ;
-    ByteBuf bBuf = Unpooled.wrappedBuffer(data) ;
-    writeContent(ctx, req, bBuf, mimeType) ;
+    FullHttpResponse response = createResponse(req, content, mimeType);
+    write(ctx, req, response) ;
   }
   
-  protected void writeContent(ChannelHandlerContext ctx, HttpRequest req, ByteBuf content, String contentType) {
+  protected void writeContent(ChannelHandlerContext ctx, HttpRequest req, ByteBuf content, String mimeType) {
+    FullHttpResponse response = createResponse(req, content, mimeType);
+    write(ctx, req, response) ;
+  }
+  
+  protected FullHttpResponse createResponse(HttpRequest req, String content, String mimeType) {
+    byte[] data = content.getBytes(StringUtil.UTF8) ;
+    ByteBuf bBuf = Unpooled.wrappedBuffer(data) ;
+    return createResponse(req, bBuf, mimeType) ;
+  }
+  
+  protected FullHttpResponse createResponse(HttpRequest req, ByteBuf content, String mimeType) {
     FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, OK, content);
-    response.headers().set(CONTENT_TYPE, contentType);
+    response.headers().set(CONTENT_TYPE, mimeType);
     response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
     response.headers().set(HttpHeaders.Names.ACCEPT_ENCODING, HttpHeaders.Values.GZIP);
-    write(ctx, req, response) ;
+    return response ;
   }
   
   protected void write(ChannelHandlerContext ctx, HttpRequest request, FullHttpResponse response) {
