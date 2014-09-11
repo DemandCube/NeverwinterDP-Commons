@@ -37,19 +37,20 @@ public class HttpConnectionUnitTest {
       client.get("/longtask") ;
     }
     client.close() ;
-    Thread.sleep(1000000);
+    Thread.sleep(3000);
   }
   
   static public class LongTaskRouteHandler extends RouteHandlerGeneric {
     @Override
     protected void doGet(ChannelHandlerContext ctx, HttpRequest httpReq) {
-      System.out.println("doGet..............................");
+      System.out.println("start doGet()");
       try {
-        Thread.sleep(1000);
+        Thread.sleep(2000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
       writeContent(ctx, httpReq, "long task", "text/plain");
+      System.out.println("finish doGet()");
     }
   }
 }
