@@ -2,15 +2,12 @@ package com.neverwinterdp.util.monitor;
 
 import static org.junit.Assert.assertEquals;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.neverwinterdp.util.monitor.mergestrategy.AverageFormula;
 import com.neverwinterdp.util.monitor.mergestrategy.MergeFormula;
-import com.neverwinterdp.util.monitor.mergestrategy.WeightedAverageFormula;
 import com.neverwinterdp.util.monitor.snapshot.MetricRegistrySnapshot;
 import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 
