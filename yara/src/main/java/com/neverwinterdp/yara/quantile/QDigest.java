@@ -2,8 +2,6 @@ package com.neverwinterdp.yara.quantile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -295,6 +293,7 @@ public class QDigest implements IQuantileEstimator, Serializable {
   @Override
   public long getQuantile(double q) {
     List<long[]> ranges = toAscRanges();
+    if(ranges.size() == 0) return 0 ;
     long s = 0;
     for (long[] r : ranges) {
       s += r[2];
@@ -318,6 +317,7 @@ public class QDigest implements IQuantileEstimator, Serializable {
 
   public double getMean() {
     List<long[]> ranges = toAscRanges();
+    if(ranges.size() == 0) return  0;
     long sum = 0 ;
     long count = 0 ;
     for (long[] range : ranges) {

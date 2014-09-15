@@ -11,7 +11,6 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 
-import com.codahale.metrics.Timer;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,7 +24,8 @@ import com.neverwinterdp.server.module.ModuleRegistration;
 import com.neverwinterdp.server.module.ServiceModule;
 import com.neverwinterdp.server.module.ModuleRegistration.RunningStatus;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.Timer;
 
 /**
  * @author Tuan Nguyen
@@ -33,7 +33,7 @@ import com.neverwinterdp.util.monitor.ApplicationMonitor;
  */
 public class ServiceContainer {
   @Inject
-  private ApplicationMonitor registry;
+  private MetricRegistry registry;
   @Inject
   private ClusterService  clusterService;
 

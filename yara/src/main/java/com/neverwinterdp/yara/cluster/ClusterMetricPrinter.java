@@ -1,15 +1,21 @@
 package com.neverwinterdp.yara.cluster;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.yara.Counter;
 import com.neverwinterdp.yara.MetricPrinter;
 import com.neverwinterdp.yara.Timer;
 
 public class ClusterMetricPrinter {
   private Appendable out = System.out ;
+  
+  public ClusterMetricPrinter() { } 
+  
+  public ClusterMetricPrinter(Appendable out) { 
+    this.out = out ;
+  }
   
   public void print(ClusterMetricRegistry registry) throws IOException {
     printCounters(registry.getCounters()) ;
@@ -18,16 +24,14 @@ public class ClusterMetricPrinter {
   
   public void printCounters(Map<String, ClusterCounter> clusterCounters) throws IOException {
     MetricPrinter.CounterPrinter tPrinter = new MetricPrinter.CounterPrinter(out) ;
-    Iterator<Map.Entry<String, ClusterCounter>> clusterCounterItr = clusterCounters.entrySet().iterator() ;
-    while(clusterCounterItr.hasNext()) {
-      Map.Entry<String, ClusterCounter> entry = clusterCounterItr.next() ;
-      ClusterCounter clusterCounter = entry.getValue() ;
-      tPrinter.print(entry.getKey(), clusterCounter.getCounter());
-      Map<String, Counter> timers = clusterCounter.getCounters() ;
-      Iterator<Map.Entry<String, Counter>> counterItr = timers.entrySet().iterator() ;
-      while(counterItr.hasNext()) {
-        Map.Entry<String, Counter> cEntry = counterItr.next() ;
-        tPrinter.print(" - " + cEntry.getKey(), cEntry.getValue());
+    String[] keys = StringUtil.toSortedArray(clusterCounters.keySet()) ;
+    for(String key : keys) {
+      ClusterCounter clusterCounter = clusterCounters.get(key) ;
+      tPrinter.print(key, clusterCounter.getCounter());
+      Map<String, Counter> counters = clusterCounter.getCounters() ;
+      String[] serverNames = StringUtil.toSortedArray(counters.keySet()) ;
+      for(String serverName : serverNames) {
+        tPrinter.print(" - " + serverName, counters.get(serverName));
       }
     }
     tPrinter.flush(); 
@@ -35,16 +39,14 @@ public class ClusterMetricPrinter {
   
   public void printTimers(Map<String, ClusterTimer> clusterTimers) throws IOException {
     MetricPrinter.TimerPrinter tPrinter = new MetricPrinter.TimerPrinter(out) ;
-    Iterator<Map.Entry<String, ClusterTimer>> clusterTimerItr = clusterTimers.entrySet().iterator() ;
-    while(clusterTimerItr.hasNext()) {
-      Map.Entry<String, ClusterTimer> entry = clusterTimerItr.next() ;
-      ClusterTimer clusterTimer = entry.getValue() ;
-      tPrinter.print(entry.getKey(), clusterTimer.getTimer());
+    String[] keys = StringUtil.toSortedArray(clusterTimers.keySet()) ;
+    for(String key : keys) {
+      ClusterTimer clusterTimer = clusterTimers.get(key) ;
+      tPrinter.print(key, clusterTimer.getTimer());
       Map<String, Timer> timers = clusterTimer.getTimers() ;
-      Iterator<Map.Entry<String, Timer>> timerItr = timers.entrySet().iterator() ;
-      while(timerItr.hasNext()) {
-        Map.Entry<String, Timer> tEntry = timerItr.next() ;
-        tPrinter.print(" - " + tEntry.getKey(), tEntry.getValue());
+      String[] serverNames = StringUtil.toSortedArray(timers.keySet()) ;
+      for(String serverName : serverNames) {
+        tPrinter.print(" - " + serverName, timers.get(serverName));
       }
     }
     tPrinter.flush(); 

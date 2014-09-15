@@ -49,7 +49,7 @@ public class JSScriptUnitTest {
     ScriptRunner runner = new ScriptRunner(".", ctx) ;
     runner.require("src/main/javascript/util/io.js");
     runner.require("src/main/javascript/util/assert.js");
-    runner.require("src/main/javascript/cluster/cluster.js");
-    runner.require("src/main/javascript/cluster/cluster-unit-test.js");
+    //runner.require("src/main/javascript/cluster/cluster.js");
+    //runner.require("src/main/javascript/cluster/cluster-unit-test.js");
   }
 }

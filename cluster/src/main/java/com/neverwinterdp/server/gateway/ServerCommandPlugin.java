@@ -5,7 +5,7 @@ import com.neverwinterdp.server.cluster.ClusterClient;
 import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
-import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
+import com.neverwinterdp.yara.MetricRegistry;
 
 public class ServerCommandPlugin extends CommandPlugin {
   public ServerCommandPlugin() {
@@ -36,7 +36,7 @@ public class ServerCommandPlugin extends CommandPlugin {
   
   static public class metric implements SubCommandExecutor {
     public Object execute(ClusterClient clusterClient, Command command) throws Exception {
-      ServerCommand<ApplicationMonitorSnapshot> serverCmd = new ServerCommands.GetMonitorSnapshot() ;
+      ServerCommand<MetricRegistry> serverCmd = new ServerCommands.GetMetricRegistry() ;
       command.mapPartial(serverCmd);
       return command.getMemberSelector().execute(clusterClient, serverCmd) ;
     }

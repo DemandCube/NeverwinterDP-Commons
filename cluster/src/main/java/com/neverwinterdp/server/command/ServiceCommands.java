@@ -2,6 +2,7 @@ package com.neverwinterdp.server.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
@@ -10,8 +11,7 @@ import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
 import com.neverwinterdp.util.BeanInspector;
-import com.neverwinterdp.util.monitor.ComponentMonitorable;
-import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
+import com.neverwinterdp.yara.MetricRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -70,12 +70,12 @@ public class ServiceCommands {
     }
   }
   
-  static public class GetServiceMonitor extends ServiceCommand<ComponentMonitorSnapshot> {
-    public ComponentMonitorSnapshot execute(Server server, Service service) throws Exception {
-      if(service instanceof ComponentMonitorable) {
-        return ((ComponentMonitorable)service).getComponentMonitor().getComponentMonitorSnapshot() ;
-      }
-      return null ;
+  static public class GetServiceMetricRegistry extends ServiceCommand<MetricRegistry> {
+    public MetricRegistry execute(Server server, Service service) throws Exception {
+      MetricRegistry registry = new MetricRegistry(server.getClusterService().getMember().getMemberName()) ;
+      registry.counter("TODO").incr() ;
+      registry.timer("TODO").update(100, TimeUnit.NANOSECONDS);
+      return registry ;
     }
   }
   

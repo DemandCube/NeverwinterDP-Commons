@@ -2,6 +2,7 @@ package com.neverwinterdp.util.text;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -170,6 +171,12 @@ public class StringUtil {
       array[index] = i.next() ;
       index++ ;
     }
+    return array ;
+  }
+  
+  static public String[]  toSortedArray(java.util.Collection<String> collection) {
+    String[] array = toArray(collection) ;
+    Arrays.sort(array);
     return array ;
   }
   

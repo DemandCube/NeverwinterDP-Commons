@@ -57,8 +57,6 @@ public class QDigestUnitTest {
     System.out.println("Custom Serialization Size: " + customSerializedData.length)  ;
     
     QDigest customqDigestClone = QDigest.deserialize(customSerializedData) ;
-    System.out.println("qdigest: " + qdigest);
-    System.out.println("clone:   " + customqDigestClone);
     assertEquals(qdigest.toString(), customqDigestClone.toString()) ;
   }
 }

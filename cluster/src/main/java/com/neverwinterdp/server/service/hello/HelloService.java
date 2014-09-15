@@ -6,20 +6,18 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Timer;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.neverwinterdp.server.service.AbstractService;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
-import com.neverwinterdp.util.monitor.ComponentMonitor;
-import com.neverwinterdp.util.monitor.ComponentMonitorable;
+import com.neverwinterdp.yara.Counter;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.Timer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
  */
-public class HelloService extends AbstractService implements ComponentMonitorable  {
+public class HelloService extends AbstractService {
   private Logger logger ;
   
   @Inject @Named("hello")
@@ -32,7 +30,7 @@ public class HelloService extends AbstractService implements ComponentMonitorabl
   @Inject(optional = true) @Named("server.group")
   private String   serverGroup;
   
-  private ComponentMonitor monitorRegistry ;
+  private MetricRegistry monitorRegistry ;
 
   public String getServerGroup() { return this.serverGroup ; }
   
@@ -43,16 +41,12 @@ public class HelloService extends AbstractService implements ComponentMonitorabl
   }
   
   @Inject
-  public void setLoggerFactory(LoggerFactory lfactory) {
+  public void init(LoggerFactory lfactory, MetricRegistry mRegistry) {
     logger = lfactory.getLogger("HelloService") ;
-  }
-  
-  @Inject
-  public void init(ApplicationMonitor mRegistry) {
-    this.monitorRegistry = mRegistry.createComponentMonitor("HelloModule", getClass().getSimpleName()) ;
+    this.monitorRegistry = mRegistry ;
   }
 
-  public ComponentMonitor getComponentMonitor() { 
+  public MetricRegistry getComponentMonitor() { 
     return this.monitorRegistry ; 
   }
   
@@ -74,10 +68,10 @@ public class HelloService extends AbstractService implements ComponentMonitorabl
   }
 
   public String hello(String message) {
-    Timer helloTimer = monitorRegistry.timer("hello-counter") ;
+    Timer helloTimer = monitorRegistry.timer("hello-timer") ;
     Timer.Context ctx = helloTimer.time() ;
-    Counter helloCounter = monitorRegistry.counter("hello-timer") ;
-    helloCounter.inc();
+    Counter counter = monitorRegistry.counter("hello-counter") ;
+    counter.incr();
     ctx.stop() ;
     return "Hello " + message;
   }

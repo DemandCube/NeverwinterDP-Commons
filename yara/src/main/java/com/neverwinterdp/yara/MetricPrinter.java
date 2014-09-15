@@ -2,13 +2,20 @@ package com.neverwinterdp.yara;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularFormater;
 
 public class MetricPrinter {
   private Appendable out = System.out ;
+  
+  public MetricPrinter() { }
+  
+  public MetricPrinter(Appendable out) { 
+    this.out = out ;
+  }
   
   public void print(MetricRegistry registry) throws IOException {
     printCounters(registry.getCounters()) ;
@@ -17,29 +24,27 @@ public class MetricPrinter {
   
   public void printTimers(Map<String, Timer> timers) throws IOException {
     TimerPrinter tprinter = new TimerPrinter(out) ;
-    Iterator<Map.Entry<String, Timer>> timerItr = timers.entrySet().iterator() ;
-    while(timerItr.hasNext()) {
-      Map.Entry<String, Timer> entry = timerItr.next() ;
-      tprinter.print(entry.getKey(), entry.getValue());
+    String[] keys = StringUtil.toSortedArray(timers.keySet()) ;
+    for(String key : keys) {
+      tprinter.print(key, timers.get(key));
     }
     tprinter.flush(); 
   }
   
   public void printCounters(Map<String, Counter> counters) throws IOException {
     CounterPrinter cPrinter = new CounterPrinter(out) ;
-    Iterator<Map.Entry<String, Counter>> timerItr = counters.entrySet().iterator() ;
-    while(timerItr.hasNext()) {
-      Map.Entry<String, Counter> entry = timerItr.next() ;
-      cPrinter.print(entry.getKey(), entry.getValue());
+    String[] keys = StringUtil.toSortedArray(counters.keySet()) ;
+    for(String key : keys) {
+      cPrinter.print(key, counters.get(key));
     }
     cPrinter.flush(); 
   }
   
-  
   static public class TimerPrinter {
     private Appendable out = System.out;
-    protected DecimalFormat dFormater = new DecimalFormat("#.00");
+    protected DecimalFormat dFormater = new DecimalFormat("#");
     protected TabularFormater  tformater ;
+    protected TimeUnit timeUnit = TimeUnit.NANOSECONDS ;
     
     public TimerPrinter() { 
       tformater = new TabularFormater(
@@ -62,7 +67,10 @@ public class MetricPrinter {
         name, 
         timer.getCount(),
         
-        histogram.getMin(), histogram.getMax(), dFormater.format(histogram.getMean()), dFormater.format(histogram.getStdDev()), 
+        dFormater.format(histogram.getMin()), 
+        dFormater.format(histogram.getMax()), 
+        dFormater.format(histogram.getMean()), 
+        dFormater.format(histogram.getStdDev()), 
         
         dFormater.format(histogram.getQuantile(0.75)),
         dFormater.format(histogram.getQuantile(0.90)),
@@ -89,9 +97,7 @@ public class MetricPrinter {
     protected TabularFormater  tformater ;
     
     public CounterPrinter() { 
-      tformater = new TabularFormater(
-          "Name", "Count"
-      ) ;
+      tformater = new TabularFormater("Name", "Count") ;
       tformater.setTitle("Counter") ;
     }
     

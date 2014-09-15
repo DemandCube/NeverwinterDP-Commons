@@ -22,6 +22,8 @@ public class Console {
     this.out = out ;
   }
   
+  public ConsoleAppendable getConsoleAppendable() { return this.consoleOutput ; }
+  
   public String getTextOutput() { return consoleOutput.getTextOutput() ; }
   
   public TabularPrinter tabularPrinter(int ... colWidth) {

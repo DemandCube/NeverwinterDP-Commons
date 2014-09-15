@@ -34,10 +34,7 @@ public class ClusterMetricRegistry {
       clusterCounter.update(registry.getName(), entry.getValue());
     }
     
-    Map<String, Timer> timers = registry.getTimers() ;
-    Iterator<Map.Entry<String, Timer>> timerItr = timers.entrySet().iterator() ;
-    while(timerItr.hasNext()) {
-      Map.Entry<String, Timer> entry = timerItr.next() ;
+    for(Map.Entry<String, Timer> entry : registry.getTimers().entrySet()) {
       String key = entry.getKey() ;
       ClusterTimer clusterTimer = clusterTimers.get(key) ;
       if(clusterTimer == null) {

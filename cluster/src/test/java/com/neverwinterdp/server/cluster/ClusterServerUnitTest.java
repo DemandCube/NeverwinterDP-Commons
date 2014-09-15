@@ -19,8 +19,10 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.server.service.ServiceRegistration;
-import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
+import com.neverwinterdp.yara.MetricPrinter;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.cluster.ClusterMetricPrinter;
+import com.neverwinterdp.yara.cluster.ClusterMetricRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -36,12 +38,9 @@ public class ClusterServerUnitTest {
 
   @BeforeClass
   static public void setup() throws Exception {
-    String[] args = {
-      "-Pserver.group=NeverwinterDP", "-Pserver.name=test", "-Pserver.roles=master"
-    };
     instance = new Server[3] ;
     for(int i = 0; i < instance.length; i++) {
-      instance[i] = Server.create(args) ;  
+      instance[i] = Server.create("-Pserver.group=NeverwinterDP", "-Pserver.name=test" + i, "-Pserver.roles=master") ;  
     }
     client = new HazelcastClusterClient() ;
   }
@@ -154,12 +153,16 @@ public class ClusterServerUnitTest {
   }
   
   @Test
-  public void testMonitorRegistry() throws Exception {
+  public void testGetMetricRegistry() throws Exception {
     Util.assertServerState(client, ServerState.RUNNING) ;
-    ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<ApplicationMonitorSnapshot> monitorResult = 
-        client.execute(new ServerCommands.GetMonitorSnapshot(), targetMember) ;
-    assertFalse(monitorResult.hasError()) ;
-    System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
+    
+    ServerCommandResult<MetricRegistry>[] monitorResult = client.execute(new ServerCommands.GetMetricRegistry()) ;
+    ClusterMetricRegistry clusterRegistry = new ClusterMetricRegistry() ;
+    for(int i = 0; i < monitorResult.length; i++) {
+      assertFalse(monitorResult[i].hasError()) ;
+      clusterRegistry.update(monitorResult[i].getResult());
+    }
+    new MetricPrinter().print(monitorResult[0].getResult());
+    new ClusterMetricPrinter().print(clusterRegistry);
   }
 }

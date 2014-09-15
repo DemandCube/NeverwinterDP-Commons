@@ -5,8 +5,7 @@ import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.util.jvm.JVMInfo;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
-import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
+import com.neverwinterdp.yara.MetricRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -53,21 +52,19 @@ public class ServerCommands {
     }
   }
   
-  static public class GetMonitorSnapshot extends ServerCommand<ApplicationMonitorSnapshot> {
+  static public class GetMetricRegistry extends ServerCommand<MetricRegistry> {
     @Parameter(names = {"--filter"}, description = "Filter by the pattern expression")
     private String filter ;
     
-    public GetMonitorSnapshot() { }
+    public GetMetricRegistry() { }
     
-    public GetMonitorSnapshot(String filter) {
+    public GetMetricRegistry(String filter) {
       this.filter = filter ;
     }
     
-    public ApplicationMonitorSnapshot execute(Server server) throws Exception {
-      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
-      ApplicationMonitorSnapshot snapshot = appMonitor.snapshot() ;
-      snapshot.filter(filter);
-      return snapshot ;
+    public MetricRegistry execute(Server server) throws Exception {
+      MetricRegistry registry = server.getMetricRegistry() ;
+      return registry ;
     }
   }
   
@@ -82,8 +79,8 @@ public class ServerCommands {
     }
     
     public Integer execute(Server server) throws Exception {
-      ApplicationMonitor appMonitor = server.getApplicationMonitor() ;
-      return appMonitor.remove(nameExp) ;
+      MetricRegistry registry = server.getMetricRegistry() ;
+      return registry.remove(nameExp) ;
     }
   }
   

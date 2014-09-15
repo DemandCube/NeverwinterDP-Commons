@@ -22,7 +22,7 @@ import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
 import com.neverwinterdp.util.SysStreamLogger;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.yara.MetricRegistry;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -53,7 +53,7 @@ public class Server {
   private ServerState      serverState  = null;
   
   @Inject
-  private ApplicationMonitor appMonitor ;
+  private MetricRegistry metricRegistry ;
   
   /**
    * The configuration for the server such name, group, version, description,
@@ -99,7 +99,7 @@ public class Server {
     return this.runtimeEnvironment ; 
   }
 
-  public ApplicationMonitor getApplicationMonitor() { return this.appMonitor ; }
+  public MetricRegistry getMetricRegistry() { return this.metricRegistry ; }
   
   /**
    * This lifecycle method be called after the configuration is set. The method

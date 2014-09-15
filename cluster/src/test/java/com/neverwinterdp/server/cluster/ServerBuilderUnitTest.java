@@ -53,7 +53,7 @@ public class ServerBuilderUnitTest {
     assertNotNull(config) ;
     assertEquals(name, config.getServerName()) ;
     
-    assertNotNull(server.getApplicationMonitor()) ;
+    assertNotNull(server.getMetricRegistry()) ;
     assertNotNull(server.getLoggerFactory()) ;
     
     ModuleContainer moduleContainer = server.getModuleContainer() ;

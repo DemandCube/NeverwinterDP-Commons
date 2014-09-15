@@ -1,7 +1,6 @@
 package com.neverwinterdp.server.shell;
 
 import java.util.List;
-import java.util.Map;
 
 import com.beust.jcommander.Parameters;
 import com.beust.jcommander.ParametersDelegate;
@@ -12,10 +11,10 @@ import com.neverwinterdp.server.gateway.Command;
 import com.neverwinterdp.server.gateway.MemberSelector;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
-import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
-import com.neverwinterdp.util.monitor.snapshot.MetricFormater;
-import com.neverwinterdp.util.monitor.snapshot.TimerSnapshot;
 import com.neverwinterdp.util.text.TabularPrinter;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.cluster.ClusterMetricPrinter;
+import com.neverwinterdp.yara.cluster.ClusterMetricRegistry;
 
 @ShellCommandConfig(name = "server")
 public class ShellServerCommand extends ShellCommand {
@@ -110,15 +109,15 @@ public class ShellServerCommand extends ShellCommand {
   
   static public class Metric extends ShellSubCommand {
     public void execute(Shell shell, ShellContext ctx, Command command) throws Exception {
-      ServerCommandResult<ApplicationMonitorSnapshot>[] results = ctx.getClusterGateway().execute(command) ;
-      MetricFormater formater = new MetricFormater("  ") ;
+      ServerCommandResult<MetricRegistry>[] results = ctx.getClusterGateway().execute(command) ;
+      ClusterMetricRegistry clusterRegistry = new ClusterMetricRegistry() ;
       ctx.console().header(command.getCommandLine());
-      for(ServerCommandResult<ApplicationMonitorSnapshot> sel : results) {
-        ApplicationMonitorSnapshot snapshot = sel.getResult() ;
-        ctx.console().println(sel.getFromMember().toString() + " - member name " + sel.getFromMember().getMemberName());
-        Map<String, TimerSnapshot> timers = snapshot.getRegistry().getTimers() ;
-        ctx.console().println(formater.format(timers));
+      for(ServerCommandResult<MetricRegistry> sel : results) {
+        MetricRegistry registry = sel.getResult() ;
+        clusterRegistry.update(registry);
       }
+      ClusterMetricPrinter printer = new ClusterMetricPrinter(ctx.console().getConsoleAppendable()) ;
+      printer.print(clusterRegistry);
     }
   }
   

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +23,8 @@ import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.command.ServiceCommands;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
-import com.neverwinterdp.util.JSONSerializer;
-import com.neverwinterdp.util.monitor.snapshot.ApplicationMonitorSnapshot;
-import com.neverwinterdp.util.monitor.snapshot.ComponentMonitorSnapshot;
+import com.neverwinterdp.yara.MetricPrinter;
+import com.neverwinterdp.yara.MetricRegistry;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -109,7 +109,7 @@ public class ClusterServiceUnitTest {
   }
   
   @Test
-  public void testMethodCall() {
+  public void testMethodCall() throws IOException {
     Util.assertServerState(client, ServerState.RUNNING) ;
     ClusterMember member = instance[0].getClusterService().getMember() ;
     ServerRegistration serverRegistration = client.getServerRegistration(member);
@@ -123,21 +123,20 @@ public class ClusterServiceUnitTest {
     }
     assertEquals("Hello Tuan", sel.getResult()) ;
 
-    ServiceCommand<ComponentMonitorSnapshot> monitorCall = new ServiceCommands.GetServiceMonitor() ;
+    ServiceCommand<MetricRegistry> monitorCall = new ServiceCommands.GetServiceMetricRegistry() ;
     monitorCall.setTargetService(helloService);
-    ServiceCommandResult<ComponentMonitorSnapshot> monitorCallResult = client.execute(monitorCall, member) ;
+    ServiceCommandResult<MetricRegistry> monitorCallResult = client.execute(monitorCall, member) ;
     assertFalse(monitorCallResult.hasError()) ;
+    MetricPrinter mPrinter = new MetricPrinter() ;
     System.out.println("----Service Monitor Registry----");
-    System.out.println(JSONSerializer.INSTANCE.toString(monitorCallResult.getResult()));
+    mPrinter.print(monitorCallResult.getResult());
     System.out.println("--------------------------------");
     
     ClusterMember targetMember = instance[0].getClusterService().getMember() ;
-    ServerCommandResult<ApplicationMonitorSnapshot> monitorResult = 
-        client.execute(new ServerCommands.GetMonitorSnapshot(), targetMember) ;
+    ServerCommandResult<MetricRegistry> monitorResult = 
+        client.execute(new ServerCommands.GetMetricRegistry(), targetMember) ;
     assertFalse(monitorResult.hasError()) ;
-    System.out.println(JSONSerializer.INSTANCE.toString(monitorResult.getResult()));
-  
-    
+    mPrinter.print(monitorResult.getResult());
   }
   
   static public class ServiceClusterListener<T> implements ClusterListener<T> {

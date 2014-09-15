@@ -10,7 +10,7 @@ import com.neverwinterdp.server.cluster.ClusterService;
 import com.neverwinterdp.server.cluster.hazelcast.HazelcastClusterService;
 import com.neverwinterdp.server.module.ModuleContainer;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.yara.MetricRegistry;
 
 public class ServerModule extends AbstractModule {
   private Map<String, String> properties ;
@@ -36,9 +36,9 @@ public class ServerModule extends AbstractModule {
 
     bind(ClusterService.class).toInstance(clusterService);
     
-    ApplicationMonitor appMonitor = new ApplicationMonitor(hostId, "server") ;
-    clusterService.setApplicationMonitor(appMonitor);
-    bind(ApplicationMonitor.class).toInstance(appMonitor);
+    MetricRegistry metricRegistry = new MetricRegistry(properties.get("server.name")) ;
+    clusterService.setMetricRegistry(metricRegistry);
+    bind(MetricRegistry.class).toInstance(metricRegistry);
     
     LoggerFactory loggerFactory = new LoggerFactory("[" + hostId + "][NeverwinterDP] ") ;
     clusterService.setLoggerFactory(loggerFactory);

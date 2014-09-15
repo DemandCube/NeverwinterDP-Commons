@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.codahale.metrics.Timer;
 import com.google.inject.Singleton;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
@@ -32,7 +31,8 @@ import com.neverwinterdp.server.command.ServiceCommand;
 import com.neverwinterdp.server.command.ServiceCommandResult;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
-import com.neverwinterdp.util.monitor.ApplicationMonitor;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.Timer;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -46,7 +46,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   private ClusterMemberImpl member ;
   private ClusterRegistration clusterRegistration ;
   private Server server ;
-  private ApplicationMonitor appMonitor ;
+  private MetricRegistry appMonitor ;
   private List<ClusterListener<Server>> listeners = new ArrayList<ClusterListener<Server>>() ;
   private ITopic<ClusterEvent> clusterEventTopic ;
   private String               clusterEventTopicListenerId ;
@@ -63,7 +63,7 @@ public class HazelcastClusterService implements ClusterService, MessageListener<
   
   public HazelcastInstance getHazelcastInstance() { return this.hzinstance ; }
   
-  public void setApplicationMonitor(ApplicationMonitor appMonitor) {
+  public void setMetricRegistry(MetricRegistry appMonitor) {
     this.appMonitor = appMonitor ;
   }
  
