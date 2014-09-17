@@ -6,6 +6,7 @@ import com.neverwinterdp.server.ServerRegistration;
 import com.neverwinterdp.server.ServerState;
 import com.neverwinterdp.util.jvm.JVMInfo;
 import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 /**
  * @author Tuan Nguyen
  * @email  tuan08@gmail.com
@@ -68,13 +69,22 @@ public class ServerCommands {
     }
   }
   
-  static public class ClearMonitor extends ServerCommand<Integer> {
+  static public class GetMetricRegistrySnapshot extends ServerCommand<MetricRegistrySnapshot> {
+    public GetMetricRegistrySnapshot() { }
+    
+    public MetricRegistrySnapshot execute(Server server) throws Exception {
+      MetricRegistry registry = server.getMetricRegistry() ;
+      return new MetricRegistrySnapshot(registry) ;
+    }
+  }
+  
+  static public class ClearMetricRegistry extends ServerCommand<Integer> {
     @Parameter(names = {"--expression"}, description = "Clear the metric with the name pattern")
     private String nameExp ;
     
-    public ClearMonitor() { }
+    public ClearMetricRegistry() { }
     
-    public ClearMonitor(String nameExp) {
+    public ClearMetricRegistry(String nameExp) {
       this.nameExp = nameExp ;
     }
     

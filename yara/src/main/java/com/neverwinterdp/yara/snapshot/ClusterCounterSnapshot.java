@@ -1,12 +1,13 @@
 package com.neverwinterdp.yara.snapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.yara.Counter;
 import com.neverwinterdp.yara.cluster.ClusterCounter;
 
-public class ClusterCounterSnapshot {
+public class ClusterCounterSnapshot implements Serializable {
   private long count ;
   private Map<String, Long> counters = new HashMap<String, Long>() ;
 

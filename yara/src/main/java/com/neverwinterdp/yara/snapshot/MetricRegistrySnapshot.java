@@ -1,15 +1,16 @@
 package com.neverwinterdp.yara.snapshot;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.neverwinterdp.yara.Counter;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
-public class MetricRegistrySnapshot {
-  private Map<String, Long> counters = new HashMap<String, Long>() ;
-  private Map<String, TimerSnapshot>   timers = new HashMap<String, TimerSnapshot>() ;
+public class MetricRegistrySnapshot implements Serializable {
+  private Map<String, Long> counters = new TreeMap<String, Long>() ;
+  private Map<String, TimerSnapshot>   timers = new TreeMap<String, TimerSnapshot>() ;
 
   public MetricRegistrySnapshot() {}
   

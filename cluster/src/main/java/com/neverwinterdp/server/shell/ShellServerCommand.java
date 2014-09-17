@@ -128,7 +128,6 @@ public class ShellServerCommand extends ShellCommand {
         "The result is the number of the removed metric."
       };
       CommandResultPrinterUtil.printPrimitiveServerResults(ctx, command, results, explaination);
-        
     }
   }
 }

@@ -6,13 +6,19 @@ import com.neverwinterdp.server.command.ServerCommand;
 import com.neverwinterdp.server.command.ServerCommandResult;
 import com.neverwinterdp.server.command.ServerCommands;
 import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.cluster.ClusterMetricRegistry;
+import com.neverwinterdp.yara.snapshot.ClusterMetricRegistrySnapshot;
+import com.neverwinterdp.yara.snapshot.MetricRegistrySnapshot;
 
 public class ServerCommandPlugin extends CommandPlugin {
   public ServerCommandPlugin() {
     add("ping", new ping());
     add("registration", new registration())  ;
     add("metric", new metric()) ;
+    add("metric-snapshot", new metricSnapshot()) ;
     add("metric-clear", new metricClear()) ;
+    add("metric-cluster", new metricCluster()) ;
+    add("metric-cluster-snapshot", new metricClusterSnapshot()) ;
     add("start", new start()) ;
     add("shutdown", new shutdown()) ;
     add("exit", new exit())  ;
@@ -42,9 +48,43 @@ public class ServerCommandPlugin extends CommandPlugin {
     }
   }
   
+  static public class metricSnapshot implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ServerCommand<MetricRegistrySnapshot> serverCmd = new ServerCommands.GetMetricRegistrySnapshot() ;
+      command.mapPartial(serverCmd);
+      return command.getMemberSelector().execute(clusterClient, serverCmd) ;
+    }
+  }
+  
+  static public class metricCluster implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ServerCommand<MetricRegistry> serverCmd = new ServerCommands.GetMetricRegistry() ;
+      command.mapPartial(serverCmd);
+      ServerCommandResult<MetricRegistry>[] results = command.getMemberSelector().execute(clusterClient, serverCmd) ;
+      ClusterMetricRegistry registry = new ClusterMetricRegistry() ;
+      for(ServerCommandResult<MetricRegistry> result : results) {
+        registry.update(result.getResult());
+      }
+      return registry ;
+    }
+  }
+  
+  static public class metricClusterSnapshot implements SubCommandExecutor {
+    public Object execute(ClusterClient clusterClient, Command command) throws Exception {
+      ServerCommand<MetricRegistry> serverCmd = new ServerCommands.GetMetricRegistry() ;
+      command.mapPartial(serverCmd);
+      ServerCommandResult<MetricRegistry>[] results = command.getMemberSelector().execute(clusterClient, serverCmd) ;
+      ClusterMetricRegistry registry = new ClusterMetricRegistry() ;
+      for(ServerCommandResult<MetricRegistry> result : results) {
+        registry.update(result.getResult());
+      }
+      return new ClusterMetricRegistrySnapshot(registry) ;
+    }
+  }
+  
   static public class metricClear implements SubCommandExecutor {
     public Object execute(ClusterClient clusterClient, Command command) throws Exception {
-      ServerCommand<Integer> serverCmd = new ServerCommands.ClearMonitor() ;
+      ServerCommand<Integer> serverCmd = new ServerCommands.ClearMetricRegistry() ;
       command.mapPartial(serverCmd);
       return command.getMemberSelector().execute(clusterClient, serverCmd) ;
     }

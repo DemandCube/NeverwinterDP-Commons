@@ -1,12 +1,13 @@
 package com.neverwinterdp.yara.snapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.neverwinterdp.yara.Timer;
 import com.neverwinterdp.yara.cluster.ClusterTimer;
 
-public class ClusterTimerSnapshot {
+public class ClusterTimerSnapshot implements Serializable {
   private TimerSnapshot timer ;
   private Map<String, TimerSnapshot> timers = new HashMap<String, TimerSnapshot>() ;
 

@@ -1,5 +1,6 @@
 package com.neverwinterdp.yara.snapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import com.neverwinterdp.yara.cluster.ClusterCounter;
 import com.neverwinterdp.yara.cluster.ClusterMetricRegistry;
 import com.neverwinterdp.yara.cluster.ClusterTimer;
 
-public class ClusterMetricRegistrySnapshot {
+public class ClusterMetricRegistrySnapshot implements Serializable {
   private Map<String, ClusterCounterSnapshot> counters = new HashMap<String, ClusterCounterSnapshot>();
   private Map<String, ClusterTimerSnapshot> timers = new HashMap<String, ClusterTimerSnapshot>();
 
