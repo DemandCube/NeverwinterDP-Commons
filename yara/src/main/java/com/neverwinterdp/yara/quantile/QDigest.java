@@ -69,12 +69,12 @@ public class QDigest implements IQuantileEstimator, Serializable {
     }
   };
 
-  private long                            size;
-  private long                            capacity          = 1;
-  private long                            maxValue;
-  private double                          compressionFactor;
-  private LongHashMap                     node2count        = new LongHashMap();
-  private ReentrantReadWriteLock          lock              = new ReentrantReadWriteLock();
+  private long                             size;
+  private long                             capacity          = 1;
+  private long                             maxValue;
+  private double                           compressionFactor;
+  private LongHashMap                      node2count        = new LongHashMap();
+  transient private ReentrantReadWriteLock lock              = new ReentrantReadWriteLock();
   
   public QDigest(double compressionFactor) {
     this.compressionFactor = compressionFactor;
@@ -360,29 +360,40 @@ public class QDigest implements IQuantileEstimator, Serializable {
   }
   
   private void writeObject(ObjectOutputStream s) throws IOException {
-    s.writeLong(size);
-    s.writeDouble(compressionFactor);
-    s.writeLong(capacity);
-    s.writeInt(node2count.size());
-    for (long k : node2count.keySet()) {
-      s.writeLong(k);
-      s.writeLong(node2count.get(k));
+    try {
+      lock.readLock().lock(); 
+      s.writeLong(size);
+      s.writeDouble(compressionFactor);
+      s.writeLong(capacity);
+      s.writeInt(node2count.size());
+      for (long k : node2count.keySet()) {
+        s.writeLong(k);
+        s.writeLong(node2count.get(k));
+      }
+      s.writeLong(maxValue);
+    } finally {
+      lock.readLock().unlock(); 
     }
-    s.writeLong(maxValue);
   }
 
   private void readObject(ObjectInputStream s) throws IOException {
-    node2count        = new LongHashMap();
-    size = s.readLong();
-    compressionFactor = s.readDouble();
-    capacity = s.readLong();
-    int count = s.readInt();
-    for (int i = 0; i < count; ++i) {
-      long k = s.readLong();
-      long n = s.readLong();
-      node2count.put(k, n);
+    lock = new ReentrantReadWriteLock();
+    try {
+      lock.readLock().lock(); 
+      node2count        = new LongHashMap();
+      size = s.readLong();
+      compressionFactor = s.readDouble();
+      capacity = s.readLong();
+      int count = s.readInt();
+      for (int i = 0; i < count; ++i) {
+        long k = s.readLong();
+        long n = s.readLong();
+        node2count.put(k, n);
+      }
+      maxValue = s.readLong() ;
+    } finally {
+      lock.readLock().unlock(); 
     }
-    maxValue = s.readLong() ;
   }
 
   public String toString() {
