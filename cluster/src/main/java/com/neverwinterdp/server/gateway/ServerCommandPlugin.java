@@ -78,7 +78,9 @@ public class ServerCommandPlugin extends CommandPlugin {
       for(ServerCommandResult<MetricRegistry> result : results) {
         registry.update(result.getResult());
       }
-      return new ClusterMetricRegistrySnapshot(registry) ;
+      ServerCommandResult<ClusterMetricRegistrySnapshot> result = new ServerCommandResult<ClusterMetricRegistrySnapshot>() ;
+      result.setResult(new ClusterMetricRegistrySnapshot(registry));
+      return result ;
     }
   }
   
