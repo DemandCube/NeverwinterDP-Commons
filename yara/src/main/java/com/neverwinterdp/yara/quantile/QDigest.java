@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.neverwinterdp.yara.quantile.util.LongFIFOPriorityQueue;
 import com.neverwinterdp.yara.quantile.util.LongHashMap;
@@ -73,7 +74,8 @@ public class QDigest implements IQuantileEstimator, Serializable {
   private long                            maxValue;
   private double                          compressionFactor;
   private LongHashMap                     node2count        = new LongHashMap();
-
+  private ReentrantReadWriteLock          lock              = new ReentrantReadWriteLock();
+  
   public QDigest(double compressionFactor) {
     this.compressionFactor = compressionFactor;
   }
@@ -126,25 +128,30 @@ public class QDigest implements IQuantileEstimator, Serializable {
 
   @Override
   public void offer(long value) {
-    if (value < 0 || value > Long.MAX_VALUE / 2) {
-      throw new IllegalArgumentException("Can only accept values in the range 0.." + Long.MAX_VALUE / 2 + ", got " + value);
-    }
-    if(value > maxValue) maxValue = value ;
-    // Rebuild if the value is too large for the current tree height
-    if (value >= capacity) {
-      rebuildToCapacity(Long.highestOneBit(value) << 1);
-    }
+    lock.readLock().lock(); 
+    try {
+      if (value < 0 || value > Long.MAX_VALUE / 2) {
+        throw new IllegalArgumentException("Can only accept values in the range 0.." + Long.MAX_VALUE / 2 + ", got " + value);
+      }
+      if(value > maxValue) maxValue = value ;
+      // Rebuild if the value is too large for the current tree height
+      if (value >= capacity) {
+        rebuildToCapacity(Long.highestOneBit(value) << 1);
+      }
 
-    long leaf = value2leaf(value);
-    node2count.addTo(leaf, 1);
-    size++;
-    // Always compress at the inserted node, and recompress fully
-    // if the tree becomes too large.
-    // This is one sensible strategy which both is fast and keeps
-    // the tree reasonably small (within the theoretical bound of 3k nodes)
-    compressUpward(leaf);
-    if (node2count.size() > 3 * compressionFactor) {
-      compressFully();
+      long leaf = value2leaf(value);
+      node2count.addTo(leaf, 1);
+      size++;
+      // Always compress at the inserted node, and recompress fully
+      // if the tree becomes too large.
+      // This is one sensible strategy which both is fast and keeps
+      // the tree reasonably small (within the theoretical bound of 3k nodes)
+      compressUpward(leaf);
+      if (node2count.size() > 3 * compressionFactor) {
+        compressFully();
+      }
+    } finally {
+      lock.readLock().unlock(); 
     }
   }
 
@@ -306,13 +313,18 @@ public class QDigest implements IQuantileEstimator, Serializable {
   }
 
   public List<long[]> toAscRanges() {
-    List<long[]> ranges = new ArrayList<long[]>();
-    for (long key : node2count.keySet()) {
-      ranges.add(new long[]{rangeLeft(key), rangeRight(key), node2count.get(key)});
-    }
+    try {
+      lock.readLock().lock(); 
+      List<long[]> ranges = new ArrayList<long[]>();
+      for (long key : node2count.keySet()) {
+        ranges.add(new long[]{rangeLeft(key), rangeRight(key), node2count.get(key)});
+      }
 
-    Collections.sort(ranges, RANGES_COMPARATOR);
-    return ranges;
+      Collections.sort(ranges, RANGES_COMPARATOR);
+      return ranges;
+    } finally {
+      lock.readLock().unlock() ;
+    }
   }
 
   public double getMean() {

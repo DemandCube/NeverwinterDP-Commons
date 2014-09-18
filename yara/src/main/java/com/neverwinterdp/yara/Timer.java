@@ -4,11 +4,12 @@ import java.io.Closeable;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Timer implements Serializable {
   private Meter meter;
   private Histogram histogram ;
-
+  
   public Timer() {
     histogram = new Histogram();
     meter = new Meter();
@@ -18,7 +19,7 @@ public class Timer implements Serializable {
     this.histogram = histogram;
     this.meter = meter;
   }
-
+  
   /**
    * Adds a recorded duration.
    *
