@@ -77,6 +77,11 @@ public class RouteHandlerGeneric implements RouteHandler {
     writeContent(ctx, req, content, "application/json") ;
   }
   
+  protected <T> void writeBytes(ChannelHandlerContext ctx, HttpRequest req, byte[] bytes) {
+    ByteBuf content = Unpooled.wrappedBuffer(bytes) ;
+    writeContent(ctx, req, content, "application/binary") ;
+  }
+  
   protected <T> void writeContent(ChannelHandlerContext ctx, HttpRequest req, String content, String mimeType) {
     FullHttpResponse response = createResponse(req, content, mimeType);
     write(ctx, req, response) ;
