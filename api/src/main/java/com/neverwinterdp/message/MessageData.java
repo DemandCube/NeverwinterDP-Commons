@@ -26,8 +26,8 @@ public class MessageData implements Serializable {
     this.data = data ;
   }
   
-  public <T> MessageData(String type, T obj) {
-    this.type = type ;
+  public <T> MessageData(T obj) {
+    this.type = obj.getClass().getName() ;
     setDataAs(obj) ;
   }
   

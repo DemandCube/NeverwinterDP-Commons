@@ -19,9 +19,8 @@ public class Message implements Serializable {
 
   public <T> Message(String key, T obj, boolean traceEnable) {
     header.setTraceEnable(traceEnable);
-    ;
     header.setKey(key);
-    data = new MessageData(null, obj);
+    data = new MessageData(obj);
   }
 
   public MessageHeader getHeader() {

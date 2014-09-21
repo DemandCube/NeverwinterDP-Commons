@@ -8,30 +8,35 @@ import com.neverwinterdp.util.text.StringUtil;
 
 public class MapUtil {
   static public int getInteger(Map<String, String> map, String name, int defaultValue) {
+    if(map == null) return defaultValue ;
     String val = map.get(name) ;
     if(val != null) return Integer.parseInt(val) ;
     return defaultValue ;
   }
   
   static public long getLong(Map<String, String> map, String name, long defaultValue) {
+    if(map == null) return defaultValue ;
     String val = map.get(name) ;
     if(val != null) return Long.parseLong(val) ;
     return defaultValue ;
   }
   
   static public String getString(Map<String, String> map, String name, String defaultValue) {
+    if(map == null) return defaultValue ;
     String val = map.get(name) ;
     if(val != null) return val ;
     return defaultValue ;
   }
   
   static public String[] getStringArray(Map<String, String> map, String name, String[] defaultValue) {
+    if(map == null) return defaultValue ;
     String val = map.get(name) ;
     if(val != null) return StringUtil.toStringArray(val) ;
     return defaultValue ;
   }
   
   static public Map<String, String> getSubMap(Map<String, String> map, String prefix) {
+    if(map == null) return null ;
     Map<String, String> submap = new HashMap<String, String>() ;
     Iterator<Map.Entry<String, String>> i = map.entrySet().iterator() ;
     while(i.hasNext()) {
