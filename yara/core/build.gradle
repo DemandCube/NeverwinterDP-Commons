@@ -1,0 +1,19 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'commons.yara.core'
+
+eclipse {
+  project {
+    name = 'commons.yara.core'
+  }
+}
+
+dependencies {
+  compile project(':utils')
+
+
+  testCompile group: 'com.clearspring.analytics', name: 'stream', version: '2.7.0'
+  testCompile group: 'com.codahale.metrics', name: 'metrics-core', version: '3.0.2'
+  testCompile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
+  //compile group: 'com.tdunning', name: 't-digest', version: '3.0'
+}

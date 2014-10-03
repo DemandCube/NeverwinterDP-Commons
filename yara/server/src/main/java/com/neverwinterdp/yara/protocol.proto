@@ -1,0 +1,36 @@
+// How to generate
+// ===============
+// $ cd example
+// $ protoc src/main/java/com/neverwinterdp/yara/protocol.proto --java_out=src/main/java
+
+option java_generic_services = true;
+option java_package = "com.neverwinterdp.yara";
+option java_outer_classname = "protocol";
+
+message TimerLog {
+  required string  name          = 1 ; 
+  required int64   timestampTick = 2 ; 
+  required int64   duration      = 3 ; 
+}
+
+message CounterLog {
+  required string  name          = 1 ; 
+  required int64   timestampTick = 2 ; 
+  required int64   count         = 3 ; 
+}
+
+message LogRequest {
+  required string     server   = 1 ; 
+  repeated TimerLog   timer   = 2 ;
+  repeated CounterLog counter = 3 ;
+}
+
+message LogResponse {
+  required int64 logTime      = 1; 
+  required int64 counterCount = 2; 
+  required int64 timerCount   = 3; 
+}
+
+service YaraService {
+  rpc log(LogRequest) returns (LogResponse);
+}

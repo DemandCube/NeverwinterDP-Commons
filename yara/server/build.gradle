@@ -1,0 +1,16 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'com.neverwinterdp.yara.server'
+
+eclipse {
+  project {
+    name = 'com.neverwinterdp.yara.server'
+  }
+}
+
+dependencies {
+  compile project(':utils')
+  compile project(':buffer')
+  compile project(':netty')
+  compile project(':cluster')
+}
