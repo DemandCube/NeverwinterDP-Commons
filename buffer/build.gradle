@@ -1,0 +1,16 @@
+apply plugin: 'maven-publish'
+
+archivesBaseName = 'commons.buffer'
+
+eclipse {
+  project {
+    name = 'commons.buffer'
+  }
+}
+
+dependencies {
+  compile project(':utils')
+  compile project(':yara:core')
+
+  compile group: 'net.openhft', name: 'chronicle', version: '3.2.2'
+}
