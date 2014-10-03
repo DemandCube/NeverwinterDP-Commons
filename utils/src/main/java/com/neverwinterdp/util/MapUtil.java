@@ -7,6 +7,13 @@ import java.util.Map;
 import com.neverwinterdp.util.text.StringUtil;
 
 public class MapUtil {
+  static public boolean getBool(Map<String, String> map, String name, boolean defaultValue) {
+    if(map == null) return defaultValue ;
+    String val = map.get(name) ;
+    if(val != null) return Boolean.parseBoolean(val) ;
+    return defaultValue ;
+  }
+  
   static public int getInteger(Map<String, String> map, String name, int defaultValue) {
     if(map == null) return defaultValue ;
     String val = map.get(name) ;

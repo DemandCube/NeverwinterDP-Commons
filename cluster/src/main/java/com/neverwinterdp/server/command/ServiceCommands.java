@@ -10,6 +10,7 @@ import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.server.service.ServiceState;
+import com.neverwinterdp.server.service.hello.HelloService;
 import com.neverwinterdp.util.BeanInspector;
 import com.neverwinterdp.yara.MetricRegistry;
 /**

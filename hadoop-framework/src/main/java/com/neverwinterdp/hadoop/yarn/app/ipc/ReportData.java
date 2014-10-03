@@ -8,7 +8,6 @@ import java.io.Serializable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerState;
 import com.neverwinterdp.util.JSONSerializer;
 
 public class ReportData implements Serializable, Writable {

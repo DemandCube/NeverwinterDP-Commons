@@ -2,7 +2,6 @@ package com.neverwinterdp.server.command;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 
 import com.neverwinterdp.server.cluster.ClusterMember;
 

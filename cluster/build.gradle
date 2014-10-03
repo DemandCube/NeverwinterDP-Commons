@@ -12,7 +12,7 @@ dependencies {
   compile project(':utils')
   compile project(':api')
   compile project(':netty')
-  compile project(':yara')
+  compile project(':yara:core')
 
   compile group: 'com.hazelcast', name: 'hazelcast', version: '3.2.5'
   compile group: 'com.hazelcast', name: 'hazelcast-client', version: '3.2.5'
