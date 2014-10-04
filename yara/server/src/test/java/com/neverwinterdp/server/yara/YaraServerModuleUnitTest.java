@@ -65,14 +65,14 @@ public class YaraServerModuleUnitTest {
         " -Pyara:rpc.host=127.0.0.1" +
         " -Pyara:rpc.port=8463" +
         " --member-role worker --autostart --module YaraClient --timeout 10000" ;
-      shell.executeScript(installScript);
-      Thread.sleep(1000);
+    shell.executeScript(installScript);
+    Thread.sleep(1000);
   }
   
   public void uninstall() {
     String uninstallScript = 
-        "module uninstall --member-role worker --timeout 20000 --module YaraClient \n" +
-        "module uninstall --member-role master --timeout 20000 --module YaraServer";
+      "module uninstall --member-role worker --timeout 20000 --module YaraClient \n" +
+      "module uninstall --member-role master --timeout 20000 --module YaraServer";
     shell.executeScript(uninstallScript);
   }
 }
