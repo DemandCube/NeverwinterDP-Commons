@@ -23,6 +23,8 @@ import org.elasticsearch.action.admin.indices.status.IndicesStatusResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
+import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -31,14 +33,14 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
  * $Author: Tuan Nguyen$
  **/
 public class ESClient {
-  protected Client client;
+  protected TransportClient client;
   private String[] address;
 
   public ESClient(String[] address) {
     this.address = address;
     Settings settings =
         ImmutableSettings.settingsBuilder().put("cluster.name", "neverwinterdp").build();
-    TransportClient client = new TransportClient(settings);
+    client = new TransportClient(settings);
     for (String selAddr : address) {
       int port = 9300;
       if (selAddr.indexOf(":") > 0) {
@@ -47,17 +49,22 @@ public class ESClient {
       }
       client.addTransportAddress(new InetSocketTransportAddress(selAddr, port));
     }
-    this.client = client;
-  }
-
-  public ESClient(Client client) {
-    this.client = client;
   }
 
   public String[] getAddress() {
     return this.address;
   }
 
+  public boolean waitForConnected(long timeout) throws InterruptedException {
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      ImmutableList<DiscoveryNode> nodes  = client.connectedNodes() ;
+      if(!nodes.isEmpty()) return true ;
+      Thread.sleep(1000);
+    }
+    return false ;
+  }
+  
   public void createIndex(String index, String settings) throws Exception {
     CreateIndexRequestBuilder builder = client.admin().indices().prepareCreate(index);
     if (settings != null) {

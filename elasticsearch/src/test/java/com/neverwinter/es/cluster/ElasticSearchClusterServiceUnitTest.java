@@ -20,7 +20,10 @@ public class ElasticSearchClusterServiceUnitTest {
   @Test
   public void test() throws Exception {
     clusterBuilder.install();
-    Thread.sleep(10000);
+    for(int i = 0; i < 10; i++) {
+      Thread.sleep(1000);
+      clusterBuilder.esServer[0].getLogger().info("wait: this is a test");
+    }
     clusterBuilder.uninstall();
   }
 }

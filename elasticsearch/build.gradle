@@ -8,6 +8,7 @@ eclipse {
 
 dependencies {
   compile project(':cluster')
+  compile project(':buffer')
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: '1.2.2'
 }
 

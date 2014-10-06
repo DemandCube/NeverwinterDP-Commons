@@ -13,12 +13,15 @@ public class ElasticSearchClusterBuilder {
   
   static String TOPIC = "metrics.consumer" ;
   
-  Server  esServer ;
+  Server[]  esServer ;
   Shell   shell ;
 
   public ElasticSearchClusterBuilder() throws Exception {
     FileUtil.removeIfExist("build/cluster", false);
-    esServer = Server.create("-Pserver.name=ElasticSearch", "-Pserver.roles=elasticsearch") ;
+    esServer = new Server[2] ;
+    for(int i = 0; i < esServer.length; i++) {
+      esServer[i] = Server.create("-Pserver.name=elasticsearch" + (i + 1), "-Pserver.roles=elasticsearch") ;
+    }
     
     shell = new Shell() ;
     shell.getShellContext().connect();
@@ -30,7 +33,9 @@ public class ElasticSearchClusterBuilder {
   
   public void destroy() throws Exception {
     shell.close() ; 
-    esServer.destroy();
+    for(int i = 0; i < esServer.length; i++) {
+      esServer[i].destroy();
+    }
   }
   
   public void install() throws InterruptedException {
@@ -45,7 +50,7 @@ public class ElasticSearchClusterBuilder {
   
   public void uninstall() {
     String uninstallScript = 
-        "module uninstall --member-role elasticsearch --timeout 20000 --module ElasticSearch";
+        "module uninstall --member-role elasticsearch --timeout 30000 --module ElasticSearch";
     shell.executeScript(uninstallScript);
   }
 }

@@ -1,8 +1,10 @@
 package com.neverwinterdp.es.log4j;
 
+import java.io.Serializable;
+
 import org.apache.log4j.spi.LoggingEvent;
 
-public class Log4jRecord {
+public class Log4jRecord implements Serializable {
   private long   timestamp;
   private String threadName ;
   private String loggerName;

@@ -2,6 +2,7 @@ package com.neverwinterdp.es;
 
 import java.util.Map;
 
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -60,7 +61,7 @@ public class ESObjectClient<T> {
     esclient.updateMapping(index, mappingType.getSimpleName(), mapping);
   }
 
-  public void put(T idoc, String id) throws Exception {
+  public void put(T idoc, String id) throws ElasticsearchException{
     BulkRequestBuilder bulkRequest = esclient.client.prepareBulk();
     byte[] data = JSONSerializer.INSTANCE.toBytes(idoc);
     bulkRequest.add(
@@ -69,11 +70,11 @@ public class ESObjectClient<T> {
         );
     BulkResponse bulkResponse = bulkRequest.execute().actionGet();
     if (bulkResponse.hasFailures()) {
-      throw new Exception("The operation has been failed!!!");
+      throw new ElasticsearchException("The operation has been failed!!!");
     }
   }
 
-  public void put(Map<String, T> records) throws Exception {
+  public void put(Map<String, T> records) throws ElasticsearchException {
     BulkRequestBuilder bulkRequest = esclient.client.prepareBulk();
     for (Map.Entry<String, T> entry : records.entrySet()) {
       T idoc = entry.getValue();
@@ -85,36 +86,35 @@ public class ESObjectClient<T> {
     }
     BulkResponse bulkResponse = bulkRequest.execute().actionGet();
     if (bulkResponse.hasFailures()) {
-      throw new Exception("The operation has been failed!!!");
+      throw new ElasticsearchException("The operation has been failed!!!");
     }
   }
 
-  public T get(String id) throws Exception {
+  public T get(String id) throws ElasticsearchException {
     GetResponse response = esclient.client.prepareGet(index, mappingType.getSimpleName(), id).execute().actionGet();
-    if (!response.isExists())
-      return null;
+    if (!response.isExists()) return null;
     return JSONSerializer.INSTANCE.fromBytes(response.getSourceAsBytes(), mappingType);
   }
 
-  public boolean remove(String id) throws Exception {
+  public boolean remove(String id) throws ElasticsearchException {
     DeleteResponse response =
         esclient.client.prepareDelete(index, mappingType.getSimpleName(), id).execute().actionGet();
     return response.isFound();
   }
 
-  public SearchResponse search(BaseQueryBuilder xqb) throws Exception {
+  public SearchResponse search(BaseQueryBuilder xqb) throws ElasticsearchException {
     return search(xqb, false, 0, 100);
   }
 
-  public SearchResponse search(BaseQueryBuilder xqb, int from, int to) throws Exception {
+  public SearchResponse search(BaseQueryBuilder xqb, int from, int to) throws ElasticsearchException {
     return search(xqb, false, from, to);
   }
 
-  public T getIDocument(SearchHit hit) throws Exception {
+  public T getIDocument(SearchHit hit) throws ElasticsearchException {
     return JSONSerializer.INSTANCE.fromBytes(hit.source(), mappingType);
   }
 
-  public SearchResponse search(BaseQueryBuilder xqb, boolean explain, int from, int to) throws Exception {
+  public SearchResponse search(BaseQueryBuilder xqb, boolean explain, int from, int to) throws ElasticsearchException {
     SearchResponse response =
         esclient.client.prepareSearch(index).setSearchType(SearchType.QUERY_THEN_FETCH).
             setQuery(xqb).

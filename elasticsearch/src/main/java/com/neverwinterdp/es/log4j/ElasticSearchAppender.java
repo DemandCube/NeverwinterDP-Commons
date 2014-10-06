@@ -1,123 +1,123 @@
 package com.neverwinterdp.es.log4j;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
+import org.elasticsearch.ElasticsearchException;
 
+import com.neverwinterdp.buffer.chronicle.MultiSegmentQueue;
+import com.neverwinterdp.buffer.chronicle.Segment;
 import com.neverwinterdp.es.ESClient;
 import com.neverwinterdp.es.ESObjectClient;
 import com.neverwinterdp.util.text.StringUtil;
 
-public class ElasticSearchAppender extends AppenderSkeleton implements Runnable {
+public class ElasticSearchAppender extends AppenderSkeleton {
   private String[] connect ;
   private String   indexName ;
-  private int      maxRetry = 3;
-  private long     retryPeriod = 1000 ;
-  private long     reconnectPeriod = 1000 ;
+  private String   queueBufferDir;
+  private int      queueMaxSizePerSegment = 100000;
+  private boolean  queueError = false ;
+  private MultiSegmentQueue<Log4jRecord> queue ; 
   
-  private long     reconnectTime  = 0 ;
-  
-  private LinkedBlockingQueue<Log4jRecord> queue = new LinkedBlockingQueue<Log4jRecord>(30000) ; 
-  
-  private ESObjectClient<Log4jRecord> esLog4jRecordClient ;
-  private Thread forwardThread ;
+  private DeamonThread forwardThread ;
   
   public void close() {
   }
 
   public void activateOptions() {
-    System.out.println("ACTIVATE: Elasticsearch log4j appender");
-    forwardThread = new Thread(this); 
+    System.out.println("ElasticSearchAppender: Start Activate Elasticsearch log4j appender");
+    try {
+      queue = new MultiSegmentQueue<Log4jRecord>(queueBufferDir, queueMaxSizePerSegment) ;
+    } catch (Exception e) {
+      queueError = true ;
+      e.printStackTrace();
+    }
+    forwardThread = new DeamonThread(); 
+    forwardThread.setDaemon(true);
     forwardThread.start() ;
-  }
-  
-  public void setIndexName(String indexName) {
-    this.indexName = indexName ;
-  }
-  
-  public void setMaxRetry(int maxRetry) {
-    this.maxRetry = maxRetry ;
-  }
-  
-  
-  public void setRetryPeriod(long period) {
-    retryPeriod = period ;
+    System.out.println("ElasticSearchAppender: Finish Activate Elasticsearch log4j appender");
   }
 
-  public void setReconnectPeriod(long reconnectPeriod) {
-    this.reconnectPeriod = reconnectPeriod ;
-  }
-  
   public void setConnects(String connects) {
     this.connect = StringUtil.toStringArray(connects) ;
   }
   
+  
+  public void setIndexName(String indexName) {
+    this.indexName = indexName ;
+  }
+ 
+  public void setQueueBufferDir(String queueBufferDir) { this.queueBufferDir = queueBufferDir; }
+
+  public void setQueueMaxSizePerSegment(int queueMaxSizePerSegment) {
+    this.queueMaxSizePerSegment = queueMaxSizePerSegment;
+  }
+
   public boolean requiresLayout() { return false; }
 
   protected void append(LoggingEvent event) {
+    if(queueError) return ;
     Log4jRecord record = new Log4jRecord(event) ;
     try {
-      queue.offer(record, 1000, TimeUnit.MILLISECONDS) ;
-    } catch (InterruptedException e1) {
-      e1.printStackTrace();
+      queue.writeObject(record) ;
+    } catch (Exception e) {
+      queueError = true ;
+      e.printStackTrace();
     }
   }
   
-  ESObjectClient<Log4jRecord> getESObjectClient() throws Exception {
-    ESClient esclient = new ESClient(connect);
-    esLog4jRecordClient = new ESObjectClient<Log4jRecord>(esclient, indexName, Log4jRecord.class) ;
-    if (!esLog4jRecordClient.isCreated()) {
-      esLog4jRecordClient.createIndexWith(null, null);
-    }
-    return esLog4jRecordClient ;
-  }
-  
-  void releaseESObjectClient() {
-    if(esLog4jRecordClient != null) {
-      esLog4jRecordClient.close(); 
-      esLog4jRecordClient = null ;
-    }
-  }
-  
-
-  public void run() {
-    ESObjectClient<Log4jRecord> client = null ; 
-    while(client == null) {
+  public class DeamonThread extends Thread {
+    private ESObjectClient<Log4jRecord> esLog4jRecordClient ;
+    private boolean elasticsearchError = false ;
+    
+    boolean init() {
       try {
-        Thread.sleep(reconnectPeriod);
-        client = getESObjectClient() ;
-      } catch(Throwable t) {
-        t.printStackTrace();
+        esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
+        esLog4jRecordClient.getESClient().waitForConnected(60 * 60 * 60) ;
+        if (!esLog4jRecordClient.isCreated()) {
+          esLog4jRecordClient.createIndexWith(null, null);
+        }
+      } catch(Exception ex) {
+        ex.printStackTrace();
+        return false ;
+      }
+      return true ;
+    }
+    
+    public void forward() {
+      while(true) {
+        try {
+          if(elasticsearchError) {
+            Thread.sleep(60 * 1000);
+            elasticsearchError = false ;
+          }
+          Segment<Log4jRecord> segment = null ;
+          while((segment = queue.nextReadSegment(15000)) != null) {
+            segment.open();
+            while(segment.hasNext()) {
+              Log4jRecord record = segment.nextObject() ;
+              esLog4jRecordClient.put(record, record.getId());
+            }
+            queue.commitReadSegment(segment);
+          }
+        } catch(ElasticsearchException ex) {
+          elasticsearchError = true ;
+        } catch (InterruptedException e) {
+          return ;
+        } catch(Exception ex) {
+          ex.printStackTrace() ; 
+          return ;
+        }
       }
     }
     
-    while(true) {
-      try {
-        Log4jRecord record = queue.take() ;
-        for(int i = 0 ; i < this.maxRetry; i++) {
-          if(!doAppend(client, record)) {
-            Thread.sleep(retryPeriod) ;
-          }
-        }
-      } catch (InterruptedException e) {
-        e.printStackTrace() ;
-        return ;
-      } catch(Throwable t) {
-        t.printStackTrace() ; 
-        return ;
-      }
+    void shutdown() {
+      esLog4jRecordClient.close() ;
     }
-  }
-  
-  private boolean doAppend(ESObjectClient<Log4jRecord> client, Log4jRecord record) {
-    try {
-      client.put(record, record.getId());
-      return true ;
-    } catch (Exception e) {
-      e.printStackTrace();
+    
+    public void run() {
+      if(!init()) return ;
+      forward() ;
+      shutdown() ;
     }
-    return false ;
   }
 }
