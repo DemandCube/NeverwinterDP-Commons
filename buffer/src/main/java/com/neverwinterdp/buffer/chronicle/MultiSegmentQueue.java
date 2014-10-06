@@ -73,11 +73,9 @@ public class MultiSegmentQueue<T> {
   
   synchronized public Segment<T> nextReadSegment(long wait) throws InterruptedException, IOException {
     if(segments.size() > 0) return segments.getFirst() ;
-    synchronized(segments) {
-      segments.wait(wait) ;
-      closeWritingSegment() ;
-      if(segments.size() > 0) return segments.getFirst() ;
-    }
+    wait(wait) ;
+    closeWritingSegment() ;
+    if(segments.size() > 0) return segments.getFirst() ;
     return null ;
   }
   
@@ -85,14 +83,12 @@ public class MultiSegmentQueue<T> {
     segments.remove(segment) ;
     segment.delete();
   }
-  
+
   void closeWritingSegment() throws IOException {
     if(writting == null) return ;
     writting.close() ;
-    synchronized(segments) {
-      segments.addLast(writting);
-      segments.notifyAll();
-    }
+    segments.addLast(writting);
+    notifyAll();
     writting = null ;
   }
   
