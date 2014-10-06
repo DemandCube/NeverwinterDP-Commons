@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -17,6 +18,8 @@ import com.neverwinterdp.server.service.Service;
 import com.neverwinterdp.server.service.ServiceContainer;
 import com.neverwinterdp.server.service.ServiceRegistration;
 import com.neverwinterdp.util.LoggerFactory;
+import com.neverwinterdp.yara.MetricRegistry;
+import com.neverwinterdp.yara.Timer;
 /**
  * @author Tuan Nguyen
  * @email tuan08@gmail.com
@@ -28,6 +31,9 @@ public class ModuleContainer {
   
   @Inject
   private RuntimeEnvironment runtimeEnvironment ;
+  
+  @Inject
+  private MetricRegistry metricRegistry ;
   
   private LoggerFactory loggerFactory ;
   private Logger          logger;
@@ -75,6 +81,7 @@ public class ModuleContainer {
         logger.info("Module " + moduleNames[i] + " is not available");
         continue ;
       }
+      Timer.Context timeCtx = metricRegistry.timer("server", "install", moduleNames[i]).time() ;
       try {
         Class<ServiceModule> clazz = (Class<ServiceModule>) Class.forName(mreg.getConfigureClass());
         ServiceModule module = clazz.newInstance() ;
@@ -88,6 +95,8 @@ public class ModuleContainer {
       } catch(Exception ex) {
         logger.error("Cannot install the module " + moduleNames[i], ex);
       }
+      long duration = timeCtx.stop() ;
+      logger.info("Install module " + moduleNames[i] + " in " + TimeUnit.NANOSECONDS.toMillis(duration) + "ms");
     }
     logger.info("Finish install(String ... moduleNames)");
     return moduleStatusHolder.toArray(new ModuleRegistration[moduleStatusHolder.size()]) ;
@@ -99,6 +108,7 @@ public class ModuleContainer {
     for(int i = 0; i < moduleNames.length; i++) {
       ServiceContainer scontainer = installedModules.get(moduleNames[i]) ;
       if(scontainer != null) {
+        Timer.Context timeCtx = metricRegistry.timer("server", "uninstall", moduleNames[i]).time() ;
         installedModules.remove(moduleNames[i]) ;
         ModuleRegistration mstatus = scontainer.getModuleStatus() ;
         scontainer.stop(); 
@@ -106,6 +116,9 @@ public class ModuleContainer {
         mstatus.setInstallStatus(InstallStatus.AVAILABLE);
         mstatus.setRunningStatus(RunningStatus.UNINSTALLED);
         holder.add(mstatus) ;
+        long duration = timeCtx.stop() ;
+        duration = TimeUnit.NANOSECONDS.toMillis(duration) ;
+        logger.info("Uninstall module " + moduleNames[i] + " in " + duration + "ms");
       } else {
         logger.warn("Cannot find the module " + moduleNames[i] + " to uninstall");
       }

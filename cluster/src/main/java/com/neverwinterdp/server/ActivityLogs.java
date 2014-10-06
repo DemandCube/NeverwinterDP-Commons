@@ -3,6 +3,7 @@ package com.neverwinterdp.server;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.neverwinterdp.server.ActivityLog.Type;
 
@@ -13,7 +14,7 @@ import com.neverwinterdp.server.ActivityLog.Type;
  * TODO: remove this class and the relation, replace by the MonitorRegistry
  */
 public class ActivityLogs implements Serializable {
-  private List<ActivityLog> activityLogs = new ArrayList<ActivityLog>() ;
+  private List<ActivityLog> activityLogs = new CopyOnWriteArrayList<ActivityLog>() ;
   
   public List<ActivityLog> getActivityLog() { return this.activityLogs ; }
   
