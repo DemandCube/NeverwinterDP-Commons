@@ -1,14 +1,11 @@
 package com.neverwinterdp.hadoop.yarn.app.worker;
 
 import java.io.Serializable;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.Container;
-import org.apache.hadoop.yarn.api.records.ContainerId;
-import org.apache.hadoop.yarn.api.records.NodeId;
 
 public class AppWorkerContainerInfo implements Serializable {
   private int    containerId ;
@@ -17,7 +14,7 @@ public class AppWorkerContainerInfo implements Serializable {
   private int    cores ;
   private List<String> commands ;
   private AppWorkerContainerProgressStatus progressStatus ;
-  private Map<String, Object> reports  = new HashMap<String, Object> () ;
+  private Map<String, Serializable> reports  = new HashMap<String, Serializable> () ;
   
   public AppWorkerContainerInfo() {}
       
@@ -47,6 +44,19 @@ public class AppWorkerContainerInfo implements Serializable {
 
   public List<String> getCommands() { return commands; }
   public void setCommands(List<String> commands) { this.commands = commands; }
+
+  public void setReport(String name, Serializable report) {
+    reports.put(name, report) ;
+  }
+  
+  /**json serializer may need to have get/set method so I create get/set. should use add report method*/
+  public Map<String, Object> getReports() {
+    return reports;
+  }
+
+  public void setReports(Map<String, Object> reports) {
+    this.reports = reports;
+  }
 
   public AppWorkerContainerProgressStatus getProgressStatus() { return progressStatus; }
   public void setProgressStatus(AppWorkerContainerProgressStatus progressStatus) {
