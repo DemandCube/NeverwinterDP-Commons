@@ -1,5 +1,7 @@
 package com.neverwinterdp.es.log4j;
 
+import java.io.IOException;
+
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.spi.LoggingEvent;
 import org.elasticsearch.ElasticsearchException;
@@ -21,6 +23,10 @@ public class ElasticSearchAppender extends AppenderSkeleton {
   private DeamonThread forwardThread ;
   
   public void close() {
+    if(forwardThread != null) {
+      forwardThread.exit = true ;
+      forwardThread.interrupt() ; 
+    }
   }
 
   public void activateOptions() {
@@ -68,6 +74,7 @@ public class ElasticSearchAppender extends AppenderSkeleton {
   public class DeamonThread extends Thread {
     private ESObjectClient<Log4jRecord> esLog4jRecordClient ;
     private boolean elasticsearchError = false ;
+    private boolean exit = false ;
     
     boolean init() {
       try {
@@ -112,6 +119,13 @@ public class ElasticSearchAppender extends AppenderSkeleton {
     
     void shutdown() {
       esLog4jRecordClient.close() ;
+      if(exit) {
+        try {
+          if(queue != null) queue.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
     }
     
     public void run() {
