@@ -50,7 +50,7 @@ public class MultiSegmentQueue<T> {
     writtingSegment().append(data) ;
   }
   
-  public void write(byte[] data, MetricRegistry mRegistry) throws Exception {
+  synchronized public void write(byte[] data, MetricRegistry mRegistry) throws Exception {
     Timer.Context timeCtx = mRegistry.timer("queue", "segment", "find").time() ;
     Segment<T> segment = writtingSegment();
     timeCtx.stop() ;
