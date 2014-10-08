@@ -22,7 +22,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpVersion;
 
+import java.net.ConnectException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.neverwinterdp.util.JSONSerializer;
 /**
@@ -34,48 +36,80 @@ public class AsyncHttpClient {
   private int    port ;
   private Channel channel ;
   private EventLoopGroup group ;
+  private ResponseHandler handler ;
+  private boolean connected = false ;
   
-  public AsyncHttpClient(String hostport, final ResponseHandler handler) throws Exception {
-    
+  public AsyncHttpClient(String host, int port, ResponseHandler handler) throws Exception {
+    this(host, port, handler, true) ;
   }
   
-  public AsyncHttpClient(String host, int port, final ResponseHandler handler) throws Exception {
+  public AsyncHttpClient(String host, int port, ResponseHandler handler, boolean connect) throws Exception {
     this.host = host ;
     this.port = port ;
-    ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
-      public void initChannel(SocketChannel ch) throws Exception {
-        ChannelPipeline p = ch.pipeline();
-        //p.addLast("log", new LoggingHandler(LogLevel.INFO));
-        p.addLast("codec", new HttpClientCodec());
-        
-        // Remove the following line if you don't want automatic content compression.
-        //p.addLast("deflater", new HttpContentCompressor());
-        //handle automatic content decompression.
-        p.addLast("inflater", new HttpContentDecompressor());
-        
-        //handle HttpChunks.
-        p.addLast("aggregator", new HttpObjectAggregator(3 * 1024 * 1024));
-        p.addLast("handler", new HttpClientHandler(handler));
-      }
-    };
-    
-    group = new NioEventLoopGroup();
-    Bootstrap b = new Bootstrap();
-    //b.option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024);
-    //b.option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024);
-    //b.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(16 * 1024 * 1024));
-    b.group(group).
+    this.handler = handler ;
+    if(connect) connect() ;
+  }
+  
+  public boolean connect() throws Exception {
+    try {
+      ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
+        public void initChannel(SocketChannel ch) throws Exception {
+          ChannelPipeline p = ch.pipeline();
+          //p.addLast("log", new LoggingHandler(LogLevel.INFO));
+          p.addLast("codec", new HttpClientCodec());
+
+          // Remove the following line if you don't want automatic content compression.
+          //p.addLast("deflater", new HttpContentCompressor());
+          //handle automatic content decompression.
+          p.addLast("inflater", new HttpContentDecompressor());
+
+          //handle HttpChunks.
+          p.addLast("aggregator", new HttpObjectAggregator(3 * 1024 * 1024));
+          p.addLast("handler", new HttpClientHandler(handler));
+        }
+      };
+
+      group = new NioEventLoopGroup();
+      Bootstrap b = new Bootstrap();
+      //b.option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024);
+      //b.option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024);
+      //b.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(16 * 1024 * 1024));
+      b.group(group).
       channel(NioSocketChannel.class).
       handler(initializer);
-   
-    // Make the connection attempt.
-    channel = b.connect(host, port).sync().channel();
+
+      // Make the connection attempt.
+      channel = b.connect(host, port).sync().channel();
+      connected = true ;
+      return true ;
+    } catch(Exception ex) {
+      connected = false;
+      if(ex instanceof ConnectException) {
+        return false ;
+      }
+      throw ex ;
+    }
+  }
+  
+  public boolean connect(long timeout, long tryPeriod) throws Exception {
+    long stopTime = System.currentTimeMillis() + timeout ;
+    while(System.currentTimeMillis() < stopTime) {
+      Thread.sleep(tryPeriod);
+      if(connect()) return true ;
+    }
+    return false ;
+  }
+  
+  public boolean isConnected() { return connected ; }
+  
+  public void setNotConnected() {
+    connected = false ; 
   }
   
   public void close() {
     //Shut down executor threads to exit.
-    channel.close();
-    group.shutdownGracefully();
+    if(channel != null) channel.close();
+    if(group != null) group.shutdownGracefully();
   }
   
   public void await() throws InterruptedException {
@@ -83,32 +117,34 @@ public class AsyncHttpClient {
     channel.closeFuture().await() ;
   }
   
-  public void get(String uriString) throws Exception {
+  public void get(String uriString) throws URISyntaxException, ConnectException {
+    if(!connected) throw new ConnectException("Not Connected") ;
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.GET, null) ;
     channel.writeAndFlush(request) ;
   }
   
-  public void post(String uriString, String data) throws Exception {
+  public void post(String uriString, String data) throws ConnectException, URISyntaxException {
     ByteBuf content = Unpooled.wrappedBuffer(data.getBytes()) ;
     post(uriString, content) ;
     //content.release() ;
   }
   
-  public void post(String uriString, byte[] data) throws Exception {
+  public void post(String uriString, byte[] data) throws ConnectException, URISyntaxException {
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     post(uriString, content) ;
     //content.release() ;
   }
   
-  public <T> void post(String uriString, T object) throws Exception {
+  public <T> void post(String uriString, T object) throws ConnectException, URISyntaxException {
     byte[] data = JSONSerializer.INSTANCE.toBytes(object) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     post(uriString, content) ;
     //content.release() ;
   }
   
-  public void post(String uriString, ByteBuf content) throws Exception {
+  public void post(String uriString, ByteBuf content) throws ConnectException, URISyntaxException {
+    if(!connected) throw new ConnectException("Not Connected") ;
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.POST, content.retain()) ;
     channel.writeAndFlush(request) ;
