@@ -58,7 +58,7 @@ public class Timer implements Serializable {
     return update(Clock.defaultClock().getTick(), duration);
   }
   
-  public long update(long timestampTick, long duration) {
+  synchronized public long update(long timestampTick, long duration) {
     if (duration >= 0) {
       histogram.update(duration);
       timestampTick = meter.mark(timestampTick,1l);
