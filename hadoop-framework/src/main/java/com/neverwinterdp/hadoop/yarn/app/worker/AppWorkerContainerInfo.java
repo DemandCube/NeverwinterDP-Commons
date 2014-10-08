@@ -50,11 +50,11 @@ public class AppWorkerContainerInfo implements Serializable {
   }
   
   /**json serializer may need to have get/set method so I create get/set. should use add report method*/
-  public Map<String, Object> getReports() {
+  public Map<String, Serializable> getReports() {
     return reports;
   }
 
-  public void setReports(Map<String, Object> reports) {
+  public void setReports(Map<String, Serializable> reports) {
     this.reports = reports;
   }
 
