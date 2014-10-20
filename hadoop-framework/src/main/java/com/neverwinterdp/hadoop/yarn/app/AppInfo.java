@@ -1,162 +1,110 @@
 package com.neverwinterdp.hadoop.yarn.app;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.Container;
+import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 
-import com.beust.jcommander.DynamicParameter;
-import com.beust.jcommander.Parameter;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainer;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfo;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerInfoList;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerReport;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatus;
+import com.neverwinterdp.hadoop.yarn.app.protocol.AppContainerStatusList;
+import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
 
-public class AppInfo {
-  @Parameter(names = "--mini-cluster-env", description = "Setup the mini cluster env for testing")
-  public boolean miniClusterEnv = false ;
-  
-  @Parameter(names = "--app-id", description = "The application id")
-  public String appId ;
-  
-  @Parameter(names = "--app-home-local", description = "The shared location of the application directory")
-  public String appHomeLocal ;
-  
-  @Parameter(
-    names = "--app-home", 
-    description = "The local app home on the client, that should be copy and deploy to app home share"
-  )
-  public String appHome ;
-  
-  @Parameter(names = "--app-name", description = "The application name")
-  public String appName = "Yarn Application"  ;
-  
-  @Parameter(names = "--app-host-name", description = "The application host name")
-  public String appHostName  ;
-  
-  @Parameter(names = "--app-rpc-port", description = "The application rpc port")
-  public int appRpcPort = 6500  ;
-  
-  @Parameter(names = "--app-tracking-url", description = "The application tracking url")
-  public String appTrackingUrl  ;
-  
-  @Parameter(names = "--app-container-manager", description = "The application container manager class")
-  public String appContainerManager   ;
-  
-  @Parameter(names = "--app-max-memory", description = "Maximum amount of memory allocate to jvm")
-  public int appMaxMemory = 128 ;
-  
-  @Parameter(names = "--app-num-of-worker", description = "Number of worker")
-  public int appNumOfWorkers = 1;
+public class AppInfo  {
+  private AtomicInteger completedContainerCount = new AtomicInteger() ;
+  private AtomicInteger allocatedContainerCount = new AtomicInteger() ;
+  private AtomicInteger failedContainerCount = new AtomicInteger() ;
+  private AtomicInteger requestedContainerCount = new AtomicInteger() ;
 
-  @Parameter(names = "--app-start-time", description = "Start Time")
-  public long appStartTime ;
+  private AppMasterInfoHolder masterInfo = new AppMasterInfoHolder() ;
+  private Map<Integer, AppContainerInfoHolder > containerInfos = new LinkedHashMap<Integer, AppContainerInfoHolder>() ;
   
-  @Parameter(names = "--app-finish-time", description = "Finish Time")
-  public long appFinishTime ;
-  
-  @Parameter(names = "--app-state", description = "App State")
-  public String appState ;
-  
-  @Parameter(names = "--app-history-server-address", description = "Number of worker")
-  public String appHistoryServerAddress = null;
-  
-  
-  @Parameter(names = "--worker-class", description = "App worker")
-  public String worker ;
-  
-  @Parameter(names = "--worker-max-memory", description = "Maximum amount of memory allocate to jvm")
-  public int workerMaxMemory = 128 ;
- 
-  @Parameter(names = "--worker-num-of-core", description = "Maximum amount of memory allocate to jvm")
-  public int workerNumOfCore = 1 ;
- 
-  @DynamicParameter(names = "--conf:", description = "The yarn configuration overrided properties")
-  public Map<String, String> yarnConf = new HashMap<String, String>()  ;
-  
-  public int getAppWorkerContainerId() {
-    String val  = yarnConf.get("worker-container-id") ;
-    if(val == null) return 0;
-    return Integer.parseInt(val) ;
-  }
-  
-  public void setAppWorkerContainerId(int id) {
-    yarnConf.put("worker-container-id", Integer.toString(id)) ;
+
+  public AtomicInteger getCompletedContainerCount() {
+    return completedContainerCount;
   }
 
-  public void setWorkerByType(Class<?> type) { this.worker = type.getName(); }
-  
-  public String buildMasterCommand() {
-    StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(" -Xmx" + appMaxMemory + "m ").
-      append(AppMaster.class.getName()) ;
-    addParameters(b);
-    System.out.println("Master Command: " + b.toString());
-    return b.toString() ;
+  public AtomicInteger getAllocatedContainerCount() {
+    return allocatedContainerCount;
+  }
+
+  public AtomicInteger getFailedContainerCount() {
+    return failedContainerCount;
+  }
+
+  public AtomicInteger getRequestedContainerCount() {
+    return requestedContainerCount;
   }
   
-  public String buildWorkerCommand() {
-    StringBuilder b = new StringBuilder() ;
-    b.append("java ").append(" -Xmx" + workerMaxMemory + "m ").append(AppWorkerContainer.class.getName()) ;
-    addParameters(b);
-    return b.toString() ;
-  } 
-  
-  public void overrideConfiguration(Configuration aconf) {
-    for(Map.Entry<String, String> entry : yarnConf.entrySet()) {
-      aconf.set(entry.getKey(), entry.getValue()) ;
-    }
+  public AppMasterInfoHolder getAppMasterInfoHolder() { return this.masterInfo ; }
+
+  public AppContainerInfoHolder getAppContainerInfoHolder(int containerId) {
+    return containerInfos.get(containerId) ;
   }
   
-  private void addParameters(StringBuilder b) {
-    if(this.miniClusterEnv) {
-      b.append(" --mini-cluster-env ") ;
+  public AppContainerInfoHolder[] getAppContainerInfoHolders() {
+    AppContainerInfoHolder[] array = new AppContainerInfoHolder[containerInfos.size()] ;
+    return containerInfos.values().toArray(array) ;
+  }
+  
+  public AppContainerInfo[] getAppContainerInfos() {
+    AppContainerInfoHolder[] holder = getAppContainerInfoHolders() ;
+    AppContainerInfo[] info = new AppContainerInfo[holder.length];
+    for(int i = 0; i < holder.length; i++) {
+      info[i] = holder[i].getAppContainerInfo() ;
     }
-    
-    if(appId != null) {
-      b.append(" --app-id ").append(this.appId) ;
-    }
-    
-    if(appHomeLocal != null) {
-      b.append(" --app-home ").append(this.appHome) ;
-    }
-    
-    if(appHome != null) {
-      b.append(" --app-home-local ").append(this.appHomeLocal) ;
-    }
-    
-    if(appName != null) {
-      b.append(" --app-name ").append(this.appName) ;
-    }
-    
-    if(appHostName != null) {
-      b.append(" --app-host-name ").append(this.appHostName) ;
-    }
-    b.append(" --app-rpc-port ").append(this.appRpcPort) ;
-    if(appTrackingUrl != null) {
-      b.append(" --app-tracking-url ").append(this.appTrackingUrl) ;
-    }
-    b.append(" --app-container-manager ").append(this.appContainerManager) ;
-    b.append(" --app-max-memory ").append(this.appMaxMemory) ;
-    b.append(" --app-num-of-worker ").append(this.appNumOfWorkers) ;
-    b.append(" --app-start-time ").append(this.appStartTime) ;
-    b.append(" --app-finish-time ").append(this.appFinishTime) ;
-    
-    if(appState != null) {
-      b.append(" --app-state ").append(this.appState) ;
-    }
-    
-    if(appHistoryServerAddress != null) {
-      b.append(" --app-history-server-address ").append(this.appHistoryServerAddress) ;
-    }
-    
-    if(worker != null) {
-      b.append(" --worker-class ").append(this.worker) ;
-    }
-    
-    b.append(" --worker-max-memory ").append(this.workerMaxMemory) ;
-    b.append(" --worker-num-of-core ").append(this.workerNumOfCore) ;
-    
-    for(Map.Entry<String, String> entry : yarnConf.entrySet()) {
-      b.append(" --conf:").append(entry.getKey()).append("=").append(entry.getValue()) ;
-    }
+    return info ;
+  }
+  
+  public AppContainerStatusList getAppContainerStatusList() {
+    AppContainerStatusList.Builder builder = AppContainerStatusList.newBuilder() ;
+    for(AppContainerInfo sel : getAppContainerInfos()) builder.addContainerStatus(sel.getStatus()) ;
+    return builder.build();
+  }
+  
+  public AppContainerInfoList getAppContainerInfoList() {
+    AppContainerInfoList.Builder builder = AppContainerInfoList.newBuilder() ;
+    for(AppContainerInfo sel : getAppContainerInfos()) builder.addContainerInfo(sel) ;
+    return builder.build();
+  }
+  
+  
+  public void onContainerRequest(ContainerRequest containerReq) {
+    requestedContainerCount.incrementAndGet() ;
+  }
+  
+  public void onCompletedContainer(ContainerStatus status) {
+    AppContainerInfoHolder containerInfo = containerInfos.get(status.getContainerId()) ;
+    containerInfo.setProcessStatus(ProcessStatus.TERMINATED) ;
+    completedContainerCount.incrementAndGet();
+  }
+  
+  public void onFailedContainer(ContainerStatus status) {
+    AppContainerInfoHolder containerInfo = containerInfos.get(status.getContainerId()) ;
+    containerInfo.setProcessStatus(ProcessStatus.TERMINATED) ;
+    failedContainerCount.incrementAndGet();
+  }
+  
+  public void onAllocatedContainer(Container container, List<String> commands) {
+    allocatedContainerCount.incrementAndGet() ;
+    int containerId = container.getId().getId() ;
+    AppContainerInfoHolder containerInfo = new AppContainerInfoHolder(containerId) ;
+    containerInfos.put(containerId, containerInfo) ;
+  }
+  
+  public void onUpdateAppContainerStatus(AppContainerStatus status) {
+    AppContainerInfoHolder containerInfo = containerInfos.get(status.getContainerId()) ;
+    containerInfo.setAppContainerStatus(status) ;
+  }
+  
+  public void onUpdateAppContainerReport(AppContainerReport report) {
+    AppContainerInfoHolder containerInfo = containerInfos.get(report.getContainerId()) ;
+    containerInfo.mergeAppContainerReport(report);
   }
 }

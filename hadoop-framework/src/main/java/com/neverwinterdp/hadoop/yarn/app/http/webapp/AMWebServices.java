@@ -8,8 +8,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import com.google.inject.Inject;
+import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
 
 @Path("/ws")
 public class AMWebServices {
@@ -21,8 +21,8 @@ public class AMWebServices {
   @Inject
   public AMWebServices(AppMaster appMaster) {
     this.appMaster = appMaster ;
-    System.out.println("AMWebServices: application id = " + appMaster.getAppInfo().appId);
-    this.app = new App(appMaster.getAppInfo().appId);
+    System.out.println("AMWebServices: application id = " + appMaster.getAppConfig().appId);
+    this.app = new App(appMaster.getAppConfig().appId);
   }
   
   @GET
@@ -35,7 +35,7 @@ public class AMWebServices {
   @GET
   @Path("/monitor")
   @Produces({ MediaType.APPLICATION_JSON})
-  public AppMasterMonitor getAppMonitor() {
-    return appMaster.getAppMonitor() ;
+  public AppInfo getAppInfo() {
+    return appMaster.getAppInfo() ;
   }
 }

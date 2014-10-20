@@ -4,7 +4,7 @@ import org.apache.hadoop.yarn.webapp.SubView;
 import org.apache.hadoop.yarn.webapp.view.HtmlBlock;
 
 import com.google.inject.Inject;
-import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 
 public class IndexPage extends AbstractHtmlPage {
@@ -26,7 +26,7 @@ public class IndexPage extends AbstractHtmlPage {
     }
 
     @Override protected void render(Block html) {
-      AppInfo config = appMaster.getAppInfo() ;
+      AppConfig config = appMaster.getAppConfig() ;
       String[][] data = {
           {"App Id", config.appId},
           {"App Home", config.appHome},

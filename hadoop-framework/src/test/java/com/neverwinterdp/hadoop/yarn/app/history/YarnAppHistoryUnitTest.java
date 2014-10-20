@@ -6,14 +6,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
-import com.neverwinterdp.hadoop.yarn.app.master.AppMasterMonitor;
 import com.neverwinterdp.netty.http.HttpServer;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.DumpResponseHandler;
 import com.neverwinterdp.server.Server;
 import com.neverwinterdp.server.gateway.ClusterGateway;
-import com.neverwinterdp.util.IOUtil;
 import com.neverwinterdp.util.JSONSerializer;
 /**
  * @author Tuan Nguyen
@@ -53,15 +53,12 @@ public class YarnAppHistoryUnitTest {
     
     DumpResponseHandler handler = new DumpResponseHandler() ;
     AsyncHttpClient client = new AsyncHttpClient ("127.0.0.1", 8080, handler) ;
+    client.setJSONSerializer(new JSONSerializer(new ProtobufModule()));
     
-    AppInfo appConfig = new AppInfo() ;
+    AppConfig appConfig = new AppConfig() ;
     appConfig.appHome = "Mock/App/Home" ;
     appConfig.appId   = "YarnApp" ;
-    String appMonitorJson = IOUtil.getFileContentAsString("src/test/resources/AppMonitor.json") ;
-    AppMasterMonitor appMonitor = JSONSerializer.INSTANCE.fromString(appMonitorJson, AppMasterMonitor.class) ;
-    AppHistory appHistory = new AppHistory() ;
-    appHistory.setAppInfo(appConfig);
-    appHistory.setAppMonitor(appMonitor);
+    AppHistory appHistory = new AppHistory(appConfig, new AppInfo()) ;
     sender.send(appHistory);
     
     Thread.sleep(500);

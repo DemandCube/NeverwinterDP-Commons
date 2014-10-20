@@ -1,19 +1,22 @@
 package com.neverwinterdp.hadoop.yarn.app.worker;
 
-import java.net.InetSocketAddress;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.io.serializer.JavaSerialization;
 import org.apache.hadoop.io.serializer.WritableSerialization;
 import org.apache.hadoop.io.serializer.avro.AvroSerialization;
-import org.apache.hadoop.ipc.RPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.neverwinterdp.hadoop.yarn.app.AppInfo;
-import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
+import com.google.protobuf.ServiceException;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
+import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService;
+import com.neverwinterdp.hadoop.yarn.app.protocol.ProcessStatus;
+import com.neverwinterdp.netty.rpc.client.DefaultClientRPCController;
+import com.neverwinterdp.netty.rpc.client.RPCClient;
+import com.neverwinterdp.util.ExceptionUtil;
 
 public class AppWorkerContainer {
   static {
@@ -22,13 +25,15 @@ public class AppWorkerContainer {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppWorkerContainer.class.getName());
   
-  private AppInfo config ;
-  private IPCService ipcService ;
+  private AppConfig config ;
+  private RPCClient rpcClient ;
+  private IPCService.BlockingInterface ipcService ;
   private AppWorker worker ;
-  private AppWorkerContainerProgressStatus progressStatus ;
+  private AppContainerInfoHolder appContainerInfoHolder ;
   
-  public AppWorkerContainer(AppInfo config) {
+  public AppWorkerContainer(AppConfig config) {
     this.config = config ;
+    this.appContainerInfoHolder = new AppContainerInfoHolder(config.getAppWorkerContainerId()) ;
     try {
       Configuration rpcConf = new Configuration() ;
       rpcConf.set(
@@ -36,12 +41,11 @@ public class AppWorkerContainer {
           JavaSerialization.class.getName() + "," + 
               WritableSerialization.class.getName() + "," +
               AvroSerialization.class.getName()
-          ) ;
-      InetSocketAddress rpcAddr = new InetSocketAddress(config.appHostName, config.appRpcPort) ;
-      ipcService = 
-          RPC.getProxy(IPCService.class, RPC.getProtocolVersion(IPCService.class), rpcAddr, rpcConf);
-      ipcService.ping("hello") ;
-
+      ) ;
+      
+      rpcClient = new RPCClient(config.appHostName, config.appRpcPort) ;
+      ipcService = IPCService.newBlockingStub(rpcClient.getRPCChannel()) ;
+      
       Class<AppWorker> appWorkerClass = (Class<AppWorker>) Class.forName(config.worker) ;
       worker = appWorkerClass.newInstance() ;
     } catch(Throwable error) {
@@ -50,32 +54,42 @@ public class AppWorkerContainer {
     }
   }
   
-  public AppInfo getConfig() { return this.config ; }
+  public AppConfig getConfig() { return this.config ; }
   
-  public IPCService getAppMasterRPC() { return this.ipcService ; }
+  public IPCService.BlockingInterface getAppMasterRPC() { return this.ipcService ; }
 
-  public void reportProgress(float progress) {
-    progressStatus.setProgress(progress);
-    ipcService.report(config.getAppWorkerContainerId(), progressStatus);
+  public void reportStatus() {
+    try {
+      ipcService.updateAppContainerStatus(new DefaultClientRPCController(), appContainerInfoHolder.getAppContainerStatus());
+    } catch (ServiceException e) {
+      LOGGER.error("Cannot report progress", e);
+    }
+  }
+  
+  public void reportProgress(double progress) {
+    appContainerInfoHolder.setProgress(progress);
+    reportStatus() ;
   }
   
   public void run() {
-    progressStatus = new AppWorkerContainerProgressStatus(AppWorkerContainerState.RUNNING) ;
-    int workerContainerId = config.getAppWorkerContainerId() ;
+    appContainerInfoHolder.setProcessStatus(ProcessStatus.RUNNING);
+    appContainerInfoHolder.setProgress(0d);
+    reportStatus() ;
     try {
-      ipcService.report(workerContainerId, progressStatus) ;
-      
       worker.run(this) ;
-      
-      progressStatus.setProgress(1);
-      progressStatus.setContainerState(AppWorkerContainerState.FINISHED);
-      ipcService.report(workerContainerId, progressStatus) ;
+      appContainerInfoHolder.setProgress(1d);
+      reportStatus() ;
     } catch(Throwable error) {
       LOGGER.error("Error", error);
-      progressStatus.setThrowableError(error);
-      ipcService.report(workerContainerId, progressStatus);
+      appContainerInfoHolder.getAppContainerStatusBuilder().setErrorStacktrace(ExceptionUtil.getStackTrace(error)) ;
+      reportStatus() ;
     } finally {
+      appContainerInfoHolder.setProcessStatus(ProcessStatus.DESTROY);
+      reportStatus() ;
       onDestroy() ;
+      appContainerInfoHolder.setProcessStatus(ProcessStatus.TERMINATED);
+      reportStatus() ;
+      if(rpcClient != null) rpcClient.close() ; 
     }
   }
   
@@ -86,11 +100,12 @@ public class AppWorkerContainer {
   
   public void onKill() {
     onDestroy() ;
+    if(rpcClient != null) rpcClient.close() ; 
     System.exit(0) ;
   }
   
   static public void main(String[] args) throws Exception {
-    AppInfo options = new AppInfo() ;
+    AppConfig options = new AppConfig() ;
     new JCommander(options, args) ;
     new AppWorkerContainer(options).run() ;
   }

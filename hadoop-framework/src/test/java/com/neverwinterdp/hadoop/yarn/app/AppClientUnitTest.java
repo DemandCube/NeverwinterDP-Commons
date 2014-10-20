@@ -8,8 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
-import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
-import com.neverwinterdp.util.JSONSerializer;
+import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService;
+import com.neverwinterdp.hadoop.yarn.app.protocol.Void;
+import com.neverwinterdp.netty.rpc.client.DefaultClientRPCController;
 
 public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
   static {
@@ -46,9 +47,8 @@ public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
     AppClientMonitor reporter = 
         appClient.run(args, new YarnConfiguration(miniYarnCluster.getConfig()));
     
-    IPCService ipcService = reporter.getIPCService() ;
-    System.out.println("PING: " + ipcService.ping("hello")) ;
-    System.out.println(JSONSerializer.INSTANCE.toString(ipcService.getMonitorData().getJsonData())) ;
+    IPCService.BlockingInterface ipcService = reporter.getIPCService() ;
+    System.out.println("Status: " + ipcService.getAppMasterStatus(new DefaultClientRPCController(), Void.getDefaultInstance())) ;
     reporter.monitor(); 
     reporter.report(System.out);
   }

@@ -1,10 +1,8 @@
 package com.neverwinterdp.hadoop.yarn.app;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.Date;
 
-import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
@@ -13,17 +11,20 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
-import com.neverwinterdp.hadoop.yarn.app.ipc.IPCService;
+import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService;
+import com.neverwinterdp.netty.rpc.client.RPCClient;
 import com.neverwinterdp.util.text.StringUtil;
 import com.neverwinterdp.util.text.TabularPrinter;
 
 public class AppClientMonitor {
-  private AppInfo     config ;
+  private AppConfig     config ;
   private YarnClient    yarnClient;
   private ApplicationId appId;
-  private IPCService    ipcService ;
+  
+  private RPCClient rpcClient ;
+  private IPCService.BlockingInterface  ipcService ;
 
-  public AppClientMonitor(AppInfo config, YarnClient yarnClient, ApplicationId appId) throws Exception {
+  public AppClientMonitor(AppConfig config, YarnClient yarnClient, ApplicationId appId) throws Exception {
     this.config = config ;
     this.yarnClient = yarnClient;
     this.appId = appId;
@@ -39,13 +40,12 @@ public class AppClientMonitor {
     }
     
     if(appMasterHostname != null) {
-      InetSocketAddress rpcAddr = new InetSocketAddress(appMasterHostname, config.appRpcPort) ;
-      ipcService = 
-        RPC.getProxy(IPCService.class, RPC.getProtocolVersion(IPCService.class), rpcAddr, yarnClient.getConfig());
+      rpcClient = new RPCClient(appMasterHostname, config.appRpcPort) ;
+      ipcService = IPCService.newBlockingStub(rpcClient.getRPCChannel()) ;
     }
   }
 
-  public AppInfo getAppConfig() { return this.config ; }
+  public AppConfig getAppConfig() { return this.config ; }
   
   public YarnClient getYarnClient() {
     return this.yarnClient;
@@ -55,7 +55,7 @@ public class AppClientMonitor {
     return this.appId;
   }
 
-  public IPCService getIPCService() { return this.ipcService ; }
+  public IPCService.BlockingInterface getIPCService() { return this.ipcService ; }
   
   public ApplicationReport getApplicationReport() throws YarnException, IOException {
     return yarnClient.getApplicationReport(appId);

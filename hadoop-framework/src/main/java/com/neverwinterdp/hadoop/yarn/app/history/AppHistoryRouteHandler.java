@@ -11,7 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.netty.http.RouteMatcher;
 import com.neverwinterdp.netty.http.rest.RestRouteHandler;
 import com.neverwinterdp.util.ExceptionUtil;
@@ -22,6 +23,7 @@ public class AppHistoryRouteHandler extends RestRouteHandler {
   private RouteMatcher<SubRouteHandler> subRouteHandlers = new RouteMatcher<SubRouteHandler>() ;
   
   public AppHistoryRouteHandler() throws Exception {
+    setJSONSerializer(new JSONSerializer(new ProtobufModule())) ;
     subRouteHandlers.addPattern("/.*/list", new ListAppHandler());
     subRouteHandlers.addPattern("/.*/app/:id", new AppHandler());
   }
@@ -39,8 +41,8 @@ public class AppHistoryRouteHandler extends RestRouteHandler {
   
   protected Object post(ChannelHandlerContext ctx, FullHttpRequest request) {
     byte[] data = getBodyData(request) ;
-    AppHistory appHistory = JSONSerializer.INSTANCE.fromBytes(data, AppHistory.class) ;
-    histories.put(appHistory.getAppInfo().appId, appHistory) ;
+    AppHistory appHistory = jsonSerializer.fromBytes(data, AppHistory.class) ;
+    histories.put(appHistory.getAppConfig().appId, appHistory) ;
     return new AppHistorySendAck(true);
   }
   
@@ -54,7 +56,7 @@ public class AppHistoryRouteHandler extends RestRouteHandler {
       List<AppHistoryDescription> holder = new ArrayList<AppHistoryDescription>() ;
       while(i.hasNext()) {
         AppHistory history = i.next() ;
-        AppInfo appInfo = history.getAppInfo() ;
+        AppConfig appInfo = history.getAppConfig() ;
         AppHistoryDescription desc = new AppHistoryDescription() ;
         desc.setAppId(appInfo.appId);
         desc.setStartTime(new Date(appInfo.appStartTime).toString());

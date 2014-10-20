@@ -31,13 +31,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
+import com.neverwinterdp.hadoop.yarn.app.AppContainerInfoHolder;
 import com.neverwinterdp.hadoop.yarn.app.AppInfo;
 import com.neverwinterdp.hadoop.yarn.app.Util;
+import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService;
 import com.neverwinterdp.hadoop.yarn.app.history.AppHistorySender;
 import com.neverwinterdp.hadoop.yarn.app.http.HttpService;
 import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
-import com.neverwinterdp.hadoop.yarn.app.ipc.IPCServiceServer;
+import com.neverwinterdp.hadoop.yarn.app.ipc.AppIPCService;
 import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
+import com.neverwinterdp.netty.rpc.ping.PingServiceImpl;
+import com.neverwinterdp.netty.rpc.ping.protocol.PingService;
+import com.neverwinterdp.netty.rpc.server.RPCServer;
 
 public class AppMaster {
   static {
@@ -46,15 +52,16 @@ public class AppMaster {
   
   protected static final Logger LOGGER = LoggerFactory.getLogger(AppMaster.class.getName());
   
-  private AppInfo appInfo ;
+  private AppConfig appConfig;
   
   private AMRMClient<ContainerRequest> amrmClient ;
   private AMRMClientAsync<ContainerRequest> amrmClientAsync ;
   private NMClient nmClient;
   private Configuration conf;
 
-  private IPCServiceServer ipcServiceServer ;
-  private AppMasterMonitor appMonitor = new AppMasterMonitor() ;
+  private RPCServer rpcServer ;
+  private AppIPCService ipcService;
+  private AppInfo  appInfo = new AppInfo();
   private AppMasterContainerManager containerManager ;
   
   //private WebApp webApp ;
@@ -64,36 +71,41 @@ public class AppMaster {
   public AppMaster() {
   }
   
-  public AppInfo getAppInfo() { return this.appInfo ; }
+  public AppConfig getAppConfig() { return this.appConfig ; }
   
   public Configuration getConfiguration() { return this.conf ; }
   
-  public AppMasterMonitor getAppMonitor() { return this.appMonitor ; }
+  public AppInfo getAppInfo() { return this.appInfo ; }
 
   public AMRMClient<ContainerRequest> getAMRMClient() { return this.amrmClient ; }
   
   public NMClient getNMClient() { return this.nmClient ; }
   
-  public IPCServiceServer getIPCServiceServer()  { return this.ipcServiceServer ; }
+  public AppIPCService getIPCServiceServer()  { return this.ipcService ; }
   
   public void run(String[] args) throws Exception {
     try {
-      this.appInfo = new AppInfo() ;
-      new JCommander(appInfo, args) ;
-      appInfo.appStartTime = System.currentTimeMillis() ;
-      appInfo.appState = "RUNNING" ;
+      this.appConfig = new AppConfig() ;
+      new JCommander(appConfig, args) ;
+      appConfig.appStartTime = System.currentTimeMillis() ;
+      appConfig.appState = "RUNNING" ;
       conf = new YarnConfiguration() ;
-      appInfo.overrideConfiguration(conf);
-      ipcServiceServer = new IPCServiceServer(this) ;
-      this.appInfo.appHostName = ipcServiceServer.getHostAddress() ;
-      this.appInfo.appRpcPort =  ipcServiceServer.getListenPort() ;
+      appConfig.overrideConfiguration(conf);
+      
+      rpcServer = new RPCServer(appConfig.appRpcPort) ;
+      rpcServer.startAsDeamon(); 
+      
+      ipcService = new AppIPCService(this) ;
+      this.appConfig.appHostName = rpcServer.getHostIpAddress() ;
+      this.appConfig.appRpcPort =  rpcServer.getPort() ;
+      rpcServer.getServiceRegistry().register(IPCService.newReflectiveBlockingService(ipcService));
       
       httpService = new NettyHttpService(this) ;
       httpService.start();
       Thread.sleep(3000);
-      appInfo.appTrackingUrl = httpService.getTrackingUrl() ;
-      System.out.println("Tracking URL: " + appInfo.appTrackingUrl);
-      Class<?> containerClass = Class.forName(appInfo.appContainerManager) ;
+      appConfig.appTrackingUrl = httpService.getTrackingUrl() ;
+      System.out.println("Tracking URL: " + appConfig.appTrackingUrl);
+      Class<?> containerClass = Class.forName(appConfig.appContainerManager) ;
       containerManager = (AppMasterContainerManager)containerClass.newInstance() ;
 
       amrmClient = AMRMClient.createAMRMClient();
@@ -111,7 +123,7 @@ public class AppMaster {
       appHistorySender.startAutoSend(this);
       // Register with RM
       RegisterApplicationMasterResponse registerResponse = 
-          amrmClientAsync.registerApplicationMaster(appInfo.appHostName, appInfo.appRpcPort, appInfo.appTrackingUrl);
+          amrmClientAsync.registerApplicationMaster(appConfig.appHostName, appConfig.appRpcPort, appConfig.appTrackingUrl);
       containerManager.onRequestContainer(this);
       containerManager.waitForComplete(this);
       containerManager.onExit(this);
@@ -133,9 +145,12 @@ public class AppMaster {
         httpService.shutdown() ; 
       }
 
-      if(ipcServiceServer != null) ipcServiceServer.shutdown() ;
-      appInfo.appState = "FINISHED" ;
-      appInfo.appFinishTime = System.currentTimeMillis() ;
+      if(rpcServer != null) {
+        rpcServer.shutdown();
+      }
+      
+      appConfig.appState = "FINISHED" ;
+      appConfig.appFinishTime = System.currentTimeMillis() ;
       if(appHistorySender != null) {
         LOGGER.info("Shutdown the AppHistorySender");
         appHistorySender.shutdown(); 
@@ -152,7 +167,7 @@ public class AppMaster {
       }
       System.out.println("\n\n");
     }
-    if(appInfo.miniClusterEnv) System.exit(0);
+    if(appConfig.miniClusterEnv) System.exit(0);
   }
 
   public ContainerRequest createContainerRequest(int priority, int numOfCores, int memory) {
@@ -180,12 +195,12 @@ public class AppMaster {
   
   public void asyncAdd(ContainerRequest containerReq) {
     amrmClientAsync.addContainerRequest(containerReq);
-    appMonitor.onContainerRequest(containerReq);
+    appInfo.onContainerRequest(containerReq);
   }
   
   public void add(ContainerRequest containerReq) {
     amrmClient.addContainerRequest(containerReq);
-    appMonitor.onContainerRequest(containerReq);
+    appInfo.onContainerRequest(containerReq);
   }
   
   public List<Container> getAllocatedContainers() throws YarnException, IOException {
@@ -200,17 +215,17 @@ public class AppMaster {
     Util.setupAppMasterEnv(true, conf, appMasterEnv);
     ctx.setEnvironment(appMasterEnv);
     
-    appInfo.setAppWorkerContainerId(container.getId().getId());
+    appConfig.setAppWorkerContainerId(container.getId().getId());
     StringBuilder sb = new StringBuilder();
     List<String> commands = Collections.singletonList(
-        sb.append(appInfo.buildWorkerCommand()).
+        sb.append(appConfig.buildWorkerCommand()).
         append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
         append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr")
         .toString()
         );
     ctx.setCommands(commands);
     nmClient.startContainer(container, ctx);
-    appMonitor.onAllocatedContainer(container, commands);
+    appInfo.onAllocatedContainer(container, commands);
   }
   
   class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {
@@ -219,13 +234,13 @@ public class AppMaster {
       for (ContainerStatus status: statuses) {
         assert (status.getState() == ContainerState.COMPLETE);
         int exitStatus = status.getExitStatus();
-        AppWorkerContainerInfo containerInfo = appMonitor.getContainerInfo(status.getContainerId().getId()) ;
+        AppContainerInfoHolder containerInfoHolder = appInfo.getAppContainerInfoHolder(status.getContainerId().getId()) ;
         if (exitStatus != ContainerExitStatus.SUCCESS) {
-          appMonitor.onFailedContainer(status);
-          containerManager.onFailedContainer(AppMaster.this, status, containerInfo);
+          appInfo.onFailedContainer(status);
+          containerManager.onFailedContainer(AppMaster.this, containerInfoHolder, status);
         } else {
-          appMonitor.onCompletedContainer(status);
-          containerManager.onCompleteContainer(AppMaster.this, status, containerInfo);
+          appInfo.onCompletedContainer(status);
+          containerManager.onCompleteContainer(AppMaster.this, containerInfoHolder, status);
         }
       }
     }
@@ -252,13 +267,13 @@ public class AppMaster {
     public float getProgress() { return 0; }
   }
 
-  public AppMaster mock(AppInfo config) {
-    this.appInfo = config ;
+  public AppMaster mock(AppConfig config) {
+    this.appConfig = config ;
     return this ;
   }
   
-  public AppMaster mock(AppMasterMonitor monitor) {
-    this.appMonitor = monitor ;
+  public AppMaster mock(AppInfo appInfo) {
+    this.appInfo = appInfo ;
     return this ;
   }
   

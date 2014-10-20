@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.hadoop.yarn.app.AppInfo;
+import com.neverwinterdp.hadoop.yarn.app.AppConfig;
 import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.netty.http.client.DumpResponseHandler;
@@ -21,7 +21,7 @@ public class WebAppUnitTest {
   @Before
   public void setup() throws Exception {
     AppMaster appMaster = new AppMaster() ;
-    appMaster.mock(new AppInfo()) ;
+    appMaster.mock(new AppConfig()) ;
     httpService = new NettyHttpService(appMaster,port);
     httpService.start() ;
     Thread.sleep(1000);

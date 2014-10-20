@@ -29,7 +29,7 @@ public class MonitorPage extends AbstractHtmlPage {
       html.h2("Monitor Data") ;
       html.
         pre().
-          _(JSONSerializer.INSTANCE.toString(appMaster.getAppMonitor())).
+          _(JSONSerializer.INSTANCE.toString(appMaster.getAppInfo())).
         _() ;
     }
   }

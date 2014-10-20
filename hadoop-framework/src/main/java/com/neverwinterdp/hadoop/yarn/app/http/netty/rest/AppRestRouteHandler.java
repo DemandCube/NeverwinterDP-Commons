@@ -37,13 +37,13 @@ public class AppRestRouteHandler extends RestRouteHandler {
   
   public class AppConfigHandler implements SubRouteHandler {
     public Object process(QueryStringDecoder uriDecoder) throws Exception {
-      return appMaster.getAppInfo() ;
+      return appMaster.getAppConfig() ;
     }
   }
   
   public class MonitorHandler implements SubRouteHandler {
     public Object process(QueryStringDecoder uriDecoder) throws Exception {
-      return appMaster.getAppInfo() ;
+      return appMaster.getAppConfig() ;
     }
   }
 }

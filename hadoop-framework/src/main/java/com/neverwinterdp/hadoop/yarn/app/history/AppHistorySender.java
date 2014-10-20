@@ -7,9 +7,11 @@ import java.net.ConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import com.neverwinterdp.hadoop.yarn.app.master.AppMaster;
 import com.neverwinterdp.netty.http.client.AsyncHttpClient;
 import com.neverwinterdp.netty.http.client.ResponseHandler;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.util.UrlParser;
 
 public class AppHistorySender {
@@ -27,7 +29,7 @@ public class AppHistorySender {
   private AsyncHttpClient client ;
   
   public AppHistorySender(AppMaster appMaster) {
-    this.addressUrl = appMaster.getAppInfo().appHistoryServerAddress ;
+    this.addressUrl = appMaster.getAppConfig().appHistoryServerAddress ;
     connect() ;
   }
   
@@ -46,14 +48,14 @@ public class AppHistorySender {
       urlParser = new UrlParser(addressUrl) ;
       ResponseHandler handler = new ResponseHandler() {
         public void onResponse(HttpResponse response) {
-          
         }
       };
       client = new AsyncHttpClient (urlParser.getHost(), urlParser.getPort(), handler) ;
+      client.setJSONSerializer(new JSONSerializer(new ProtobufModule()));
       error = Error.None ;
     } catch(ConnectException ex) {
       error = Error.Error ;
-      logger.error("Connect Exception: ", ex);
+      logger.error("History server not available: ", ex.getMessage());
     } catch(Exception ex) {
       error = Error.Error ;
       logger.error("Unknown Exception: ", ex);
