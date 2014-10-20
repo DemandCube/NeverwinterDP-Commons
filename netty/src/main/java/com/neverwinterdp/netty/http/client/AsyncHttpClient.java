@@ -38,6 +38,7 @@ public class AsyncHttpClient {
   private EventLoopGroup group ;
   private ResponseHandler handler ;
   private boolean connected = false ;
+  private JSONSerializer jsonSerializer = JSONSerializer.INSTANCE ;
   
   public AsyncHttpClient(String host, int port, ResponseHandler handler) throws Exception {
     this(host, port, handler, true) ;
@@ -48,6 +49,10 @@ public class AsyncHttpClient {
     this.port = port ;
     this.handler = handler ;
     if(connect) connect() ;
+  }
+  
+  public void setJSONSerializer(JSONSerializer serializer) {
+    jsonSerializer = serializer ;
   }
   
   public boolean connect() throws Exception {
@@ -137,7 +142,7 @@ public class AsyncHttpClient {
   }
   
   public <T> void post(String uriString, T object) throws ConnectException, URISyntaxException {
-    byte[] data = JSONSerializer.INSTANCE.toBytes(object) ;
+    byte[] data = jsonSerializer.toBytes(object) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     post(uriString, content) ;
     //content.release() ;

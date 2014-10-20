@@ -3,15 +3,24 @@ package com.neverwinterdp.netty.rpc;
 import org.junit.Test;
 
 import com.google.protobuf.ByteString;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import com.neverwinterdp.netty.rpc.protocol.Request;
 import com.neverwinterdp.netty.rpc.protocol.Response;
 import com.neverwinterdp.netty.rpc.protocol.WirePayload;
 import com.neverwinterdp.util.IOUtil;
+import com.neverwinterdp.util.JSONSerializer;
 import com.neverwinterdp.yara.MetricPrinter;
 import com.neverwinterdp.yara.MetricRegistry;
 import com.neverwinterdp.yara.Timer;
 
 public class SerializationPerformanceTest {
+  @Test
+  public void testJacksonSerialization() throws Exception {
+    JSONSerializer serializer = new JSONSerializer(new ProtobufModule()) ;
+    WirePayload payload = createWirePayload() ;
+    System.out.println(serializer.toString(payload));
+  }
+  
   @Test
   public void testPerformance() throws Exception {
     MetricRegistry mRegistry = new MetricRegistry() ;
@@ -40,6 +49,7 @@ public class SerializationPerformanceTest {
   
   WirePayload createWirePayload() {
     WirePayload.Builder wBuilder = WirePayload.newBuilder() ;
+    wBuilder.setCorrelationId(1l) ;
     wBuilder.setRequest(
         Request.newBuilder().
           setServiceId("AService").

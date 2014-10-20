@@ -1,5 +1,8 @@
 package com.neverwinterdp.netty.rpc.server;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -41,6 +44,12 @@ public final class RPCServer {
   }
 
   public ServiceRegistry getServiceRegistry() { return this.serviceRegistry ; }
+  
+  public String getHostIpAddress() throws UnknownHostException {
+    return InetAddress.getLocalHost().getHostAddress()  ;
+  }
+  
+  public int getPort() { return this.port ; }
   
   public RPCServer setPort(int port) { 
     this.port = port ;

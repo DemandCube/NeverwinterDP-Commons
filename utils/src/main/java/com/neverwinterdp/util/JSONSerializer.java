@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -35,6 +36,13 @@ public class JSONSerializer {
   public JSONSerializer() {
     mapper = new ObjectMapper(); // can reuse, share globally
     configure(mapper) ;
+  }
+  
+  public JSONSerializer(Module ... module) {
+    this() ;
+    for(Module selModule : module) {
+      mapper.registerModule(selModule);
+    }
   }
 
   public void setIgnoreUnknownProperty(boolean b) {

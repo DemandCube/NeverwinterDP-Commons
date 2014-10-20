@@ -33,8 +33,15 @@ import io.netty.handler.codec.http.HttpHeaders.Values;
  */
 public class RouteHandlerGeneric implements RouteHandler {
   protected Logger logger ;
-
+  protected JSONSerializer jsonSerializer = JSONSerializer.INSTANCE ;
+  
   public void configure(Map<String, String> props) {
+  }
+  
+  public JSONSerializer getJSONSerializer() { return this.jsonSerializer ; }
+  
+  public void setJSONSerializer(JSONSerializer jsonSerializer) {
+    this.jsonSerializer = jsonSerializer ;
   }
   
   public void setLogger(Logger logger) {
@@ -72,7 +79,7 @@ public class RouteHandlerGeneric implements RouteHandler {
   }
   
   protected <T> void writeJSON(ChannelHandlerContext ctx, HttpRequest req, T obj) {
-    byte[] data = JSONSerializer.INSTANCE.toBytes(obj) ;
+    byte[] data = jsonSerializer.toBytes(obj) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
     writeContent(ctx, req, content, "application/json") ;
   }
