@@ -80,12 +80,17 @@ public class ElasticSearchAppender extends AppenderSkeleton {
       try {
         esLog4jRecordClient = new ESObjectClient<Log4jRecord>(new ESClient(connect), indexName, Log4jRecord.class) ;
         esLog4jRecordClient.getESClient().waitForConnected(60 * 60 * 60) ;
+      } catch(Exception ex) {
+        ex.printStackTrace();
+        return false ;
+      }
+
+      try {
         if (!esLog4jRecordClient.isCreated()) {
           esLog4jRecordClient.createIndexWith(null, null);
         }
       } catch(Exception ex) {
         ex.printStackTrace();
-        return false ;
       }
       return true ;
     }

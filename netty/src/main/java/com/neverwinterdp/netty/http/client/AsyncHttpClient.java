@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -107,9 +108,7 @@ public class AsyncHttpClient {
   
   public boolean isConnected() { return connected ; }
   
-  public void setNotConnected() {
-    connected = false ; 
-  }
+  public void setNotConnected() { connected = false ; }
   
   public void close() {
     //Shut down executor threads to exit.
@@ -122,37 +121,37 @@ public class AsyncHttpClient {
     channel.closeFuture().await() ;
   }
   
-  public void get(String uriString) throws URISyntaxException, ConnectException {
+  public ChannelFuture get(String uriString) throws URISyntaxException, ConnectException {
     if(!connected) throw new ConnectException("Not Connected") ;
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.GET, null) ;
-    channel.writeAndFlush(request) ;
+    return channel.writeAndFlush(request) ;
   }
   
-  public void post(String uriString, String data) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, String data) throws ConnectException, URISyntaxException {
     ByteBuf content = Unpooled.wrappedBuffer(data.getBytes()) ;
-    post(uriString, content) ;
+    return post(uriString, content) ;
     //content.release() ;
   }
   
-  public void post(String uriString, byte[] data) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, byte[] data) throws ConnectException, URISyntaxException {
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
-    post(uriString, content) ;
+    return post(uriString, content) ;
     //content.release() ;
   }
   
-  public <T> void post(String uriString, T object) throws ConnectException, URISyntaxException {
+  public <T> ChannelFuture post(String uriString, T object) throws ConnectException, URISyntaxException {
     byte[] data = jsonSerializer.toBytes(object) ;
     ByteBuf content = Unpooled.wrappedBuffer(data) ;
-    post(uriString, content) ;
+    return post(uriString, content) ;
     //content.release() ;
   }
   
-  public void post(String uriString, ByteBuf content) throws ConnectException, URISyntaxException {
+  public ChannelFuture post(String uriString, ByteBuf content) throws ConnectException, URISyntaxException {
     if(!connected) throw new ConnectException("Not Connected") ;
     URI uri = new URI(uriString);
     DefaultFullHttpRequest request = createRequest(uri, HttpMethod.POST, content.retain()) ;
-    channel.writeAndFlush(request) ;
+    return channel.writeAndFlush(request) ;
   }
   
   public void flush() { channel.flush() ; }

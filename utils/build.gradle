@@ -9,11 +9,10 @@ eclipse {
 }
 
 dependencies {
-  //compile group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
-  //compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.13'
 
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.2.2'
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.2.2'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.3'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.3'
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.3'
 
   compile group: 'com.codahale.metrics', name: 'metrics-core', version: '3.0.2'
   compile group: 'com.codahale.metrics', name: 'metrics-json', version: '3.0.2'
