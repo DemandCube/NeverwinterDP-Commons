@@ -78,7 +78,5 @@ public class LeaderOffer {
     public int compare(LeaderOffer o1, LeaderOffer o2) {
       return o1.getId().compareTo(o2.getId());
     }
-
   }
-
 }

@@ -13,7 +13,6 @@ public class DefaultClientRPCController implements RpcController {
 
   @Override
   public String errorText() {
-    // TODO Auto-generated method stub
     return null;
   }
 

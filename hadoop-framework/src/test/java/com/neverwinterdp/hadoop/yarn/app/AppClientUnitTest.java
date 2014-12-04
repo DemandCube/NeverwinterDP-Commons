@@ -7,12 +7,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
+import com.neverwinterdp.hadoop.MiniClusterUtil;
 import com.neverwinterdp.hadoop.yarn.app.protocol.IPCService;
 import com.neverwinterdp.hadoop.yarn.app.protocol.Void;
 import com.neverwinterdp.netty.rpc.client.DefaultClientRPCController;
 
-public class AppClientUnitTest extends AbstractMiniClusterUnitTest {
+public class AppClientUnitTest extends MiniClusterUtil {
   static {
     System.setProperty("java.net.preferIPv4Stack", "true") ;
   }

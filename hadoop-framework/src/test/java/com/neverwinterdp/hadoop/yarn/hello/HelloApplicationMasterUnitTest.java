@@ -32,9 +32,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
+import com.neverwinterdp.hadoop.MiniClusterUtil;
 
-public class HelloApplicationMasterUnitTest extends AbstractMiniClusterUnitTest {
+public class HelloApplicationMasterUnitTest extends MiniClusterUtil {
 
   MiniYARNCluster miniYarnCluster ;
 
@@ -136,8 +136,6 @@ public class HelloApplicationMasterUnitTest extends AbstractMiniClusterUnitTest 
   }
   
   private void assertEquals(YarnApplicationState finished, YarnApplicationState appState) {
-    // TODO Auto-generated method stub
-    
   }
 
   //TODO: need to setup the upload jar in the real cluster 

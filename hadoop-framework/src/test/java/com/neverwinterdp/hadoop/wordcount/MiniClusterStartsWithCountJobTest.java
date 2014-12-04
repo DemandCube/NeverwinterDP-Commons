@@ -18,9 +18,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.neverwinterdp.hadoop.AbstractMiniClusterUnitTest;
+import com.neverwinterdp.hadoop.MiniClusterUtil;
 
-public class MiniClusterStartsWithCountJobTest extends AbstractMiniClusterUnitTest {
+public class MiniClusterStartsWithCountJobTest extends MiniClusterUtil {
   Configuration  conf  ;
   private MiniDFSCluster  dfsCluster;
   private MiniYARNCluster yarnCluster;

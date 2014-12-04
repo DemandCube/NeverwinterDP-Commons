@@ -40,9 +40,6 @@ import com.neverwinterdp.hadoop.yarn.app.history.AppHistorySender;
 import com.neverwinterdp.hadoop.yarn.app.http.HttpService;
 import com.neverwinterdp.hadoop.yarn.app.http.netty.NettyHttpService;
 import com.neverwinterdp.hadoop.yarn.app.ipc.AppIPCService;
-import com.neverwinterdp.hadoop.yarn.app.worker.AppWorkerContainerInfo;
-import com.neverwinterdp.netty.rpc.ping.PingServiceImpl;
-import com.neverwinterdp.netty.rpc.ping.protocol.PingService;
 import com.neverwinterdp.netty.rpc.server.RPCServer;
 
 public class AppMaster {
@@ -175,8 +172,7 @@ public class AppMaster {
     Priority containerPriority = Priority.newInstance(priority);
     // Resource requirements for worker containers
     Resource resource = Resource.newInstance(memory, numOfCores);
-    ContainerRequest containerReq = 
-      new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
+    ContainerRequest containerReq =  new ContainerRequest(resource, null /* hosts*/, null /*racks*/, containerPriority);
     return containerReq;
   }
   
@@ -209,8 +205,11 @@ public class AppMaster {
   }
   
   public void startContainer(Container container) throws YarnException, IOException {
+    startContainer(container, appConfig.buildWorkerCommand());
+  }
+  
+  public void startContainer(Container container, String command) throws YarnException, IOException {
     ContainerLaunchContext ctx = Records.newRecord(ContainerLaunchContext.class);
-    System.out.println("Setup the classpath for the container " + container.getId()) ;
     Map<String, String> appMasterEnv = new HashMap<String, String>();
     Util.setupAppMasterEnv(true, conf, appMasterEnv);
     ctx.setEnvironment(appMasterEnv);
@@ -218,14 +217,14 @@ public class AppMaster {
     appConfig.setAppWorkerContainerId(container.getId().getId());
     StringBuilder sb = new StringBuilder();
     List<String> commands = Collections.singletonList(
-        sb.append(appConfig.buildWorkerCommand()).
+        sb.append(command).
         append(" 1> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stdout").
         append(" 2> ").append(ApplicationConstants.LOG_DIR_EXPANSION_VAR).append("/stderr")
         .toString()
         );
     ctx.setCommands(commands);
-    nmClient.startContainer(container, ctx);
     appInfo.onAllocatedContainer(container, commands);
+    nmClient.startContainer(container, ctx);
   }
   
   class AMRMCallbackHandler implements AMRMClientAsync.CallbackHandler {

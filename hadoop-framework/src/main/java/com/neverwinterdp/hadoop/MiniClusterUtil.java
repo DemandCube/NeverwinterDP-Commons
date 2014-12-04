@@ -8,22 +8,21 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.MiniDFSNNTopology;
-import org.apache.hadoop.service.Service.STATE;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler;
 import org.junit.Assert;
 
-public class AbstractMiniClusterUnitTest {
+public class MiniClusterUtil {
   
-  static protected MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
+  static public MiniYARNCluster createMiniYARNCluster(int numOfNodeManagers) throws Exception {
     YarnConfiguration conf = new YarnConfiguration() ;
     MiniYARNCluster cluster = createMiniYARNCluster(conf, numOfNodeManagers) ;
     return cluster ;
   }
   
-  static protected MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
+  static public MiniYARNCluster createMiniYARNCluster(Configuration yarnConf, int numOfNodeManagers) throws Exception {
     yarnConf.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 64);
     yarnConf.setClass(YarnConfiguration.RM_SCHEDULER, FifoScheduler.class, ResourceScheduler.class);
     MiniYARNCluster miniYarnCluster = new MiniYARNCluster("yarn", numOfNodeManagers, 1, 1);
@@ -36,11 +35,11 @@ public class AbstractMiniClusterUnitTest {
     return miniYarnCluster ;
   }
   
-  static protected MiniDFSCluster createMiniDFSCluster(String dir, int numDataNodes) throws Exception {
+  static public MiniDFSCluster createMiniDFSCluster(String dir, int numDataNodes) throws Exception {
     return createMiniDFSCluster(new Configuration(), dir, numDataNodes) ;
   }
   
-  static protected MiniDFSCluster createMiniDFSCluster(Configuration conf, String dir, int numDataNodes) throws Exception {
+  static public MiniDFSCluster createMiniDFSCluster(Configuration conf, String dir, int numDataNodes) throws Exception {
     File baseDir = new File(dir).getAbsoluteFile();
     FileUtil.fullyDelete(baseDir);
     conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
@@ -58,5 +57,4 @@ public class AbstractMiniClusterUnitTest {
     //dfs.copyFromLocalFile(false, false, new Path("target/hadoop-samples-1.0.jar"), new Path("/tmp/hadoop-samples-1.0.jar"));
     return hdfsCluster ;
   }
-  
 }

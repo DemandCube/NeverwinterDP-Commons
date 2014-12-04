@@ -42,7 +42,6 @@ public class ZkClientUnitTest {
     @Test
     public void testZkClientCreateGetAndDelete() throws Exception {
       ZkClient c = new ZkClient(connection);
-      
       String znodename = "/theznode";
       String data = "Goobleygoop";
       

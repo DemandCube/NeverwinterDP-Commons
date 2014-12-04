@@ -186,6 +186,10 @@ public class StringUtil {
     return list ;
   }
   
+  static public void addList(List<String> holder, String ... array) {
+    for(String s :  array) holder.add(s) ;
+  }
+  
   static public String eatCharacter(String string, char ignoreChar) {
     if(string == null || string.length() == 0) return string; 
     char[] array = string.toCharArray() ;

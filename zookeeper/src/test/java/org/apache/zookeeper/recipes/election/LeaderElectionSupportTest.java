@@ -29,7 +29,6 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.recipes.election.LeaderElectionSupport;
 import org.apache.zookeeper.test.ClientBase;
 import org.junit.After;
 import org.junit.Before;
@@ -49,11 +48,8 @@ public class LeaderElectionSupportTest extends ClientBase {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-
     zooKeeper = createClient();
-
-    zooKeeper.create(testRootNode + Thread.currentThread().getId(),
-        new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    zooKeeper.create(testRootNode + Thread.currentThread().getId(), new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
   }
 
   @After

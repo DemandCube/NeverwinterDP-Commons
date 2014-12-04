@@ -80,7 +80,7 @@ public class AppInfo  {
   }
   
   public void onCompletedContainer(ContainerStatus status) {
-    AppContainerInfoHolder containerInfo = containerInfos.get(status.getContainerId()) ;
+    AppContainerInfoHolder containerInfo = containerInfos.get(status.getContainerId().getId()) ;
     containerInfo.setProcessStatus(ProcessStatus.TERMINATED) ;
     completedContainerCount.incrementAndGet();
   }
