@@ -19,7 +19,7 @@ public class AppClientIntegrationTest  {
         "--conf:fs.default.name=hdfs://hadoop:9000",
         "--conf:dfs.replication=1",
         "--conf:yarn.resourcemanager.scheduler.address=hadoop:8030",
-        "--conf:yarn.resourcemanager.address=hadoop:8032",
+        //"--conf:yarn.resourcemanager.address=hadoop:8032",
         "--conf:hello-worker.sleep-time=5000"
       } ;
       

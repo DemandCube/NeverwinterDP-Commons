@@ -29,6 +29,7 @@ dependencies {
 
   compile group: 'com.beust', name: 'jcommander', version: '1.35'
 
+  //compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.6.0'
   compile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: '2.4.0'
 
   //compile group: 'org.apache.storm', name: 'storm-core', version: '0.9.1-incubating'
