@@ -1,4 +1,4 @@
-package com.neverwinterdp.http.httpServlet;
+package com.neverwinterdp.jetty.servlets;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,23 +9,23 @@ import org.junit.Test;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.neverwinterdp.http.HttpServer;
-import com.neverwinterdp.http.servlets.CommandServlet;
+import com.neverwinterdp.jetty.JettyServer;
+import com.neverwinterdp.jetty.servlets.CommandServlet;
 
-public class CommandServletTest {
-  private static HttpServer ps;
+public class TestCommandServlet {
+  private static JettyServer httpServer;
   private static int port = 8181;
   private static String testCommand = "testcommand";
   
   @BeforeClass
   public static void setup() throws Exception{
-    ps = new HttpServer(port, new CommandServlet());
-    ps.run();
+    httpServer = new JettyServer(port, new CommandServlet());
+    httpServer.run();
   }
   
   @AfterClass
   public static void teardown() throws Exception{
-    ps.stop();
+    httpServer.stop();
   }
   
   @Test

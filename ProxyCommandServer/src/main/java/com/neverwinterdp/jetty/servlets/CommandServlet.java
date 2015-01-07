@@ -1,4 +1,4 @@
-package com.neverwinterdp.http.servlets;
+package com.neverwinterdp.jetty.servlets;
 
 import java.io.IOException;
 

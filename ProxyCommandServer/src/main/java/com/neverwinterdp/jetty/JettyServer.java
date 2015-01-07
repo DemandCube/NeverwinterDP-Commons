@@ -1,24 +1,24 @@
-package com.neverwinterdp.http;
+package com.neverwinterdp.jetty;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.Servlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 
-import com.neverwinterdp.http.servlets.CommandServlet;
+import com.neverwinterdp.jetty.servlets.CommandServlet;
 
-public class HttpServer {
-  private static Server server = null;
+public class JettyServer {
+  protected Server server = null;
   
-  public HttpServer(){
+  public JettyServer() {
     this(8080, new CommandServlet());
   }
   
-  public HttpServer(int port){
+  public JettyServer(int port) {
     this(port, new CommandServlet());
   }
   
-  public HttpServer(int port, HttpServlet handler){
+  public JettyServer(int port, Servlet handler) {
     server = new Server(port);
     ServletHandler s = new ServletHandler();
     server.setHandler(s);
@@ -42,7 +42,7 @@ public class HttpServer {
   }
 
   public static void main( String[] args ) throws Exception{
-    HttpServer s = new HttpServer(8080);
+    JettyServer s = new JettyServer(8080);
     s.run();
     s.join();
   }
