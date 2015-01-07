@@ -12,7 +12,7 @@ jacoco {
 
 eclipse {
   project {
-    name = 'ProxyCommandServer'
+    name = 'commons.ProxyCommandServer'
   }
   classpath {
     downloadSources=true
