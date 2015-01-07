@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+apply plugin:'application'
+
+mainClassName = "com.neverwinterdp.proxyCommandServer.proxyServer"
+
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/JacocoReportDir")
+}
+
+eclipse {
+  project {
+    name = 'commons.ProxyCommandServer'
+  }
+  classpath {
+    downloadSources=true
+  }
+}
+
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+
+
+dependencies {
+  compile 'org.eclipse.jetty:jetty-server:9.0.0.RC2'
+  compile 'org.eclipse.jetty:jetty-servlet:9.0.0.RC2'
+  compile 'com.mashape.unirest:unirest-java:1.3.1'
+  
+}
+
+test {
+  forkEvery = 1
+  ignoreFailures = true
+  testLogging.showStandardStreams = true
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}
