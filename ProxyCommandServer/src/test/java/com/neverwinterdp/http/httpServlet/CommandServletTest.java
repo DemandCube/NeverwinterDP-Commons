@@ -1,4 +1,4 @@
-package com.neverwinterdp.proxy.httpServlet;
+package com.neverwinterdp.http.httpServlet;
 
 import static org.junit.Assert.assertEquals;
 
