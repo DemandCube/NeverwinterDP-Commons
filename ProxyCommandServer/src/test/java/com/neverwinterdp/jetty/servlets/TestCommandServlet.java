@@ -19,7 +19,7 @@ public class TestCommandServlet {
   
   @BeforeClass
   public static void setup() throws Exception{
-    httpServer = new JettyServer(port, new CommandServlet());
+    httpServer = new JettyServer(port, CommandServlet.class);
     httpServer.run();
   }
   

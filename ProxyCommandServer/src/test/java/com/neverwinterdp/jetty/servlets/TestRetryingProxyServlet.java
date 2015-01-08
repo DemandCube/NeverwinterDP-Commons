@@ -2,6 +2,7 @@ package com.neverwinterdp.jetty.servlets;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -9,8 +10,7 @@ import org.junit.Test;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.neverwinterdp.jetty.JettyServer;
-import com.neverwinterdp.jetty.servlets.HelloServlet;
-import com.neverwinterdp.jetty.servlets.RetryingProxyServlet;
+
 
 public class TestRetryingProxyServlet {
   private static JettyServer httpServer;
@@ -19,7 +19,7 @@ public class TestRetryingProxyServlet {
   
   @BeforeClass
   public static void setup() throws Exception{
-    httpServer = new JettyServer(httpPort, new HelloServlet());
+    httpServer = new JettyServer(httpPort, HelloServlet.class);
     httpServer.run();
   }
   
@@ -30,11 +30,21 @@ public class TestRetryingProxyServlet {
   
   @Test
   public void testRetryingProxyServer() throws Exception{
+    //Used to point to custom web.xml
+    WebAppContext webapp = new WebAppContext();
+    webapp.setResourceBase("./src/test/resources/");
+    //webapp.setContextPath("/");
+    //webapp.setParentLoaderPriority(true);
+    webapp.setDescriptor("./src/test/resources/override-web.xml");
+    
+    
     JettyServer proxyServer = null;
     try{
-      proxyServer = new JettyServer(proxyPort,
-          new RetryingProxyServlet("http://localhost:"+Integer.toString(httpPort)));
+      proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);
+      
+      proxyServer.setHandler(webapp);
       proxyServer.run();
+      
       
       //Make sure http server is fine first, just for sanity's sake
       HttpResponse<String> httpResp = Unirest.get("http://localhost:"+Integer.toString(httpPort)).asString();
@@ -46,6 +56,9 @@ public class TestRetryingProxyServlet {
       HttpResponse<String> proxyResp = Unirest.get("http://localhost:"+Integer.toString(proxyPort)).asString();
       assertEquals(HelloServlet.responseString, proxyResp.getBody());
       //assertEquals(200, proxyResp.getCode());
+    }
+    catch(Exception e){
+      e.printStackTrace();
     }
     finally{
       proxyServer.stop();

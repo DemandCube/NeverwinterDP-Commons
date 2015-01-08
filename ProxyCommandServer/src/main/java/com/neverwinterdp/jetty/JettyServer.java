@@ -4,6 +4,7 @@ import javax.servlet.Servlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.neverwinterdp.jetty.servlets.CommandServlet;
 
@@ -11,18 +12,22 @@ public class JettyServer {
   protected Server server = null;
   
   public JettyServer() {
-    this(8080, new CommandServlet());
+    this(8080, CommandServlet.class);
   }
   
   public JettyServer(int port) {
-    this(port, new CommandServlet());
+    this(port, CommandServlet.class);
   }
   
-  public JettyServer(int port, Servlet handler) {
+  public JettyServer(int port, Class<?extends Servlet> servletClass) {
     server = new Server(port);
     ServletHandler s = new ServletHandler();
     server.setHandler(s);
-    s.addServletWithMapping(handler.getClass(), "/*");
+    s.addServletWithMapping(servletClass, "/*");
+  }
+  
+  public void setHandler(WebAppContext w){
+    server.setHandler(w);
   }
   
   public void run() throws Exception{

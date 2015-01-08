@@ -23,7 +23,7 @@ public class TestJettyServer {
   
   @BeforeClass
   public static void setup() throws Exception{
-    httpServer = new JettyServer(port, new HelloServlet());
+    httpServer = new JettyServer(port, HelloServlet.class);
     httpServer.run();
   }
   
@@ -47,6 +47,3 @@ public class TestJettyServer {
     assertEquals(expectedHeaders, resp.getHeaders());
   }
 }
-
-//{content-type=text/html; charset=ISO-8859-1, content-length=23, server=Jetty(9.2.0.RC0), date=Wed, 07 Jan 2015 01:16:36 GMT}
-//{content-type=text/html; charset=ISO-8859-1, content-length=23, server=Jetty(9.2.0.RC0), date=Wed, 07 Jan 2015 13:16:36 GMT}>
