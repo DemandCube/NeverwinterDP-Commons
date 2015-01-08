@@ -33,24 +33,18 @@ public class TestRetryingProxyServlet {
     //Used to point to custom web.xml
     WebAppContext webapp = new WebAppContext();
     webapp.setResourceBase("./src/test/resources/");
-    //webapp.setContextPath("/");
-    //webapp.setParentLoaderPriority(true);
     webapp.setDescriptor("./src/test/resources/override-web.xml");
     
     
     JettyServer proxyServer = null;
     try{
-      proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);
-      
-      proxyServer.setHandler(webapp);
+      proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);proxyServer.setHandler(webapp);
       proxyServer.run();
-      
       
       //Make sure http server is fine first, just for sanity's sake
       HttpResponse<String> httpResp = Unirest.get("http://localhost:"+Integer.toString(httpPort)).asString();
       assertEquals(HelloServlet.responseString, httpResp.getBody());
       assertEquals(200, httpResp.getCode());
-      
       
       //Test proxy
       HttpResponse<String> proxyResp = Unirest.get("http://localhost:"+Integer.toString(proxyPort)).asString();
@@ -62,8 +56,6 @@ public class TestRetryingProxyServlet {
     }
     finally{
       proxyServer.stop();
-    }
-    
-    
+    } 
   }
 }

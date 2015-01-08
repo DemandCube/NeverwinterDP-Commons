@@ -5,7 +5,9 @@ import java.net.URI;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.proxy.ProxyServlet;
 
 @SuppressWarnings("serial")
@@ -36,6 +38,16 @@ public class RetryingProxyServlet extends ProxyServlet {
   @Override
   protected URI rewriteURI(HttpServletRequest request) {
     return URI.create(this.forwardUrl);
+  }
+  
+  
+  /**
+   * TODO: override this to grab correct URI from registry
+   */
+  @Override
+  protected void onResponseFailure(HttpServletRequest request, HttpServletResponse response, 
+                                    Response proxyResponse, Throwable failure){
+    super.onResponseFailure(request, response, proxyResponse, failure);
   }
   
   //No longer need to override
