@@ -20,7 +20,7 @@ public class TestRetryingProxyServlet {
   @BeforeClass
   public static void setup() throws Exception{
     httpServer = new JettyServer(httpPort, HelloServlet.class);
-    httpServer.run();
+    httpServer.start();
   }
   
   @AfterClass
@@ -39,7 +39,7 @@ public class TestRetryingProxyServlet {
     JettyServer proxyServer = null;
     try{
       proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);proxyServer.setHandler(webapp);
-      proxyServer.run();
+      proxyServer.start();
       
       //Make sure http server is fine first, just for sanity's sake
       HttpResponse<String> httpResp = Unirest.get("http://localhost:"+Integer.toString(httpPort)).asString();

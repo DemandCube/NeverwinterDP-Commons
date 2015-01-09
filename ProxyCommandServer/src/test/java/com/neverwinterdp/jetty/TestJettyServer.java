@@ -24,7 +24,7 @@ public class TestJettyServer {
   @BeforeClass
   public static void setup() throws Exception{
     httpServer = new JettyServer(port, HelloServlet.class);
-    httpServer.run();
+    httpServer.start();
   }
   
   @AfterClass

@@ -30,7 +30,7 @@ public class JettyServer {
     server.setHandler(w);
   }
   
-  public void run() throws Exception{
+  public void start() throws Exception{
     server.start();
   }
   
@@ -48,7 +48,7 @@ public class JettyServer {
 
   public static void main( String[] args ) throws Exception{
     JettyServer s = new JettyServer(8080);
-    s.run();
+    s.start();
     s.join();
   }
 
