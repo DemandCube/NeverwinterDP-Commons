@@ -12,7 +12,7 @@ import com.mashape.unirest.http.Unirest;
 import com.neverwinterdp.jetty.JettyServer;
 
 
-public class TestRetryingProxyServlet {
+public class RetryingProxyServletUnitTest {
   private static JettyServer httpServer;
   private static int httpPort = 8181;
   private static int proxyPort = 8282;

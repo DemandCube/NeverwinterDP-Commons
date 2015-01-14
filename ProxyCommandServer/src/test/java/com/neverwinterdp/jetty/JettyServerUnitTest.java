@@ -17,7 +17,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.neverwinterdp.jetty.JettyServer;
 import com.neverwinterdp.jetty.servlets.HelloServlet;
 
-public class TestJettyServer {
+public class JettyServerUnitTest {
   private static JettyServer httpServer;
   private static int port = 8181;
   
