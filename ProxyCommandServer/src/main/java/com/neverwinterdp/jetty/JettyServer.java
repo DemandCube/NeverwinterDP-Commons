@@ -6,17 +6,17 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import com.neverwinterdp.jetty.servlets.CommandServlet;
+import com.neverwinterdp.jetty.servlets.HelloServlet;
 
 public class JettyServer {
   protected Server server = null;
   
   public JettyServer() {
-    this(8080, CommandServlet.class);
+    this(8080, HelloServlet.class);
   }
   
   public JettyServer(int port) {
-    this(port, CommandServlet.class);
+    this(port, HelloServlet.class);
   }
   
   public JettyServer(int port, Class<?extends Servlet> servletClass) {
