@@ -9,3 +9,5 @@ include 'elasticsearch'
 include 'broadcastserver'
 include 'yara:core'
 include 'yara:server'
+include 'ProxyCommandServer'
+
