@@ -3,9 +3,9 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 apply plugin:'application'
 
-archivesBaseName = 'commons.ProxyCommandServer'
+archivesBaseName = 'commons.jetty'
 
-mainClassName = "com.neverwinterdp.proxyCommandServer.proxyServer"
+mainClassName = "com.neverwinterdp.jetty.JettyServer"
 
 jacoco {
     toolVersion = "0.6.2.201302030002"
@@ -14,7 +14,7 @@ jacoco {
 
 eclipse {
   project {
-    name = 'commons.ProxyCommandServer'
+    name = 'commons.jetty'
   }
   classpath {
     downloadSources=true

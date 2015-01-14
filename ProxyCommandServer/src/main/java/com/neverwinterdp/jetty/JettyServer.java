@@ -1,31 +1,36 @@
-package com.neverwinterdp.http;
+package com.neverwinterdp.jetty;
 
-import javax.servlet.http.HttpServlet;
+import javax.servlet.Servlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
 
-import com.neverwinterdp.http.servlets.CommandServlet;
+import com.neverwinterdp.jetty.servlets.HelloServlet;
 
-public class HttpServer {
-  private static Server server = null;
+public class JettyServer {
+  protected Server server = null;
   
-  public HttpServer(){
-    this(8080, new CommandServlet());
+  public JettyServer() {
+    this(8080, HelloServlet.class);
   }
   
-  public HttpServer(int port){
-    this(port, new CommandServlet());
+  public JettyServer(int port) {
+    this(port, HelloServlet.class);
   }
   
-  public HttpServer(int port, HttpServlet handler){
+  public JettyServer(int port, Class<?extends Servlet> servletClass) {
     server = new Server(port);
     ServletHandler s = new ServletHandler();
     server.setHandler(s);
-    s.addServletWithMapping(handler.getClass(), "/*");
+    s.addServletWithMapping(servletClass, "/*");
   }
   
-  public void run() throws Exception{
+  public void setHandler(WebAppContext w){
+    server.setHandler(w);
+  }
+  
+  public void start() throws Exception{
     server.start();
   }
   
@@ -42,8 +47,8 @@ public class HttpServer {
   }
 
   public static void main( String[] args ) throws Exception{
-    HttpServer s = new HttpServer(8080);
-    s.run();
+    JettyServer s = new JettyServer(8080);
+    s.start();
     s.join();
   }
 
