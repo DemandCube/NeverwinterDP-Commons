@@ -43,6 +43,7 @@ public class JettyServerUnitTest {
     expectedHeaders.put("content-type", "text/html; charset=ISO-8859-1");
     expectedHeaders.put("content-length", Integer.toString(HelloServlet.responseString.length()));
     expectedHeaders.put("server", "Jetty(9.2.0.RC0)");
+    //Removing this check 
     //expectedHeaders.put("date", new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss z").format(new Date()));
     for(String key: expectedHeaders.keySet()){
       assertEquals(expectedHeaders.get(key), resp.getHeaders().get(key));
