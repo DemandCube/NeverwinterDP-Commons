@@ -1,8 +1,5 @@
 <?xml version="1.0"?>
 <web-app> 
-
-  <Configure id="TestRetryingProxyServlet" class="com.neverwinterdp.jetty.servlets.TestRetryingProxyServlet"></Configure>
-
   <servlet>
     <servlet-name>ProxyServlet</servlet-name>
     <servlet-class>com.neverwinterdp.jetty.servlets.RetryingProxyServlet</servlet-class>

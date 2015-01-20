@@ -36,20 +36,24 @@ public class RetryingProxyServletUnitTest {
     webapp.setDescriptor("./src/test/resources/override-web.xml");
     
     
+    
     JettyServer proxyServer = null;
     try{
-      proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);proxyServer.setHandler(webapp);
+      proxyServer = new JettyServer(proxyPort, RetryingProxyServlet.class);
+      proxyServer.setHandler(webapp);
       proxyServer.start();
       
       //Make sure http server is fine first, just for sanity's sake
-      HttpResponse<String> httpResp = Unirest.get("http://localhost:"+Integer.toString(httpPort)).asString();
-      assertEquals(HelloServlet.responseString, httpResp.getBody());
-      assertEquals(200, httpResp.getCode());
+      //HttpResponse<String> httpResp = Unirest.get("http://localhost:"+Integer.toString(httpPort)).asString();
+      //assertEquals(HelloServlet.responseString, httpResp.getBody());
+      //assertEquals(200, httpResp.getCode());
       
       //Test proxy
       HttpResponse<String> proxyResp = Unirest.get("http://localhost:"+Integer.toString(proxyPort)).asString();
       assertEquals(HelloServlet.responseString, proxyResp.getBody());
-      //assertEquals(200, proxyResp.getCode());
+      assertEquals(200, proxyResp.getCode());
+      
+      
     }
     catch(Exception e){
       e.printStackTrace();
