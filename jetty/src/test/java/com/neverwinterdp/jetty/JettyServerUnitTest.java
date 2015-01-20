@@ -39,11 +39,13 @@ public class JettyServerUnitTest {
     assertEquals(HelloServlet.responseString, resp.getBody());
     assertEquals(200, resp.getCode());
     
-    Map<String,String> expectedHeaders = new HashMap<String,String>();
+    HashMap<String,String> expectedHeaders = new HashMap<String,String>();
     expectedHeaders.put("content-type", "text/html; charset=ISO-8859-1");
     expectedHeaders.put("content-length", Integer.toString(HelloServlet.responseString.length()));
     expectedHeaders.put("server", "Jetty(9.2.0.RC0)");
-    expectedHeaders.put("date", new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss z").format(new Date()));
-    assertEquals(expectedHeaders, resp.getHeaders());
+    //expectedHeaders.put("date", new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss z").format(new Date()));
+    for(String key: expectedHeaders.keySet()){
+      assertEquals(expectedHeaders.get(key), resp.getHeaders().get(key));
+    }
   }
 }
